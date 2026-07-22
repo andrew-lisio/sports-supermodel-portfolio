@@ -18,7 +18,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="sports-supermodel",
         description=(
             "Fetch an official MLB slate, accept user-entered two-way moneylines, run "
-            "the V2.3.2 seven-model ensemble and Poisson simulation, and rank the games. "
+            "the V2.3.3 seven-model ensemble and Poisson simulation, and rank the games. "
             "No bankroll or wager sizing is produced."
         ),
     )

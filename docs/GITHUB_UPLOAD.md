@@ -1,6 +1,6 @@
 # Uploading Sports SuperModel to GitHub
 
-This repository is prepared as the V2.3.2 open-input, prediction-only release.
+This repository is prepared as the V2.3.3 open-input, prediction-only release.
 
 ## Before uploading
 
@@ -46,14 +46,14 @@ Keep it private for the first push while you inspect the rendered README and rep
 ### 2. Initialize and commit locally
 
 ```powershell
-cd C:\path\to\sports-supermodel-v2.3.2
+cd C:\path\to\sports-supermodel-v2.3.3
 
 git init
 git add .
 git status
-git commit -m "Release Sports SuperModel V2.3.2"
+git commit -m "Release Sports SuperModel V2.3.3"
 git branch -M main
-git tag -a v2.3.2 -m "Sports SuperModel V2.3.2 open-input release"
+git tag -a v2.3.3 -m "Sports SuperModel V2.3.3 open-input release"
 ```
 
 ### 3. Connect and push
@@ -64,7 +64,7 @@ Replace the example URL with your repository URL:
 git remote add origin https://github.com/YOUR-USERNAME/sports-supermodel.git
 git remote -v
 git push -u origin main
-git push origin v2.3.2
+git push origin v2.3.3
 ```
 
 ## GitHub CLI method
@@ -72,16 +72,16 @@ git push origin v2.3.2
 When GitHub CLI is installed and authenticated:
 
 ```powershell
-cd C:\path\to\sports-supermodel-v2.3.2
+cd C:\path\to\sports-supermodel-v2.3.3
 
 git init
 git add .
-git commit -m "Release Sports SuperModel V2.3.2"
+git commit -m "Release Sports SuperModel V2.3.3"
 git branch -M main
-git tag -a v2.3.2 -m "Sports SuperModel V2.3.2 open-input release"
+git tag -a v2.3.3 -m "Sports SuperModel V2.3.3 open-input release"
 
 gh repo create sports-supermodel --private --source=. --remote=origin --push
-git push origin v2.3.2
+git push origin v2.3.3
 ```
 
 ## GitHub Desktop method
@@ -91,7 +91,7 @@ git push origin v2.3.2
 3. Select **File > Add local repository**.
 4. Choose the extracted project folder.
 5. If prompted, create a Git repository there.
-6. Commit all files with `Release Sports SuperModel V2.3.2`.
+6. Commit all files with `Release Sports SuperModel V2.3.3`.
 7. Select **Publish repository**.
 8. Keep it private for the initial review.
 9. Publish.
@@ -136,14 +136,14 @@ Recommended settings:
 
 ## Make V2.4 branch
 
-After V2.3.2 is safely pushed:
+After V2.3.3 is safely pushed:
 
 ```powershell
 git switch -c v2.4-development
 git push -u origin v2.4-development
 ```
 
-Keep `main` on the stable V2.3.2 input release until V2.4 passes validation and integrity gates.
+Keep `main` on the stable V2.3.3 input release until V2.4 passes validation and integrity gates.
 
 ## Future updates
 

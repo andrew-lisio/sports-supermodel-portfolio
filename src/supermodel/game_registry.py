@@ -67,19 +67,107 @@ def _team_fields(game: dict[str, Any], side: str) -> tuple[int, str, str | None,
     return team_id, team_name, str(abbreviation) if abbreviation else None, pitcher_id, pitcher_name
 
 
+def _same_game_identity(left: GameRecord, right: GameRecord) -> bool:
+    """Return whether two records refer to the same official matchup.
+
+    MLB schedule responses can repeat one ``gamePk`` for suspended, resumed, or
+    rescheduled games. Mutable metadata such as status, scheduled time, venue details,
+    and probable pitchers may differ between those repeated rows. Team identity must
+    never differ for the same ``gamePk``.
+    """
+
+    return (
+        left.game_pk == right.game_pk
+        and left.away_team_id == right.away_team_id
+        and left.home_team_id == right.home_team_id
+    )
+
+
+def _status_rank(record: GameRecord) -> int:
+    abstract = record.status_abstract.lower()
+    detailed = record.status_detailed.lower()
+    if "final" in abstract or "final" in detailed or "completed" in detailed:
+        return 4
+    if "live" in abstract or "in progress" in detailed:
+        return 3
+    if "preview" in abstract or "scheduled" in detailed or "pre-game" in detailed:
+        return 2
+    if "postpon" in detailed or "suspend" in detailed:
+        return 1
+    return 0
+
+
+def _record_completeness(record: GameRecord) -> int:
+    optional_values = (
+        record.away_team_abbreviation,
+        record.home_team_abbreviation,
+        record.venue_id,
+        record.venue_name,
+        record.away_probable_pitcher_id,
+        record.away_probable_pitcher_name,
+        record.home_probable_pitcher_id,
+        record.home_probable_pitcher_name,
+    )
+    return sum(value is not None for value in optional_values)
+
+
+def _merge_duplicate_records(existing: GameRecord, incoming: GameRecord) -> GameRecord:
+    """Reconcile repeated rows for one ``gamePk`` without weakening identity checks."""
+
+    if not _same_game_identity(existing, incoming):
+        raise ScheduleIntegrityError(f"Conflicting records for gamePk={incoming.game_pk}")
+
+    # Prefer the most advanced and information-rich representation. The incoming row
+    # wins an exact tie because MLB commonly places the current/rescheduled row later
+    # in a multi-date response.
+    existing_score = (_status_rank(existing), _record_completeness(existing))
+    incoming_score = (_status_rank(incoming), _record_completeness(incoming))
+    primary, secondary = (incoming, existing) if incoming_score >= existing_score else (existing, incoming)
+
+    def choose(primary_value: Any, secondary_value: Any) -> Any:
+        return primary_value if primary_value not in (None, "") else secondary_value
+
+    return GameRecord(
+        game_pk=primary.game_pk,
+        official_date=str(choose(primary.official_date, secondary.official_date)),
+        game_datetime=str(choose(primary.game_datetime, secondary.game_datetime)),
+        game_number=primary.game_number,
+        double_header=str(choose(primary.double_header, secondary.double_header)),
+        status_abstract=str(choose(primary.status_abstract, secondary.status_abstract)),
+        status_detailed=str(choose(primary.status_detailed, secondary.status_detailed)),
+        away_team_id=primary.away_team_id,
+        away_team_name=str(choose(primary.away_team_name, secondary.away_team_name)),
+        away_team_abbreviation=choose(primary.away_team_abbreviation, secondary.away_team_abbreviation),
+        home_team_id=primary.home_team_id,
+        home_team_name=str(choose(primary.home_team_name, secondary.home_team_name)),
+        home_team_abbreviation=choose(primary.home_team_abbreviation, secondary.home_team_abbreviation),
+        venue_id=choose(primary.venue_id, secondary.venue_id),
+        venue_name=choose(primary.venue_name, secondary.venue_name),
+        away_probable_pitcher_id=choose(primary.away_probable_pitcher_id, secondary.away_probable_pitcher_id),
+        away_probable_pitcher_name=choose(primary.away_probable_pitcher_name, secondary.away_probable_pitcher_name),
+        home_probable_pitcher_id=choose(primary.home_probable_pitcher_id, secondary.home_probable_pitcher_id),
+        home_probable_pitcher_name=choose(primary.home_probable_pitcher_name, secondary.home_probable_pitcher_name),
+    )
+
+
 def parse_mlb_schedule(payload: dict[str, Any]) -> list[GameRecord]:
     """Parse an MLB Stats API schedule response into canonical game records.
 
-    Duplicate ``gamePk`` values are accepted only when their canonical records are
-    identical. Conflicting duplicates are rejected instead of silently selecting one.
+    The MLB API can repeat a ``gamePk`` in multi-day responses when a game is
+    postponed, suspended, resumed, or rescheduled. Those repetitions are reconciled
+    when the participating team IDs agree. A repeated ``gamePk`` with different teams
+    remains a hard integrity failure.
     """
 
     by_game_pk: dict[int, GameRecord] = {}
     for date_block in payload.get("dates", []):
-        official_date = str(_required(date_block, "date", "date"))
+        date_block_date = str(_required(date_block, "date", "date"))
         for game in date_block.get("games", []):
             game_pk = int(_required(game, "gamePk", "game"))
             game_datetime = str(_required(game, "gameDate", "game"))
+            # ``officialDate`` belongs to the game itself and is more stable than the
+            # surrounding date bucket for resumed/rescheduled games.
+            official_date = str(game.get("officialDate") or date_block_date)
             away_id, away_name, away_abbr, away_pitcher_id, away_pitcher_name = _team_fields(game, "away")
             home_id, home_name, home_abbr, home_pitcher_id, home_pitcher_name = _team_fields(game, "home")
             venue = game.get("venue") or {}
@@ -106,9 +194,7 @@ def parse_mlb_schedule(payload: dict[str, Any]) -> list[GameRecord]:
                 home_probable_pitcher_name=home_pitcher_name,
             )
             existing = by_game_pk.get(game_pk)
-            if existing is not None and existing != record:
-                raise ScheduleIntegrityError(f"Conflicting records for gamePk={game_pk}")
-            by_game_pk[game_pk] = record
+            by_game_pk[game_pk] = record if existing is None else _merge_duplicate_records(existing, record)
     return sorted(by_game_pk.values(), key=lambda r: (r.game_datetime, r.game_pk))
 
 
@@ -116,9 +202,7 @@ def index_by_game_pk(records: Iterable[GameRecord]) -> dict[int, GameRecord]:
     index: dict[int, GameRecord] = {}
     for record in records:
         existing = index.get(record.game_pk)
-        if existing is not None and existing != record:
-            raise ScheduleIntegrityError(f"Conflicting records for gamePk={record.game_pk}")
-        index[record.game_pk] = record
+        index[record.game_pk] = record if existing is None else _merge_duplicate_records(existing, record)
     return index
 
 

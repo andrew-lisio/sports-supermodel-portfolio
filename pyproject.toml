@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sports-supermodel"
-version = "2.3.2"
+version = "2.3.3"
 description = "Experimental MLB prediction ensemble with user-entered odds, immutable pregame snapshots, and Monte Carlo score simulation"
 readme = "README.md"
 requires-python = ">=3.11"

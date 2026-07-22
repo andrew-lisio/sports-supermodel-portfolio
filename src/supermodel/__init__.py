@@ -41,7 +41,7 @@ from .workflow import (
     evaluate_captured_slate,
 )
 
-__version__ = "2.3.2"
+__version__ = "2.3.3"
 
 __all__ = [
     "__version__",

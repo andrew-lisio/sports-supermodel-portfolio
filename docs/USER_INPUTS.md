@@ -1,6 +1,6 @@
 # User odds input
 
-V2.3.2 does not require sportsbook screenshots. Users enter or import two-way moneylines through the local browser application, interactive terminal, CSV, JSON, or Python API.
+V2.3.3 does not require sportsbook screenshots. Users enter or import two-way moneylines through the local browser application, interactive terminal, CSV, JSON, or Python API.
 
 ## Why odds remain user-supplied
 

@@ -35,7 +35,7 @@ from .market import (
 class LiveEvaluationConfig:
     """Configuration for prediction, simulation, and confidence ranking.
 
-    V2.3.2 intentionally contains no bankroll management, stake sizing, or Kelly
+    V2.3.3 intentionally contains no bankroll management, stake sizing, or Kelly
     criterion. Market prices are used only to report implied probability, fair odds,
     and model-versus-market edges.
     """
@@ -67,7 +67,7 @@ class MLBStatsHTTPClient:
         base_url: str = "https://statsapi.mlb.com/api",
         timeout_seconds: float = 20.0,
         retries: int = 2,
-        user_agent: str = "SportsSuperModel/2.3.2 (+recreational research use)",
+        user_agent: str = "SportsSuperModel/2.3.3 (+recreational research use)",
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds

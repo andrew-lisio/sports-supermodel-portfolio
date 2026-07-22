@@ -1,6 +1,6 @@
 # Local browser application
 
-V2.3.2 includes a Streamlit interface for users who do not want to edit files or use terminal prompts.
+V2.3.3 includes a Streamlit interface for users who do not want to edit files or use terminal prompts.
 
 ## Install
 

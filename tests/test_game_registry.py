@@ -52,10 +52,41 @@ def test_game_pk_preserves_both_doubleheader_games():
     assert all(record.home_team_abbreviation == "TB" for record in records)
 
 
+def test_duplicate_game_pk_across_date_buckets_uses_game_official_date():
+    payload = _doubleheader_payload()
+    original = payload["dates"][0]["games"][0]
+    original["officialDate"] = "2026-07-17"
+    duplicate = json.loads(json.dumps(original))
+    duplicate["status"] = {"abstractGameState": "Final", "detailedState": "Final"}
+    payload["dates"].append({"date": "2026-07-18", "games": [duplicate]})
+
+    records = parse_mlb_schedule(payload)
+    record = next(record for record in records if record.game_pk == 900001)
+
+    assert record.official_date == "2026-07-17"
+    assert record.status_abstract == "Final"
+
+
+def test_duplicate_game_pk_allows_mutable_schedule_metadata():
+    payload = _doubleheader_payload()
+    duplicate = json.loads(json.dumps(payload["dates"][0]["games"][0]))
+    duplicate["gameDate"] = "2026-07-18T20:10:00Z"
+    duplicate["status"] = {"abstractGameState": "Final", "detailedState": "Final"}
+    duplicate["teams"]["away"].pop("probablePitcher", None)
+    payload["dates"][0]["games"].append(duplicate)
+
+    records = parse_mlb_schedule(payload)
+    record = next(record for record in records if record.game_pk == 900001)
+
+    assert record.game_datetime == "2026-07-18T20:10:00Z"
+    assert record.status_abstract == "Final"
+    # The merge retains richer pregame metadata when the later/final row omits it.
+    assert record.away_probable_pitcher_name == "Away Starter"
+
 def test_conflicting_duplicate_game_pk_is_rejected():
     payload = _doubleheader_payload()
     duplicate = json.loads(json.dumps(payload["dates"][0]["games"][0]))
-    duplicate["teams"]["home"]["team"]["name"] = "Conflicting Team"
+    duplicate["teams"]["home"]["team"]["id"] = 999
     payload["dates"][0]["games"].append(duplicate)
     with pytest.raises(ScheduleIntegrityError, match="Conflicting records"):
         parse_mlb_schedule(payload)

@@ -2,7 +2,7 @@
 
 Sports SuperModel is an experimental, reproducible MLB game-prediction research project. It combines seven winner models, a calibrated ensemble, a separate Poisson score model, immutable pregame snapshots, and Monte Carlo simulation.
 
-> **Current release: V2.3.2 — open-input, prediction-only release.** Users no longer need to send sportsbook screenshots to another person. The repository includes a local browser interface, an interactive terminal workflow, and CSV/JSON import tools for entering two-way moneylines directly. Bankroll management, wager sizing, exposure limits, and the Kelly criterion are not part of the active engine.
+> **Current release: V2.3.3 — schedule-integrity hotfix for the open-input, prediction-only release.** Users no longer need to send sportsbook screenshots to another person. The repository includes a local browser interface, an interactive terminal workflow, and CSV/JSON import tools for entering two-way moneylines directly. Bankroll management, wager sizing, exposure limits, and the Kelly criterion are not part of the active engine.
 
 ## Important notice
 
@@ -10,9 +10,11 @@ This software is provided solely for **recreational, educational, statistical, a
 
 Anyone who chooses to gamble does so voluntarily and assumes the entire risk of loss. Users are responsible for legal-age requirements, local laws, taxes, sportsbook terms, and independent verification of every input. Read [DISCLAIMER.md](DISCLAIMER.md) before using, publishing, or distributing the project. No disclaimer can guarantee immunity from a lawsuit or regulatory inquiry; obtain jurisdiction-specific advice from a qualified attorney before marketing, monetizing, or operating the project for others.
 
-## What changed in V2.3.2
+## What changed in V2.3.3
 
-V2.3.2 turns the private screenshot workflow into a self-contained open-source application.
+V2.3.3 keeps the V2.3.2 open-input workflow and fixes a live MLB schedule edge case discovered during browser testing. Multi-day MLB schedule responses can repeat the same `gamePk` when a game is postponed, suspended, resumed, or rescheduled. The parser now reconciles repeated rows when the official away/home team IDs agree, uses the game-level `officialDate` when available, and still fails closed if the same `gamePk` is attached to different teams.
+
+The open-input application introduced in V2.3.2 remains unchanged:
 
 Users can now supply odds in four ways:
 
@@ -398,7 +400,7 @@ print(result.evaluation[[
 pytest
 ```
 
-The V2.3.2 release contains **29 passing tests** covering:
+The V2.3.3 release contains **31 passing tests** covering:
 
 - Historical data construction
 - Official game identity
@@ -426,7 +428,7 @@ V2 remains experimental. On the preserved 1,101-game chronological comparison, t
 | Log loss | 0.68887 |
 | AUC | 0.56480 |
 
-V2.3.2 changes the input and application workflow; it does not claim a new predictive-performance improvement over the same V2.3 model. These results do not demonstrate profitability and are not a promise of future performance.
+V2.3.3 contains a schedule-integrity hotfix and retains the V2.3.2 input workflow; it does not claim a new predictive-performance improvement over the same V2.3 model. These results do not demonstrate profitability and are not a promise of future performance.
 
 ## Data-integrity principles
 
@@ -466,7 +468,7 @@ Planned work includes:
 - Improved calibration and prospective tracking
 - Learned ensemble weighting under strict walk-forward validation
 
-V2.4 should be developed on a separate branch and should not replace the stable V2.3.2 input release until it passes the repository's validation and data-integrity gates.
+V2.4 should be developed on a separate branch and should not replace the stable V2.3.3 input release until it passes the repository's validation and data-integrity gates.
 
 ## Contributing
 

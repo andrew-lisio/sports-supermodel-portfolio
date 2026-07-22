@@ -1,5 +1,14 @@
 # Changelog
 
+## V2.3.3 — schedule-integrity hotfix
+
+- Reconciles repeated MLB schedule rows for the same `gamePk` when away/home team IDs agree.
+- Uses the game-level `officialDate` instead of the surrounding date bucket when available.
+- Preserves richer probable-pitcher and venue metadata while preferring the most advanced game status.
+- Continues to reject a repeated `gamePk` if it points to different away/home teams.
+- Fixes live evaluations that previously failed with `Conflicting records for gamePk=...` on postponed, suspended, resumed, or rescheduled games.
+- Active test suite: 31 passing tests.
+
 ## V2.3.2 — open-input application release
 
 - Added a local Streamlit browser interface with an editable official-slate odds table.
