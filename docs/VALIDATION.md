@@ -43,4 +43,4 @@ python scripts/run_all.py
 python scripts/run_v2_2_validation.py
 ```
 
-Some historical reports refer to earlier releases and are retained for auditability. They are not the active V2.3.1 output schema.
+Some historical reports refer to earlier releases and are retained for auditability. They are not the active V2.3.2 output schema.

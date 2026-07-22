@@ -34,6 +34,16 @@ Unless expressly stated otherwise, this project is independent and is not sponso
 
 Users are responsible for complying with the licenses, terms, rate limits, attribution requirements, privacy requirements, and acceptable-use rules of all third-party APIs, websites, datasets, and services. The authors do not warrant continued access to any data source and are not responsible for third-party outages, errors, changes, or enforcement actions.
 
+## 7A. User-supplied market data and privacy
+
+The project can accept odds and related market information entered by a user through a local browser interface, terminal prompt, CSV, JSON, or Python API. Users must have the lawful right to access and use any submitted information and are responsible for complying with sportsbook terms, data licenses, intellectual-property rights, privacy duties, and applicable law.
+
+Do not submit sportsbook credentials, authentication cookies, account identifiers, balances, payment information, precise location data, or other personal or confidential information. The project does not need those items. Local snapshots and reports may preserve user-entered odds; users are responsible for securing, reviewing, redacting, and deleting those files before sharing or publishing them.
+
+## 7B. Local development interface
+
+The included browser interface is a local research tool, not a hardened public web service. The authors make no representation that it is suitable for public hosting, multi-user operation, regulated activity, custody of data, or commercial deployment. Anyone who exposes, hosts, modifies, or operates the interface for others assumes responsibility for authentication, authorization, cybersecurity, privacy, accessibility, consumer disclosures, recordkeeping, data licensing, geographic restrictions, and all other operational and legal requirements.
+
 ## 8. Software provided “as is”
 
 To the maximum extent permitted by applicable law, the software, data, documentation, examples, reports, and related materials are provided **“AS IS” and “AS AVAILABLE,” without warranties or representations of any kind**, express, implied, statutory, or otherwise, including warranties of accuracy, completeness, reliability, merchantability, fitness for a particular purpose, title, non-infringement, availability, security, or error-free operation.

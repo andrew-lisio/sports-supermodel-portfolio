@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 import json
 import math
@@ -22,6 +22,7 @@ from .mlb_v2 import (
 )
 from .mlb_v2 import simulate_poisson_score_distribution
 from .providers import PregameContext
+from .odds_input import ManualMoneyline, load_moneylines
 from .market import (
     american_implied_probability,
     american_to_decimal,
@@ -30,22 +31,11 @@ from .market import (
     probability_to_american,
 )
 
-
-@dataclass(frozen=True)
-class ManualMoneyline:
-    game_date: str
-    away_team: str
-    home_team: str
-    away_odds: int
-    home_odds: int
-    game_pk: int | None = None
-
-
 @dataclass(frozen=True)
 class LiveEvaluationConfig:
     """Configuration for prediction, simulation, and confidence ranking.
 
-    V2.3.1 intentionally contains no bankroll management, stake sizing, or Kelly
+    V2.3.2 intentionally contains no bankroll management, stake sizing, or Kelly
     criterion. Market prices are used only to report implied probability, fair odds,
     and model-versus-market edges.
     """
@@ -77,7 +67,7 @@ class MLBStatsHTTPClient:
         base_url: str = "https://statsapi.mlb.com/api",
         timeout_seconds: float = 20.0,
         retries: int = 2,
-        user_agent: str = "SportsSuperModel/2.3.1 (+recreational research use)",
+        user_agent: str = "SportsSuperModel/2.3.2 (+recreational research use)",
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
@@ -570,26 +560,9 @@ def evaluate_top_pick_parlays(
 
 
 def load_manual_moneylines(path: str | Path) -> list[ManualMoneyline]:
-    frame = pd.read_csv(path)
-    required = {"game_date", "away_team", "home_team", "away_odds", "home_odds"}
-    missing = required.difference(frame.columns)
-    if missing:
-        raise ValueError(f"moneyline CSV missing required columns: {sorted(missing)}")
-    output: list[ManualMoneyline] = []
-    for record in frame.to_dict("records"):
-        output.append(ManualMoneyline(
-            game_date=str(record["game_date"]),
-            away_team=str(record["away_team"]),
-            home_team=str(record["home_team"]),
-            away_odds=int(record["away_odds"]),
-            home_odds=int(record["home_odds"]),
-            game_pk=(
-                int(record["game_pk"])
-                if record.get("game_pk") is not None and pd.notna(record.get("game_pk"))
-                else None
-            ),
-        ))
-    return output
+    """Backward-compatible alias for the CSV/JSON user-input loader."""
+
+    return load_moneylines(path)
 
 
 def contexts_to_matchups(contexts: list[PregameContext]) -> pd.DataFrame:

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sports-supermodel"
-version = "2.3.1"
-description = "Experimental MLB prediction ensemble with immutable pregame snapshots and Monte Carlo score simulation"
+version = "2.3.2"
+description = "Experimental MLB prediction ensemble with user-entered odds, immutable pregame snapshots, and Monte Carlo score simulation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
@@ -34,6 +34,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+ui = [
+  "streamlit>=1.37",
+]
 dev = [
   "pytest>=8.0",
   "ruff>=0.9",
@@ -42,6 +45,7 @@ dev = [
 
 [project.scripts]
 sports-supermodel = "supermodel.cli:main"
+sports-supermodel-ui = "supermodel.web_app:launch"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

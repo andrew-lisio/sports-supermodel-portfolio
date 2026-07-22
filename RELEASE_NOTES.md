@@ -1,12 +1,32 @@
-# V2.3.1 release notes
+# V2.3.2 release notes
 
-V2.3.1 is the final pre-V2.4 prediction-only release.
+V2.3.2 is the open-input, prediction-only release prepared for GitHub publication.
 
 ## Main change
 
-The active engine no longer contains bankroll management, the Kelly criterion, stake recommendations, minimum-return rules, or exposure allocation. Live evaluation ends at confidence ranking, probability, expected score, fair odds, and market comparison.
+The project no longer depends on a private workflow where a user uploads sportsbook screenshots to a chat. Users can now provide two-way moneylines directly through:
 
-## Included
+- A local browser application
+- Interactive terminal prompts
+- CSV files
+- JSON files
+- The Python API
+
+The project does not scrape screenshots, use OCR, request sportsbook credentials, or require a paid odds API.
+
+## Input safeguards
+
+- American and decimal prices are supported.
+- Both sides of the market are required.
+- Blank or disabled rows are skipped.
+- Official MLB `gamePk` is attached by generated templates and the browser app.
+- Ambiguous doubleheaders fail closed.
+- Duplicate `gamePk` inputs are rejected.
+- Accepted market inputs are preserved in timestamped local snapshots.
+
+## Prediction engine
+
+The predictive model remains the V2.3 engine:
 
 - Seven required winner-model components
 - Calibrated ensemble with frozen V1 anchor
@@ -15,12 +35,16 @@ The active engine no longer contains bankroll management, the Kelly criterion, s
 - Official `gamePk` identity and doubleheader controls
 - Immutable pregame snapshots
 - Explicit last-game feature block
-- Historical validation reports and cleaned daily outputs through July 22, 2026
-- Installable CLI, tests, documentation, license, disclaimer, and GitHub templates
+
+V2.3.2 improves usability and reproducibility; it does not claim a new predictive-performance gain over V2.3.
+
+## Prediction-only boundary
+
+The active package has no Kelly criterion, bankroll management, stake recommendation, minimum-return rule, or exposure allocation. It reports probability, confidence, expected score, fair odds, and market comparison only.
 
 ## Test status
 
-21 tests pass in the release environment.
+29 tests pass in the release environment.
 
 ## V2.4 boundary
 

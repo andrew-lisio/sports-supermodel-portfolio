@@ -15,4 +15,4 @@ policy: >-
   V2.4 must remain separate from main if it improves only a small retrospective sample,
   lacks point-in-time feature provenance, introduces schedule ambiguity, or fails broad
   chronological calibration. Prediction-model promotion is independent of any future
-  optional decision-support or bankroll module.
+  optional downstream decision-support module.

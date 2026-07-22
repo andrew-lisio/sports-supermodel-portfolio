@@ -24,8 +24,24 @@ from .mlb_v2 import (
     walk_forward_trials,
 )
 from .providers import OfficialScheduleSnapshotProvider, PregameContext, ProviderPipeline
+from .odds_input import (
+    ManualMoneyline,
+    OddsInputError,
+    build_moneyline_template,
+    collect_moneylines_interactively,
+    load_moneylines,
+    moneylines_from_records,
+    parse_user_odds,
+    write_moneyline_template,
+)
+from .workflow import (
+    CapturedSlate,
+    WorkflowResult,
+    capture_official_slate,
+    evaluate_captured_slate,
+)
 
-__version__ = "2.3.1"
+__version__ = "2.3.2"
 
 __all__ = [
     "__version__",
@@ -49,4 +65,16 @@ __all__ = [
     "replay_dates",
     "V2Ensemble",
     "LIVE_FEATURES",
+    "ManualMoneyline",
+    "OddsInputError",
+    "parse_user_odds",
+    "load_moneylines",
+    "moneylines_from_records",
+    "build_moneyline_template",
+    "write_moneyline_template",
+    "collect_moneylines_interactively",
+    "CapturedSlate",
+    "WorkflowResult",
+    "capture_official_slate",
+    "evaluate_captured_slate",
 ]

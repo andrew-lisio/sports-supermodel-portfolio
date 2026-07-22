@@ -1,0 +1,14 @@
+{
+  "moneylines": [
+    {
+      "include": true,
+      "game_date": "2026-07-22",
+      "game_pk": 123456,
+      "away_team": "ATH",
+      "home_team": "AZ",
+      "away_odds": 111,
+      "home_odds": -151,
+      "odds_format": "american"
+    }
+  ]
+}

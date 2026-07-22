@@ -1,5 +1,19 @@
 # Changelog
 
+## V2.3.2 — open-input application release
+
+- Added a local Streamlit browser interface with an editable official-slate odds table.
+- Added interactive terminal moneyline entry.
+- Added CSV and JSON market-input support.
+- Added American and decimal odds parsing with strict validation.
+- Added official-slate template generation with `gamePk`, game number, starters, lineup status, and weather context.
+- Added shared workflow orchestration so the browser, terminal, files, and Python API run the same model engine.
+- Added fail-closed doubleheader matching and duplicate market-input rejection.
+- Added immutable user-market snapshots for reproducibility.
+- Added user-input, web-app, privacy, deployment, and GitHub documentation.
+- Preserved the prediction-only boundary: no Kelly criterion, bankroll, stake sizing, or exposure logic is active.
+- Active test suite: 29 passing tests.
+
 ## V2.3.1 — prediction-only GitHub release
 
 - Removed the staking module from the active package.

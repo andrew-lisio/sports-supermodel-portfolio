@@ -33,3 +33,12 @@ snapshots/private_book/**/local_*
 # Generated scratch artifacts
 reports/live/local_*
 *.log
+
+# Local UI and user-entered market data
+user_inputs/
+.streamlit/secrets.toml
+examples/manual_moneylines.json
+snapshots/market_input/**/local_*
+
+# Default local runtime artifacts (official captures, user odds, and reports)
+runtime/
