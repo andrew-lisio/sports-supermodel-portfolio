@@ -1,0 +1,18 @@
+production_branch: main
+candidate_branch: v2.4-development
+requirements:
+  minimum_walk_forward_games: 1000
+  brier_improvement_required: true
+  log_loss_improvement_required: true
+  auc_not_worse_by_more_than: 0.005
+  accuracy_not_worse_by_more_than: 0.01
+  minimum_prospective_games: 500
+  closing_line_value_tracking_required: true
+  no_schedule_integrity_errors: true
+  no_target_leakage: true
+  point_in_time_provenance_required: true
+policy: >-
+  V2.4 must remain separate from main if it improves only a small retrospective sample,
+  lacks point-in-time feature provenance, introduces schedule ambiguity, or fails broad
+  chronological calibration. Prediction-model promotion is independent of any future
+  optional decision-support or bankroll module.

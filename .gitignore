@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local/private inputs
+.env
+.env.*
+!*.example
+examples/manual_moneylines.csv
+snapshots/private_book/**/local_*
+
+# Generated scratch artifacts
+reports/live/local_*
+*.log

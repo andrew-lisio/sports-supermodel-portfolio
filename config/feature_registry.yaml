@@ -1,0 +1,46 @@
+implemented_and_populated_in_replay:
+  - bayesian_team_win_rate
+  - pythagorean_strength
+  - season_runs_scored_allowed
+  - rolling_5_10_20_form
+  - exponentially_weighted_form
+  - rest_days
+  - schedule_density_3_7_days
+  - starter_team_result_proxy
+  - starter_recent_runs_allowed_proxy
+implemented_provider_contract_neutral_in_replay:
+  - xERA_FIP_xFIP_SIERA
+  - StuffPlus_LocationPlus_PitchingPlus
+  - CSW_KminusBB_hard_hit_barrel_ground_ball
+  - velocity_spin_pitch_mix_trends
+  - bullpen_quality_and_fatigue
+  - closer_and_setup_availability
+  - confirmed_lineup_wRCplus_xwOBA_platoon
+  - injuries_by_projected_WAR
+  - umpire_zone_run_and_strikeout_factors
+  - weather_air_density_wind_rain_roof
+  - handed_park_factors
+  - travel_time_zones_and_getaway_fatigue
+  - defense_FRV_OAA
+  - catcher_framing
+  - baserunning
+  - opening_current_closing_market_features
+  - reverse_line_movement
+reason_neutral: >-
+  The downloaded single-season team logs do not contain these historical point-in-time
+  fields. The V2 schema accepts them, records missingness, and uses neutral values until
+  a point-in-time provider is connected. This prevents fabricated historical inputs.
+implemented_explicit_last_game_context_v2_3:
+  - previous_game_result
+  - previous_game_runs_scored_allowed
+  - previous_game_run_differential
+  - previous_game_total_runs
+  - previous_game_absolute_margin
+  - previous_game_home_away
+  - previous_opponent_pregame_win_rate_and_pythagorean_strength
+  - previous_game_shutout_indicators
+  - previous_game_blowout_win_loss_indicators
+note_v2_3: >-
+  These fields are derived only from the most recently completed game before the
+  target date. They are trained alongside the existing season, rolling-window,
+  exponentially weighted, rest, schedule-density and starter-proxy features.

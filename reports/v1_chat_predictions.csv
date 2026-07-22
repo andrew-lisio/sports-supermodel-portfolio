@@ -1,0 +1,43 @@
+date,matchup,v1_pick,v1_probability,status_note
+2026-07-17,TB@BOS G1,BOS,0.579,recorded
+2026-07-17,LAD@NYY,NYY,0.616,recorded
+2026-07-17,PIT@CLE,CLE,0.559,invalid-slate-entry-no-game-that-date
+2026-07-17,TEX@ATL,ATL,0.588,recorded
+2026-07-17,CWS@TOR,TOR,0.603,recorded
+2026-07-17,MIA@MIL,MIL,0.578,recorded
+2026-07-17,MIN@CHC,CHC,0.516,recorded
+2026-07-17,BAL@HOU,HOU,0.587,recorded
+2026-07-17,SD@KC,SD,0.539,recorded
+2026-07-17,CIN@COL,COL,0.627,recorded
+2026-07-17,DET@LAA,DET,0.602,recorded
+2026-07-17,WSH@ATH,ATH,0.555,recorded
+2026-07-17,STL@AZ,STL,0.598,recorded
+2026-07-17,SF@SEA,SEA,0.637,recorded
+2026-07-17,TB@BOS G2,,,no-bet-recorded
+2026-07-18,TEX@ATL,ATL,0.590,recorded
+2026-07-18,MIA@MIL,MIL,0.611,recorded
+2026-07-18,TB@BOS,TB,0.525,recorded
+2026-07-18,LAD@NYY,LAD,0.520,invalid-slate-entry-no-game-that-date
+2026-07-18,SF@SEA,SEA,0.607,recorded
+2026-07-18,BAL@HOU,HOU,0.515,recorded
+2026-07-18,SD@KC,SD,0.515,recorded
+2026-07-18,DET@LAA,DET,0.643,recorded
+2026-07-18,STL@AZ,AZ,0.522,recorded
+2026-07-18,WSH@ATH,WSH,0.510,recorded
+2026-07-18,PIT@CLE G2,,,no-bet-recorded
+2026-07-19,CWS@TOR,CWS,0.542,recorded
+2026-07-19,LAD@NYY G1,LAD,0.515,recorded
+2026-07-19,TEX@ATL,ATL,0.636,recorded
+2026-07-19,NYM@PHI,PHI,0.610,recorded
+2026-07-19,TB@BOS,BOS,0.521,recorded
+2026-07-19,PIT@CLE,CLE,0.506,recorded
+2026-07-19,MIA@MIL,MIL,0.613,recorded
+2026-07-19,BAL@HOU,HOU,0.504,recorded
+2026-07-19,SD@KC,SD,0.525,recorded
+2026-07-19,MIN@CHC,CHC,0.603,recorded
+2026-07-19,CIN@COL,COL,0.510,recorded
+2026-07-19,WSH@ATH,WSH,0.607,recorded
+2026-07-19,DET@LAA,DET,0.591,recorded
+2026-07-19,SF@SEA,SEA,0.603,recorded
+2026-07-19,STL@AZ,AZ,0.542,recorded
+2026-07-19,LAD@NYY G2,,,no-bet-recorded
