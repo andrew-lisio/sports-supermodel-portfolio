@@ -459,7 +459,7 @@ V2.3.3 contains a schedule-integrity hotfix and retains the V2.3.2 input workflo
 
 Planned work includes:
 
-- 1/3/5/10-game recent-form engine with learned decay
+- Walk-forward decay selection for the 1/3/5/10-game recent-form engine (multi-horizon features are now implemented on the V2.4 branch)
 - Individual confirmed-lineup projections
 - Pitcher-specific FIP/xFIP/SIERA/xERA and pitch-quality model
 - Bullpen availability and leverage-usage model

@@ -39,6 +39,7 @@ except Exception:  # pragma: no cover
     CatBoostClassifier = None
 
 RANDOM_SEED = 20260720
+RECENT_FORM_WINDOWS = (3, 5, 10, 20)
 
 
 @dataclass
@@ -228,9 +229,15 @@ def _team_snapshot(state: TeamState, date: pd.Timestamp) -> dict[str, float]:
     pyth = (rf_pg**exponent) / (rf_pg**exponent + ra_pg**exponent) if rf_pg + ra_pg else 0.5
 
     recent = list(state.recent)
+
     def window(n: int, idx: int, default: float) -> float:
         vals = recent[-n:]
         return _safe_mean((x[idx] for x in vals), default)
+
+    win_windows = {n: window(n, 0, 0.5) for n in RECENT_FORM_WINDOWS}
+    rf_windows = {n: window(n, 1, 4.35) for n in RECENT_FORM_WINDOWS}
+    ra_windows = {n: window(n, 2, 4.35) for n in RECENT_FORM_WINDOWS}
+    rd_windows = {n: window(n, 3, 0.0) for n in RECENT_FORM_WINDOWS}
 
     if state.last_date is None:
         rest = 3.0
@@ -242,10 +249,14 @@ def _team_snapshot(state: TeamState, date: pd.Timestamp) -> dict[str, float]:
     return {
         "games": float(games), "win_pct": win_pct, "pyth": pyth,
         "rf_pg": rf_pg, "ra_pg": ra_pg, "run_diff_pg": rf_pg - ra_pg,
-        "win5": window(5, 0, 0.5), "win10": window(10, 0, 0.5), "win20": window(20, 0, 0.5),
-        "rf5": window(5, 1, 4.35), "rf10": window(10, 1, 4.35), "rf20": window(20, 1, 4.35),
-        "ra5": window(5, 2, 4.35), "ra10": window(10, 2, 4.35), "ra20": window(20, 2, 4.35),
-        "rd5": window(5, 3, 0.0), "rd10": window(10, 3, 0.0), "rd20": window(20, 3, 0.0),
+        **{f"win{n}": win_windows[n] for n in RECENT_FORM_WINDOWS},
+        **{f"rf{n}": rf_windows[n] for n in RECENT_FORM_WINDOWS},
+        **{f"ra{n}": ra_windows[n] for n in RECENT_FORM_WINDOWS},
+        **{f"rd{n}": rd_windows[n] for n in RECENT_FORM_WINDOWS},
+        "form_win_momentum": win_windows[3] - win_windows[10],
+        "form_rf_momentum": rf_windows[3] - rf_windows[10],
+        "form_ra_momentum": ra_windows[3] - ra_windows[10],
+        "form_rd_momentum": rd_windows[3] - rd_windows[10],
         "ewm_rf": state.ewm_rf, "ewm_ra": state.ewm_ra, "ewm_win": state.ewm_win,
         "rest_days": rest, "games_last3": float(games_3), "games_last7": float(games_7),
         "last_game_known": state.last_game_known,
@@ -309,7 +320,7 @@ def build_pregame_features(games: pd.DataFrame, external_features: pd.DataFrame 
             for name in sa:
                 rec[f"{name}_diff"] = sa[name] - sb[name]
                 if name in {
-                    "rf_pg", "ra_pg", "rf5", "ra5", "rf10", "ra10", "ewm_rf", "ewm_ra",
+                    "rf_pg", "ra_pg", "rf3", "ra3", "rf5", "ra5", "rf10", "ra10", "ewm_rf", "ewm_ra",
                     "last_win", "last_rf", "last_ra", "last_rd", "last_total_runs",
                     "last_abs_margin", "last_opponent_win_pct", "last_opponent_pyth",
                     "last_scored_shutout", "last_was_shutout",
@@ -441,7 +452,7 @@ def _feature_record_from_states(
     for name in sa:
         rec[f"{name}_diff"] = sa[name] - sb[name]
         if name in {
-            "rf_pg", "ra_pg", "rf5", "ra5", "rf10", "ra10", "ewm_rf", "ewm_ra",
+            "rf_pg", "ra_pg", "rf3", "ra3", "rf5", "ra5", "rf10", "ra10", "ewm_rf", "ewm_ra",
             "last_win", "last_rf", "last_ra", "last_rd", "last_total_runs",
             "last_abs_margin", "last_opponent_win_pct", "last_opponent_pyth",
             "last_scored_shutout", "last_was_shutout",
