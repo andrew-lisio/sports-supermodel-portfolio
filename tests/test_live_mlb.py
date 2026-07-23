@@ -196,6 +196,11 @@ def test_confidence_ranking_and_market_analysis_have_no_staking(monkeypatch):
         def predict_proba(self, target):
             comp = {f"m{i}": np.array([0.80, 0.60]) for i in range(7)}
             return np.array([0.80, 0.60]), comp
+        def group_sensitivities(self, target):
+            return {
+                "offense": np.array([0.08, -0.03]),
+                "starting_pitcher": np.array([-0.02, 0.05]),
+            }
 
     class FakeScoreModel:
         def fit(self, train):
@@ -233,6 +238,12 @@ def test_confidence_ranking_and_market_analysis_have_no_staking(monkeypatch):
     assert evaluations.iloc[0].is_top_pick
     assert evaluations.iloc[0].fair_odds < 0
     assert evaluations.iloc[0].edge_vs_break_even == pytest.approx(evaluations.iloc[0].pick_probability - (250 / 350))
+    assert evaluations.iloc[0].top_supporting_group == "offense"
+    assert evaluations.iloc[0].top_supporting_sensitivity == pytest.approx(0.08)
+    assert evaluations.iloc[0].top_opposing_group == "starting_pitcher"
+    assert evaluations.iloc[0].top_opposing_sensitivity == pytest.approx(-0.02)
+    assert evaluations.iloc[0].ensemble_pick_sensitivity_offense == pytest.approx(0.08)
+    assert evaluations.iloc[0].attribution_scope == "seven_model_ensemble_before_score_blend"
     forbidden = {
         "stake_decision", "recommended_stake", "full_kelly_amount",
         "fractional_kelly_amount", "effective_bankroll", "staking_probability",

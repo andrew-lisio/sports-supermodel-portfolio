@@ -1,3 +1,7 @@
+from .feature_attribution import (
+    AttributionInputError,
+    leave_group_at_reference_sensitivity,
+)
 from .feature_registry import (
     FEATURE_GROUP_ORDER,
     UnclassifiedFeatureError,
@@ -84,6 +88,8 @@ __all__ = [
     "WorkflowResult",
     "capture_official_slate",
     "evaluate_captured_slate",
+    "AttributionInputError",
+    "leave_group_at_reference_sensitivity",
     "FEATURE_GROUP_ORDER",
     "UnclassifiedFeatureError",
     "feature_group_for",

@@ -22,3 +22,22 @@ The registry creates one source of truth for:
 Phase 1 does **not** reorder, remove, add, or rescale the existing model inputs.  It
 only validates and labels them.  Therefore it is intended to preserve V2.3.3 model
 behavior while preparing the codebase for later V2.4 features and attribution.
+
+## Phase 2: feature-group sensitivity
+
+Phase 2 adds prediction diagnostics without changing the trained probabilities, score
+simulation, ranking, or market calculations. For each registered feature group, the
+engine compares the normal seven-model ensemble probability with a counterfactual in
+which that group is replaced by medians learned from the chronological training core.
+
+The output is oriented toward the reported pick:
+
+- a positive value means the observed group supports the pick relative to its training
+  reference;
+- a negative value means the observed group opposes the pick;
+- values are probability changes and are shown as percentage points in the browser UI.
+
+These values are **non-causal and non-additive**. Correlated features and model
+interactions mean that group effects should not be summed to reconstruct the final
+probability. The diagnostic scope is the seven-model winner ensemble before the
+separate Poisson score blend and Monte Carlo finalization.

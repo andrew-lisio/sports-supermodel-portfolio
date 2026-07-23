@@ -396,6 +396,7 @@ def evaluate_live_slate(
     model = V2Ensemble().fit(historical_features)
     score_model = PoissonScoreModel().fit(historical_features)
     model_probability_a, components = model.predict_proba(future_features)
+    group_sensitivities_a = model.group_sensitivities(future_features)
     expected_runs_a, expected_runs_b = score_model.expected_runs(future_features)
     rng = np.random.default_rng(RANDOM_SEED)
     rows: list[dict[str, Any]] = []
@@ -430,6 +431,27 @@ def evaluate_live_slate(
         pick = away if away_probability >= home_probability else home
         pick_probability = max(away_probability, home_probability)
         pick_is_away = pick == away
+
+        pick_group_sensitivities: dict[str, float] = {}
+        for group_name, values in group_sensitivities_a.items():
+            effect_a = float(values[idx])
+            effect_away = effect_a if team_a_is_away else -effect_a
+            pick_group_sensitivities[group_name] = (
+                effect_away if pick_is_away else -effect_away
+            )
+        supporting = [
+            (name, value) for name, value in pick_group_sensitivities.items() if value > 0.0
+        ]
+        opposing = [
+            (name, value) for name, value in pick_group_sensitivities.items() if value < 0.0
+        ]
+        top_supporting_group, top_supporting_sensitivity = (
+            max(supporting, key=lambda item: item[1]) if supporting else (None, 0.0)
+        )
+        top_opposing_group, top_opposing_sensitivity = (
+            min(opposing, key=lambda item: item[1]) if opposing else (None, 0.0)
+        )
+
         votes_pick = sum(
             (prob >= 0.5) if pick_is_away else (prob < 0.5)
             for prob in component_away.values()
@@ -493,6 +515,12 @@ def evaluate_live_slate(
             "edge_vs_break_even": pick_probability - pick_break_even,
             "fair_odds": probability_to_american(pick_probability),
             "lineups_confirmed": bool(feature_row.get("lineups_confirmed", False)),
+            "top_supporting_group": top_supporting_group,
+            "top_supporting_sensitivity": top_supporting_sensitivity,
+            "top_opposing_group": top_opposing_group,
+            "top_opposing_sensitivity": top_opposing_sensitivity,
+            "attribution_scope": "seven_model_ensemble_before_score_blend",
+            "attribution_method": "leave_one_group_at_training_median_non_additive",
             "away_last_win": away_last_win,
             "away_last_runs_for": away_last_rf,
             "away_last_runs_against": away_last_ra,
@@ -508,6 +536,10 @@ def evaluate_live_slate(
             "simulations": config.simulations,
         }
         row.update({f"p_{name}_{away}": prob for name, prob in component_away.items()})
+        row.update({
+            f"ensemble_pick_sensitivity_{name}": value
+            for name, value in pick_group_sensitivities.items()
+        })
         rows.append(row)
 
     frame = pd.DataFrame(rows)

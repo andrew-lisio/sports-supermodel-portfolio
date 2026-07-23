@@ -20,6 +20,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from .feature_attribution import leave_group_at_reference_sensitivity
 from .feature_registry import group_feature_names, validate_feature_groups
 
 warnings.filterwarnings("ignore")
@@ -656,6 +657,7 @@ class V2Ensemble:
         self.models = make_models()
         self.feature_names: list[str] = []
         self.feature_groups: dict[str, list[str]] = {}
+        self.feature_reference_values: dict[str, float] = {}
         self.weights: dict[str, float] = {}
         self.calibrator: LogisticRegression | None = None
         self.v1_anchor_weight: float = 0.25
@@ -667,6 +669,12 @@ class V2Ensemble:
         split = max(100, int(len(train) * 0.8))
         split = min(split, len(train)-30)
         core, cal = train.iloc[:split], train.iloc[split:]
+        self.feature_reference_values = {
+            name: (
+                float(value) if pd.notna(value) and np.isfinite(float(value)) else 0.0
+            )
+            for name, value in core[self.feature_names].median(numeric_only=True).items()
+        }
         Xc, yc = core[self.feature_names], core["a_win"]
         Xcal, ycal = cal[self.feature_names], cal["a_win"]
 
@@ -713,6 +721,25 @@ class V2Ensemble:
         calibrated = self.v1_anchor_weight * v1 + (1-self.v1_anchor_weight) * calibrated
         calibrated = np.clip(calibrated, 0.08, 0.92)
         return calibrated, comp
+
+    def group_sensitivities(self, df: pd.DataFrame) -> dict[str, np.ndarray]:
+        """Return non-additive feature-group sensitivity in canonical team-A orientation.
+
+        Each group is replaced with medians learned from the chronological training core,
+        then the fitted ensemble is evaluated again. These diagnostics explain model
+        sensitivity; they do not alter the probability and are not causal attributions.
+        """
+
+        if not self.feature_reference_values:
+            raise RuntimeError("V2Ensemble must be fitted before attribution")
+        baseline, _ = self.predict_proba(df)
+        return leave_group_at_reference_sensitivity(
+            df,
+            baseline_probability=baseline,
+            predict_probability=lambda neutral: self.predict_proba(neutral)[0],
+            feature_groups=self.feature_groups,
+            reference_values=self.feature_reference_values,
+        )
 
 
 class PoissonScoreModel:

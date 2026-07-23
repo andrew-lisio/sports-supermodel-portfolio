@@ -210,6 +210,10 @@ def render_app() -> None:
         "simulated_home_runs",
         "fair_odds",
         "edge_vs_no_vig",
+        "top_supporting_group",
+        "top_supporting_sensitivity",
+        "top_opposing_group",
+        "top_opposing_sensitivity",
         "lineups_confirmed",
     ]
     available = [column for column in display_columns if column in result.evaluation.columns]
@@ -218,6 +222,14 @@ def render_app() -> None:
         display["pick_probability_pct"] = 100.0 * display.pop("pick_probability")
     if "edge_vs_no_vig" in display:
         display["edge_vs_no_vig_pct"] = 100.0 * display.pop("edge_vs_no_vig")
+    if "top_supporting_sensitivity" in display:
+        display["top_supporting_sensitivity_pp"] = (
+            100.0 * display.pop("top_supporting_sensitivity")
+        )
+    if "top_opposing_sensitivity" in display:
+        display["top_opposing_sensitivity_pp"] = (
+            100.0 * display.pop("top_opposing_sensitivity")
+        )
     st.dataframe(
         display,
         use_container_width=True,
@@ -229,9 +241,58 @@ def render_app() -> None:
             "edge_vs_no_vig_pct": st.column_config.NumberColumn(
                 "Edge vs no-vig", format="%.1f%%"
             ),
+            "top_supporting_sensitivity_pp": st.column_config.NumberColumn(
+                "Top support (pp)", format="%+.2f"
+            ),
+            "top_opposing_sensitivity_pp": st.column_config.NumberColumn(
+                "Top opposition (pp)", format="%+.2f"
+            ),
         },
     )
-    st.caption("Downloadable files store probabilities and edges as decimals.")
+    st.caption(
+        "Downloadable files store probabilities and edges as decimals. Feature-group values "
+        "are non-additive ensemble sensitivities, not causal contributions."
+    )
+
+    sensitivity_columns = [
+        column
+        for column in result.evaluation.columns
+        if column.startswith("ensemble_pick_sensitivity_")
+    ]
+    if sensitivity_columns:
+        with st.expander("Feature-group sensitivity details"):
+            game_labels = {
+                f"{row.away_team} at {row.home_team} — pick {row.pick}": index
+                for index, row in result.evaluation.iterrows()
+            }
+            selected_label = st.selectbox("Game", list(game_labels))
+            selected = result.evaluation.loc[game_labels[selected_label]]
+            sensitivity = pd.DataFrame({
+                "feature_group": [
+                    column.removeprefix("ensemble_pick_sensitivity_")
+                    for column in sensitivity_columns
+                ],
+                "effect_on_pick_probability_pp": [
+                    100.0 * float(selected[column]) for column in sensitivity_columns
+                ],
+            }).sort_values(
+                "effect_on_pick_probability_pp", key=lambda values: values.abs(), ascending=False
+            )
+            st.dataframe(
+                sensitivity,
+                use_container_width=True,
+                hide_index=True,
+                column_config={
+                    "effect_on_pick_probability_pp": st.column_config.NumberColumn(
+                        "Effect on pick probability (pp)", format="%+.2f"
+                    ),
+                },
+            )
+            st.caption(
+                "Each row compares the normal seven-model ensemble probability with the "
+                "probability after replacing that group by training medians. Effects can "
+                "interact and therefore do not sum to the final probability."
+            )
 
     col1, col2 = st.columns(2)
     with col1:

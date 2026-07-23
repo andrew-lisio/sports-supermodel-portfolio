@@ -116,6 +116,10 @@ def _print_evaluation(evaluation: pd.DataFrame) -> None:
         "edge_vs_no_vig",
         "edge_vs_break_even",
         "fair_odds",
+        "top_supporting_group",
+        "top_supporting_sensitivity",
+        "top_opposing_group",
+        "top_opposing_sensitivity",
         "lineups_confirmed",
     ]
     available = [column for column in display_columns if column in evaluation.columns]
