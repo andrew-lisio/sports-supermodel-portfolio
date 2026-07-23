@@ -1,3 +1,10 @@
+from .feature_registry import (
+    FEATURE_GROUP_ORDER,
+    UnclassifiedFeatureError,
+    feature_group_for,
+    group_feature_names,
+    validate_feature_groups,
+)
 """Sports SuperModel public package interface."""
 
 from .game_registry import (
@@ -77,4 +84,9 @@ __all__ = [
     "WorkflowResult",
     "capture_official_slate",
     "evaluate_captured_slate",
+    "FEATURE_GROUP_ORDER",
+    "UnclassifiedFeatureError",
+    "feature_group_for",
+    "group_feature_names",
+    "validate_feature_groups",
 ]

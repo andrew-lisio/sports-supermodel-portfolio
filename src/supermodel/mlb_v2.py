@@ -20,6 +20,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from .feature_registry import group_feature_names, validate_feature_groups
+
 warnings.filterwarnings("ignore")
 
 try:
@@ -558,7 +560,11 @@ def build_future_features(
 
 def feature_columns(df: pd.DataFrame) -> list[str]:
     meta = {"date", "team_a", "team_b", "a_runs", "b_runs", "a_win", "a_starter", "b_starter"}
-    return [c for c in df.columns if c not in meta and pd.api.types.is_numeric_dtype(df[c])]
+    columns = [c for c in df.columns if c not in meta and pd.api.types.is_numeric_dtype(df[c])]
+    # V2.4 fails closed when a newly added numeric feature has not been assigned to
+    # a baseball category.  Validation does not reorder or alter model inputs.
+    validate_feature_groups(columns)
+    return columns
 
 
 def v1_baseline_probability(df: pd.DataFrame) -> np.ndarray:
@@ -649,12 +655,14 @@ class V2Ensemble:
     def __init__(self) -> None:
         self.models = make_models()
         self.feature_names: list[str] = []
+        self.feature_groups: dict[str, list[str]] = {}
         self.weights: dict[str, float] = {}
         self.calibrator: LogisticRegression | None = None
         self.v1_anchor_weight: float = 0.25
 
     def fit(self, train: pd.DataFrame) -> "V2Ensemble":
         self.feature_names = feature_columns(train)
+        self.feature_groups = group_feature_names(self.feature_names)
         train = train.sort_values("date")
         split = max(100, int(len(train) * 0.8))
         split = min(split, len(train)-30)
@@ -713,6 +721,7 @@ class PoissonScoreModel:
     def __init__(self, alpha: float = 1.0) -> None:
         self.alpha = alpha
         self.feature_names: list[str] = []
+        self.feature_groups: dict[str, list[str]] = {}
         self.team_a_model = Pipeline([
             ("imputer", SimpleImputer(strategy="median")),
             ("scale", StandardScaler()),
@@ -737,6 +746,7 @@ class PoissonScoreModel:
             name for name in feature_columns(train)
             if not name.startswith("live_") and not name.startswith("missing_")
         ]
+        self.feature_groups = group_feature_names(self.feature_names)
         X = train[self.feature_names]
         self.team_a_model.fit(X, train["a_runs"].clip(lower=0))
         self.team_b_model.fit(X, train["b_runs"].clip(lower=0))
