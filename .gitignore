@@ -42,3 +42,6 @@ snapshots/market_input/**/local_*
 
 # Default local runtime artifacts (official captures, user odds, and reports)
 runtime/
+
+# Generated V2.4 validation outputs
+reports/v2_4_validation/
