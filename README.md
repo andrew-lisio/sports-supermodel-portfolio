@@ -494,3 +494,17 @@ Released under the [MIT License](LICENSE). The license includes an “AS IS” w
 ## Responsible use
 
 Never treat a model probability as certainty. Do not chase losses, borrow to gamble, or risk money needed for essential expenses. In the United States, the National Problem Gambling Helpline can be reached by calling or texting **1-800-MY-RESET**. Users elsewhere should use an appropriate local support or self-exclusion service.
+
+## V2.4 validation command
+
+The V2.4 development branch includes a matched chronological comparison against the
+frozen V2.3.3 feature contract:
+
+```bash
+sports-supermodel-validate
+```
+
+The ordinary command evaluates only development folds. The final holdout remains locked
+unless `--unlock-holdout` is supplied after the candidate configuration is frozen. Reports
+are written to `reports/v2_4_validation/`. See
+`docs/V2_4_VALIDATION_FRAMEWORK.md` for methodology and promotion gates.

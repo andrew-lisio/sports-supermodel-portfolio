@@ -6,6 +6,9 @@ requirements:
   log_loss_improvement_required: true
   auc_not_worse_by_more_than: 0.005
   accuracy_not_worse_by_more_than: 0.01
+  ece_not_worse_by_more_than: 0.01
+  coverage_not_worse_by_more_than: 0.01
+  final_holdout_required: true
   minimum_prospective_games: 500
   closing_line_value_tracking_required: true
   no_schedule_integrity_errors: true

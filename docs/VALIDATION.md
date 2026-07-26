@@ -44,3 +44,19 @@ python scripts/run_v2_2_validation.py
 ```
 
 Some historical reports refer to earlier releases and are retained for auditability. They are not the active V2.3.2 output schema.
+
+## Active V2.4 framework
+
+V2.4 Phase 4 adds a matched V2.3.3-versus-V2.4 walk-forward runner, calibration
+metrics, paired bootstrap intervals, subgroup reports, a locked holdout, reproducibility
+metadata, and automatic promotion-gate evaluation. See
+`docs/V2_4_VALIDATION_FRAMEWORK.md`.
+
+Run it with:
+
+```bash
+sports-supermodel-validate
+```
+
+The final holdout is not part of ordinary development runs and must remain locked until
+the candidate configuration is frozen.

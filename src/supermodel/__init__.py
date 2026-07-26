@@ -52,7 +52,7 @@ from .workflow import (
     evaluate_captured_slate,
 )
 
-__version__ = "2.3.3"
+__version__ = "2.4.0.dev4"
 
 __all__ = [
     "__version__",

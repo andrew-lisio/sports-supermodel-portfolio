@@ -1,0 +1,31 @@
+version: 1
+defaults:
+  minimum_training_games: 150
+calibration_bins: 10
+bootstrap_iterations: 2000
+random_seed: 20260720
+
+development_windows:
+  - name: 2026-04-20_to_2026-05-10
+    start: 2026-04-20
+    end: 2026-05-10
+  - name: 2026-05-11_to_2026-05-31
+    start: 2026-05-11
+    end: 2026-05-31
+  - name: 2026-06-01_to_2026-06-20
+    start: 2026-06-01
+    end: 2026-06-20
+  - name: 2026-06-21_to_2026-07-05
+    start: 2026-06-21
+    end: 2026-07-05
+  - name: 2026-07-06_to_2026-07-16
+    start: 2026-07-06
+    end: 2026-07-16
+
+# This block is deliberately excluded from ordinary development runs. It may be
+# opened only after the candidate configuration is frozen. The bundled logs do not
+# yet contain the complete block, so current reports should mark it pending.
+holdout:
+  name: 2026_final_holdout
+  start: 2026-07-20
+  end: 2026-08-31
