@@ -328,14 +328,46 @@ def _fold_metric_row(
     }
 
 
+def _assert_matched_feature_rows(
+    baseline: pd.DataFrame,
+    candidate: pd.DataFrame,
+    *,
+    context: str,
+) -> None:
+    identity = [
+        column
+        for column in ["date", "game_pk", "team_a", "team_b", "a_win", "a_runs", "b_runs"]
+        if column in baseline.columns and column in candidate.columns
+    ]
+    required = {"date", "team_a", "team_b", "a_win"}
+    if not required.issubset(identity):
+        raise ValueError(f"{context}: feature frames lack required identity columns")
+    left = baseline[identity].reset_index(drop=True)
+    right = candidate[identity].reset_index(drop=True)
+    try:
+        pd.testing.assert_frame_equal(left, right, check_dtype=False)
+    except AssertionError as exc:
+        raise ValueError(
+            f"{context}: V2.3.3 and V2.4 feature frames do not contain identical games"
+        ) from exc
+
+
 def run_matched_walk_forward(
     features: pd.DataFrame,
     windows: Iterable[ValidationWindow],
     *,
     model_factory: Callable[[], Any] = V2Ensemble,
     calibration_bins: int = 10,
+    baseline_features: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Run V2.3.3 and V2.4 on identical chronological validation games."""
+    """Run V2.3.3 and V2.4 on identical chronological validation games.
+
+    ``features`` contains the active V2.4 candidate contract. When
+    ``baseline_features`` is supplied, it must contain the same games built with
+    the frozen V2.3.3 state-update settings (including its 0.18 EWM alpha). The
+    baseline feature-column contract is then frozen separately. Supplying no
+    baseline frame retains backward compatibility for tests and older callers.
+    """
 
     if "date" not in features or "a_win" not in features:
         raise ValueError("features must contain date and a_win columns")
@@ -343,12 +375,25 @@ def run_matched_walk_forward(
     frame["date"] = pd.to_datetime(frame["date"])
     frame = frame.sort_values(["date", "team_a", "team_b"]).reset_index(drop=True)
 
+    baseline_frame = (baseline_features if baseline_features is not None else features).copy()
+    if "date" not in baseline_frame or "a_win" not in baseline_frame:
+        raise ValueError("baseline_features must contain date and a_win columns")
+    baseline_frame["date"] = pd.to_datetime(baseline_frame["date"])
+    baseline_frame = baseline_frame.sort_values(
+        ["date", "team_a", "team_b"]
+    ).reset_index(drop=True)
+
     predictions: list[pd.DataFrame] = []
     folds: list[dict[str, Any]] = []
     for window in windows:
         train = frame[frame["date"] < window.start].copy()
         validation = frame[
             (frame["date"] >= window.start) & (frame["date"] <= window.end)
+        ].copy()
+        baseline_train_source = baseline_frame[baseline_frame["date"] < window.start].copy()
+        baseline_validation_source = baseline_frame[
+            (baseline_frame["date"] >= window.start)
+            & (baseline_frame["date"] <= window.end)
         ].copy()
         if len(train) < window.minimum_training_games or validation.empty:
             folds.append(
@@ -369,8 +414,18 @@ def run_matched_walk_forward(
             )
             continue
 
-        baseline_train = freeze_v23_feature_contract(train)
-        baseline_validation = freeze_v23_feature_contract(validation)
+        _assert_matched_feature_rows(
+            baseline_train_source,
+            train,
+            context=f"{window.name} training",
+        )
+        _assert_matched_feature_rows(
+            baseline_validation_source,
+            validation,
+            context=f"{window.name} validation",
+        )
+        baseline_train = freeze_v23_feature_contract(baseline_train_source)
+        baseline_validation = freeze_v23_feature_contract(baseline_validation_source)
 
         baseline_model = model_factory()
         baseline_start = perf_counter()
@@ -438,6 +493,7 @@ def run_locked_holdout(
     *,
     model_factory: Callable[[], Any] = V2Ensemble,
     calibration_bins: int = 10,
+    baseline_features: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     if window.role != "holdout":
         raise ValueError("run_locked_holdout requires a holdout window")
@@ -446,6 +502,7 @@ def run_locked_holdout(
         [window],
         model_factory=model_factory,
         calibration_bins=calibration_bins,
+        baseline_features=baseline_features,
     )
 
 

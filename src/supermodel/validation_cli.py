@@ -12,6 +12,7 @@ import pandas as pd
 
 from . import __version__
 from .mlb_v2 import build_pregame_features, load_team_logs, reconstruct_games
+from .model_contract import V23_FEATURE_CONTRACT, V24_CANDIDATE_FEATURE_CONTRACT
 from .validation import (
     calibration_table,
     dataframe_fingerprint,
@@ -220,12 +221,18 @@ def main(argv: list[str] | None = None) -> int:
 
     logs = load_team_logs(args.data_dir)
     games = reconstruct_games(logs)
-    features = build_pregame_features(games)
+    baseline_features = build_pregame_features(
+        games, recent_form_alpha=V23_FEATURE_CONTRACT.recent_form_alpha
+    )
+    candidate_features = build_pregame_features(
+        games, recent_form_alpha=V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha
+    )
 
     predictions, folds = run_matched_walk_forward(
-        features,
+        candidate_features,
         plan.development_windows,
         calibration_bins=plan.calibration_bins,
+        baseline_features=baseline_features,
     )
     if predictions.empty:
         raise RuntimeError("No development predictions were produced")
@@ -257,9 +264,10 @@ def main(argv: list[str] | None = None) -> int:
         if plan.holdout_window is None:
             raise ValueError("Validation plan has no holdout window")
         holdout_predictions, holdout_folds = run_locked_holdout(
-            features,
+            candidate_features,
             plan.holdout_window,
             calibration_bins=plan.calibration_bins,
+            baseline_features=baseline_features,
         )
         if holdout_predictions.empty:
             holdout_summary = {"status": "unavailable"}
@@ -297,9 +305,13 @@ def main(argv: list[str] | None = None) -> int:
         "data_directory": str(args.data_dir),
         "data_file_count": len(data_files),
         "data_fingerprint": dataframe_fingerprint(data_files),
-        "feature_rows": len(features),
-        "feature_date_min": pd.Timestamp(features["date"].min()).date().isoformat(),
-        "feature_date_max": pd.Timestamp(features["date"].max()).date().isoformat(),
+        "feature_rows": len(candidate_features),
+        "feature_date_min": pd.Timestamp(candidate_features["date"].min()).date().isoformat(),
+        "feature_date_max": pd.Timestamp(candidate_features["date"].max()).date().isoformat(),
+        "baseline_feature_contract": V23_FEATURE_CONTRACT.name,
+        "baseline_recent_form_alpha": V23_FEATURE_CONTRACT.recent_form_alpha,
+        "candidate_feature_contract": V24_CANDIDATE_FEATURE_CONTRACT.name,
+        "candidate_recent_form_alpha": V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
         "validation_plan": str(args.plan),
         "merge_gates": str(args.merge_gates),
         "bootstrap_iterations": bootstrap_iterations,

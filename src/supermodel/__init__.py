@@ -18,6 +18,12 @@ from .game_registry import (
     index_by_game_pk,
     parse_mlb_schedule,
 )
+from .model_contract import (
+    ModelFeatureContract,
+    V23_FEATURE_CONTRACT,
+    V24_CANDIDATE_FEATURE_CONTRACT,
+    active_candidate_contract,
+)
 from .market import (
     american_implied_probability,
     american_to_decimal,
@@ -52,10 +58,14 @@ from .workflow import (
     evaluate_captured_slate,
 )
 
-__version__ = "2.4.0.dev5"
+__version__ = "2.4.0.dev6"
 
 __all__ = [
     "__version__",
+    "ModelFeatureContract",
+    "V23_FEATURE_CONTRACT",
+    "V24_CANDIDATE_FEATURE_CONTRACT",
+    "active_candidate_contract",
     "GameRecord",
     "ImmutableSnapshotStore",
     "ScheduleIntegrityError",

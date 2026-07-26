@@ -518,3 +518,5 @@ sports-supermodel-optimize-form
 ```
 
 The optimizer keeps the final holdout locked and writes generated evidence to `reports/v2_4_recent_form/`.
+
+The current frozen V2.4 candidate is `phase3_full_alpha_025`: 3/5/10/20-game windows, momentum and previous-game context enabled, and EWM alpha `0.25`. V2.3.3 remains separately reconstructed with alpha `0.18` during matched validation. See `docs/V2_4_SELECTED_RECENT_FORM.md`.

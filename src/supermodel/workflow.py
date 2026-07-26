@@ -18,6 +18,7 @@ from .live_mlb import (
     evaluate_top_pick_parlays,
     write_evaluation_artifacts,
 )
+from .model_contract import V24_CANDIDATE_FEATURE_CONTRACT
 from .mlb_v2 import (
     attach_official_home_away,
     build_future_features,
@@ -204,12 +205,20 @@ def evaluate_captured_slate(
         source="mlb_stats_api:v1/schedule:historical_identity_backfill",
     )
     games = attach_official_home_away(games, parse_mlb_schedule(history_schedule_payload))
-    historical_features = build_pregame_features(games)
+    historical_features = build_pregame_features(
+        games,
+        recent_form_alpha=V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
+    )
     matchups = contexts_to_matchups(selected_contexts)
     external = pd.DataFrame(
         [context_to_external_feature_record(context) for context in selected_contexts]
     )
-    future_features = build_future_features(games, matchups, external)
+    future_features = build_future_features(
+        games,
+        matchups,
+        external,
+        recent_form_alpha=V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
+    )
 
     evaluation = evaluate_live_slate(
         historical_features=historical_features,

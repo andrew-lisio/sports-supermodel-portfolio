@@ -22,6 +22,7 @@ from sklearn.preprocessing import StandardScaler
 
 from .feature_attribution import leave_group_at_reference_sensitivity
 from .feature_registry import group_feature_names, validate_feature_groups
+from .model_contract import V24_CANDIDATE_FEATURE_CONTRACT
 
 warnings.filterwarnings("ignore")
 
@@ -40,7 +41,7 @@ except Exception:  # pragma: no cover
 
 RANDOM_SEED = 20260720
 RECENT_FORM_WINDOWS = (3, 5, 10, 20)
-DEFAULT_EWM_ALPHA = 0.18
+DEFAULT_EWM_ALPHA = V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha
 
 
 @dataclass
