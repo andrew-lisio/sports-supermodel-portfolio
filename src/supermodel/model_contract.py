@@ -12,6 +12,7 @@ class ModelFeatureContract:
     recent_form_windows: tuple[int, ...]
     include_recent_form_momentum: bool
     include_last_game_context: bool
+    include_opponent_adjusted_recent_form: bool = False
 
     def __post_init__(self) -> None:
         if not self.name:
@@ -30,6 +31,7 @@ V23_FEATURE_CONTRACT = ModelFeatureContract(
     recent_form_windows=(5, 10, 20),
     include_recent_form_momentum=False,
     include_last_game_context=True,
+    include_opponent_adjusted_recent_form=False,
 )
 
 # Selected on the locked development folds by the Phase 5A optimizer. This is a
@@ -41,6 +43,7 @@ V24_CANDIDATE_FEATURE_CONTRACT = ModelFeatureContract(
     recent_form_windows=(3, 5, 10, 20),
     include_recent_form_momentum=True,
     include_last_game_context=True,
+    include_opponent_adjusted_recent_form=False,
 )
 
 

@@ -53,6 +53,7 @@ class TeamState:
     last_date: pd.Timestamp | None = None
     recent_dates: deque = field(default_factory=lambda: deque(maxlen=10))
     recent: deque = field(default_factory=lambda: deque(maxlen=20))
+    opponent_adjusted_recent: deque = field(default_factory=lambda: deque(maxlen=20))
     ewm_rf: float = 4.35
     ewm_ra: float = 4.35
     ewm_win: float = 0.5
@@ -221,7 +222,12 @@ def _safe_mean(values: Iterable[float], default: float) -> float:
     return float(np.mean(vals)) if vals else default
 
 
-def _team_snapshot(state: TeamState, date: pd.Timestamp) -> dict[str, float]:
+def _team_snapshot(
+    state: TeamState,
+    date: pd.Timestamp,
+    *,
+    include_opponent_adjusted_recent_form: bool = False,
+) -> dict[str, float]:
     games = state.games
     prior_games = 10.0
     win_pct = (state.wins + prior_games * 0.5) / (games + prior_games)
@@ -241,6 +247,25 @@ def _team_snapshot(state: TeamState, date: pd.Timestamp) -> dict[str, float]:
     ra_windows = {n: window(n, 2, 4.35) for n in RECENT_FORM_WINDOWS}
     rd_windows = {n: window(n, 3, 0.0) for n in RECENT_FORM_WINDOWS}
 
+    adjusted_recent = list(state.opponent_adjusted_recent)
+
+    def adjusted_window(n: int, idx: int) -> float:
+        vals = adjusted_recent[-n:]
+        return _safe_mean((x[idx] for x in vals), 0.0)
+
+    adjusted_win_windows = {
+        n: adjusted_window(n, 0) for n in RECENT_FORM_WINDOWS
+    }
+    adjusted_rf_windows = {
+        n: adjusted_window(n, 1) for n in RECENT_FORM_WINDOWS
+    }
+    adjusted_ra_windows = {
+        n: adjusted_window(n, 2) for n in RECENT_FORM_WINDOWS
+    }
+    adjusted_rd_windows = {
+        n: adjusted_window(n, 3) for n in RECENT_FORM_WINDOWS
+    }
+
     if state.last_date is None:
         rest = 3.0
     else:
@@ -248,7 +273,7 @@ def _team_snapshot(state: TeamState, date: pd.Timestamp) -> dict[str, float]:
     games_3 = sum((date - d).days <= 3 for d in state.recent_dates)
     games_7 = sum((date - d).days <= 7 for d in state.recent_dates)
 
-    return {
+    snapshot = {
         "games": float(games), "win_pct": win_pct, "pyth": pyth,
         "rf_pg": rf_pg, "ra_pg": ra_pg, "run_diff_pg": rf_pg - ra_pg,
         **{f"win{n}": win_windows[n] for n in RECENT_FORM_WINDOWS},
@@ -276,6 +301,36 @@ def _team_snapshot(state: TeamState, date: pd.Timestamp) -> dict[str, float]:
         "last_blowout_win": state.last_blowout_win,
         "last_blowout_loss": state.last_blowout_loss,
     }
+    if include_opponent_adjusted_recent_form:
+        snapshot.update(
+            {f"opp_adj_win{n}": adjusted_win_windows[n] for n in RECENT_FORM_WINDOWS}
+        )
+        snapshot.update(
+            {f"opp_adj_rf{n}": adjusted_rf_windows[n] for n in RECENT_FORM_WINDOWS}
+        )
+        snapshot.update(
+            {f"opp_adj_ra{n}": adjusted_ra_windows[n] for n in RECENT_FORM_WINDOWS}
+        )
+        snapshot.update(
+            {f"opp_adj_rd{n}": adjusted_rd_windows[n] for n in RECENT_FORM_WINDOWS}
+        )
+        snapshot.update(
+            {
+                "opp_adj_form_win_momentum": (
+                    adjusted_win_windows[3] - adjusted_win_windows[10]
+                ),
+                "opp_adj_form_rf_momentum": (
+                    adjusted_rf_windows[3] - adjusted_rf_windows[10]
+                ),
+                "opp_adj_form_ra_momentum": (
+                    adjusted_ra_windows[3] - adjusted_ra_windows[10]
+                ),
+                "opp_adj_form_rd_momentum": (
+                    adjusted_rd_windows[3] - adjusted_rd_windows[10]
+                ),
+            }
+        )
+    return snapshot
 
 
 def _starter_snapshot(state: StarterState) -> dict[str, float]:
@@ -294,6 +349,7 @@ def build_pregame_features(
     external_features: pd.DataFrame | None = None,
     *,
     recent_form_alpha: float = DEFAULT_EWM_ALPHA,
+    include_opponent_adjusted_recent_form: bool = False,
 ) -> pd.DataFrame:
     if not 0.0 < recent_form_alpha <= 1.0:
         raise ValueError("recent_form_alpha must be in (0, 1]")
@@ -311,7 +367,20 @@ def build_pregame_features(
         pending: list[pd.Series] = []
         for _, g in day_games.iterrows():
             a, b = g.team_a, g.team_b
-            sa, sb = _team_snapshot(team_states[a], date), _team_snapshot(team_states[b], date)
+            sa = _team_snapshot(
+                team_states[a],
+                date,
+                include_opponent_adjusted_recent_form=(
+                    include_opponent_adjusted_recent_form
+                ),
+            )
+            sb = _team_snapshot(
+                team_states[b],
+                date,
+                include_opponent_adjusted_recent_form=(
+                    include_opponent_adjusted_recent_form
+                ),
+            )
             spa = _starter_snapshot(starter_states[g.a_starter])
             spb = _starter_snapshot(starter_states[g.b_starter])
             rec: dict[str, Any] = {
@@ -368,6 +437,48 @@ def build_pregame_features(
     return pd.DataFrame(output)
 
 
+def _opponent_adjusted_performance(
+    *,
+    won: float,
+    runs_for: float,
+    runs_against: float,
+    opponent_snapshot: dict[str, float],
+) -> tuple[float, float, float, float]:
+    """Return point-in-time residuals versus the opponent's pregame strength.
+
+    Positive values always represent stronger performance. Run residuals are
+    clipped to keep one extreme game from dominating short rolling windows.
+    """
+
+    opponent_strength = float(
+        np.clip(
+            0.5
+            * (
+                float(opponent_snapshot["win_pct"])
+                + float(opponent_snapshot["pyth"])
+            ),
+            0.0,
+            1.0,
+        )
+    )
+    adjusted_win = float(won) - (1.0 - opponent_strength)
+    adjusted_runs_for = float(
+        np.clip(runs_for - float(opponent_snapshot["ra_pg"]), -8.0, 8.0)
+    )
+    adjusted_runs_against = float(
+        np.clip(float(opponent_snapshot["rf_pg"]) - runs_against, -8.0, 8.0)
+    )
+    adjusted_run_difference = float(
+        np.clip(adjusted_runs_for + adjusted_runs_against, -12.0, 12.0)
+    )
+    return (
+        adjusted_win,
+        adjusted_runs_for,
+        adjusted_runs_against,
+        adjusted_run_difference,
+    )
+
+
 def _apply_completed_game_update(
     *,
     g: pd.Series,
@@ -400,6 +511,14 @@ def _apply_completed_game_update(
         st.last_date = date
         st.recent_dates.append(date)
         st.recent.append((float(won), rf, ra, rd))
+        st.opponent_adjusted_recent.append(
+            _opponent_adjusted_performance(
+                won=float(won),
+                runs_for=rf,
+                runs_against=ra,
+                opponent_snapshot=opponent_snapshot,
+            )
+        )
         st.ewm_rf = alpha * rf + (1-alpha) * st.ewm_rf
         st.ewm_ra = alpha * ra + (1-alpha) * st.ewm_ra
         st.ewm_win = alpha * float(won) + (1-alpha) * st.ewm_win
@@ -455,8 +574,18 @@ def _feature_record_from_states(
     team_states: dict[str, TeamState],
     starter_states: dict[str, StarterState],
     external: dict[str, Any] | None = None,
+    include_opponent_adjusted_recent_form: bool = False,
 ) -> dict[str, Any]:
-    sa, sb = _team_snapshot(team_states[team_a], date), _team_snapshot(team_states[team_b], date)
+    sa = _team_snapshot(
+        team_states[team_a],
+        date,
+        include_opponent_adjusted_recent_form=include_opponent_adjusted_recent_form,
+    )
+    sb = _team_snapshot(
+        team_states[team_b],
+        date,
+        include_opponent_adjusted_recent_form=include_opponent_adjusted_recent_form,
+    )
     spa, spb = _starter_snapshot(starter_states[a_starter]), _starter_snapshot(starter_states[b_starter])
     rec: dict[str, Any] = {
         "date": date,
@@ -500,6 +629,7 @@ def build_future_features(
     external_features: pd.DataFrame | None = None,
     *,
     recent_form_alpha: float = DEFAULT_EWM_ALPHA,
+    include_opponent_adjusted_recent_form: bool = False,
 ) -> pd.DataFrame:
     """Build leakage-safe feature rows for future MLB matchups.
 
@@ -579,6 +709,9 @@ def build_future_features(
             team_states=team_states,
             starter_states=starter_states,
             external=ext,
+            include_opponent_adjusted_recent_form=(
+                include_opponent_adjusted_recent_form
+            ),
         )
         rec.update({
             "game_pk": int(game_pk) if game_pk is not None and pd.notna(game_pk) else None,

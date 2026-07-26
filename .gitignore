@@ -48,3 +48,6 @@ reports/v2_4_validation/
 
 # Generated V2.4 recent-form experiment outputs
 reports/v2_4_recent_form/
+
+# Generated V2.4 opponent-adjusted form experiment outputs
+reports/v2_4_opponent_form/

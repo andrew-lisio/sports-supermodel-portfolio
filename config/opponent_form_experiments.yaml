@@ -1,0 +1,40 @@
+version: 1
+bootstrap_iterations: 500
+selection:
+  minimum_log_loss_improvement: 0.00005
+  minimum_brier_improvement: 0.00002
+  maximum_accuracy_regression: 0.005
+  maximum_auc_regression: 0.003
+  maximum_ece_regression: 0.005
+
+candidates:
+  - name: v24_frozen_reference
+    baseline: true
+    description: Frozen V2.4 alpha-0.25 recent-form contract without opponent adjustment.
+    include_adjusted_form: false
+    include_momentum: false
+    windows: [3, 5, 10, 20]
+
+  - name: opponent_adjusted_full
+    description: Adds 3/5/10/20-game opponent-adjusted win and run residuals plus 3-versus-10 momentum.
+    include_adjusted_form: true
+    include_momentum: true
+    windows: [3, 5, 10, 20]
+
+  - name: opponent_adjusted_no_momentum
+    description: Adds all opponent-adjusted rolling windows without adjusted momentum.
+    include_adjusted_form: true
+    include_momentum: false
+    windows: [3, 5, 10, 20]
+
+  - name: opponent_adjusted_5_10_20
+    description: Removes the noisiest three-game adjusted window and momentum.
+    include_adjusted_form: true
+    include_momentum: false
+    windows: [5, 10, 20]
+
+  - name: opponent_adjusted_3_10_20
+    description: Retains short, medium, and long adjusted horizons while removing the correlated five-game window.
+    include_adjusted_form: true
+    include_momentum: true
+    windows: [3, 10, 20]

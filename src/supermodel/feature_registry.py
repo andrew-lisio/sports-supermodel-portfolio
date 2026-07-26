@@ -107,6 +107,9 @@ def feature_group_for(feature_name: str) -> str:
     )):
         return "market"
 
+    if name.startswith("opp_adj_"):
+        return "recent_form"
+
     if name.startswith((
         "last_",
         "win3",

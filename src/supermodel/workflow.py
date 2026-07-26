@@ -208,6 +208,9 @@ def evaluate_captured_slate(
     historical_features = build_pregame_features(
         games,
         recent_form_alpha=V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
+        include_opponent_adjusted_recent_form=(
+            V24_CANDIDATE_FEATURE_CONTRACT.include_opponent_adjusted_recent_form
+        ),
     )
     matchups = contexts_to_matchups(selected_contexts)
     external = pd.DataFrame(
@@ -218,6 +221,9 @@ def evaluate_captured_slate(
         matchups,
         external,
         recent_form_alpha=V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
+        include_opponent_adjusted_recent_form=(
+            V24_CANDIDATE_FEATURE_CONTRACT.include_opponent_adjusted_recent_form
+        ),
     )
 
     evaluation = evaluate_live_slate(

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sports-supermodel"
-version = "2.4.0.dev6"
+version = "2.4.0.dev7"
 description = "Experimental MLB prediction ensemble with user-entered odds, immutable pregame snapshots, and Monte Carlo score simulation"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -48,6 +48,7 @@ sports-supermodel = "supermodel.cli:main"
 sports-supermodel-ui = "supermodel.web_app:launch"
 sports-supermodel-validate = "supermodel.validation_cli:main"
 sports-supermodel-optimize-form = "supermodel.recent_form_cli:launch"
+sports-supermodel-optimize-opponent-form = "supermodel.opponent_form_cli:launch"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

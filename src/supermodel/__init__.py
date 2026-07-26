@@ -41,6 +41,13 @@ from .mlb_v2 import (
     walk_forward_trials,
 )
 from .providers import OfficialScheduleSnapshotProvider, PregameContext, ProviderPipeline
+from .opponent_form import (
+    OpponentAdjustedExperimentPlan,
+    OpponentAdjustedFormContract,
+    apply_opponent_adjusted_contract,
+    load_opponent_adjusted_experiment_plan,
+    run_opponent_adjusted_experiments,
+)
 from .odds_input import (
     ManualMoneyline,
     OddsInputError,
@@ -58,7 +65,7 @@ from .workflow import (
     evaluate_captured_slate,
 )
 
-__version__ = "2.4.0.dev6"
+__version__ = "2.4.0.dev7"
 
 __all__ = [
     "__version__",
@@ -66,6 +73,11 @@ __all__ = [
     "V23_FEATURE_CONTRACT",
     "V24_CANDIDATE_FEATURE_CONTRACT",
     "active_candidate_contract",
+    "OpponentAdjustedExperimentPlan",
+    "OpponentAdjustedFormContract",
+    "apply_opponent_adjusted_contract",
+    "load_opponent_adjusted_experiment_plan",
+    "run_opponent_adjusted_experiments",
     "GameRecord",
     "ImmutableSnapshotStore",
     "ScheduleIntegrityError",
