@@ -45,3 +45,6 @@ runtime/
 
 # Generated V2.4 validation outputs
 reports/v2_4_validation/
+
+# Generated V2.4 recent-form experiment outputs
+reports/v2_4_recent_form/

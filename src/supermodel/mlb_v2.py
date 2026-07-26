@@ -40,6 +40,7 @@ except Exception:  # pragma: no cover
 
 RANDOM_SEED = 20260720
 RECENT_FORM_WINDOWS = (3, 5, 10, 20)
+DEFAULT_EWM_ALPHA = 0.18
 
 
 @dataclass
@@ -287,7 +288,14 @@ def _starter_snapshot(state: StarterState) -> dict[str, float]:
     }
 
 
-def build_pregame_features(games: pd.DataFrame, external_features: pd.DataFrame | None = None) -> pd.DataFrame:
+def build_pregame_features(
+    games: pd.DataFrame,
+    external_features: pd.DataFrame | None = None,
+    *,
+    recent_form_alpha: float = DEFAULT_EWM_ALPHA,
+) -> pd.DataFrame:
+    if not 0.0 < recent_form_alpha <= 1.0:
+        raise ValueError("recent_form_alpha must be in (0, 1]")
     team_states: dict[str, TeamState] = defaultdict(TeamState)
     starter_states: dict[str, StarterState] = defaultdict(StarterState)
     output: list[dict[str, Any]] = []
@@ -353,6 +361,7 @@ def build_pregame_features(games: pd.DataFrame, external_features: pd.DataFrame 
             _apply_completed_game_update(
                 g=g, date=date, team_states=team_states, starter_states=starter_states,
                 team_a_pregame=sa, team_b_pregame=sb,
+                ewm_alpha=recent_form_alpha,
             )
 
     return pd.DataFrame(output)
@@ -366,10 +375,13 @@ def _apply_completed_game_update(
     starter_states: dict[str, StarterState],
     team_a_pregame: dict[str, float],
     team_b_pregame: dict[str, float],
+    ewm_alpha: float = DEFAULT_EWM_ALPHA,
 ) -> None:
     """Apply a completed game's result while preserving explicit last-game context."""
 
-    alpha = 0.18
+    if not 0.0 < ewm_alpha <= 1.0:
+        raise ValueError("ewm_alpha must be in (0, 1]")
+    alpha = ewm_alpha
     a_home_raw = getattr(g, "team_a_is_home", np.nan)
     a_home = 0.5 if pd.isna(a_home_raw) else float(a_home_raw)
     rows = [
@@ -419,6 +431,8 @@ def _update_states_for_game(
     date: pd.Timestamp,
     team_states: dict[str, TeamState],
     starter_states: dict[str, StarterState],
+    *,
+    recent_form_alpha: float = DEFAULT_EWM_ALPHA,
 ) -> None:
     """Update rolling state after one completed game without target leakage."""
 
@@ -427,6 +441,7 @@ def _update_states_for_game(
     _apply_completed_game_update(
         g=g, date=date, team_states=team_states, starter_states=starter_states,
         team_a_pregame=team_a_pregame, team_b_pregame=team_b_pregame,
+        ewm_alpha=recent_form_alpha,
     )
 
 def _feature_record_from_states(
@@ -482,6 +497,8 @@ def build_future_features(
     historical_games: pd.DataFrame,
     matchups: pd.DataFrame,
     external_features: pd.DataFrame | None = None,
+    *,
+    recent_form_alpha: float = DEFAULT_EWM_ALPHA,
 ) -> pd.DataFrame:
     """Build leakage-safe feature rows for future MLB matchups.
 
@@ -512,11 +529,19 @@ def build_future_features(
             "future matchup dates must be later than the latest completed historical date"
         )
 
+    if not 0.0 < recent_form_alpha <= 1.0:
+        raise ValueError("recent_form_alpha must be in (0, 1]")
     team_states: dict[str, TeamState] = defaultdict(TeamState)
     starter_states: dict[str, StarterState] = defaultdict(StarterState)
     for date, day_games in history.groupby("date", sort=True):
         for _, game in day_games.iterrows():
-            _update_states_for_game(game, date, team_states, starter_states)
+            _update_states_for_game(
+                game,
+                date,
+                team_states,
+                starter_states,
+                recent_form_alpha=recent_form_alpha,
+            )
 
     ext_by_game_pk: dict[int, dict[str, Any]] = {}
     ext_by_matchup: dict[tuple[pd.Timestamp, str, str], dict[str, Any]] = {}
@@ -605,7 +630,7 @@ class EloPythModel:
         return np.column_stack([1-p, p])
 
 
-def make_models() -> dict[str, Any]:
+def make_models(*, parallel_jobs: int = -1) -> dict[str, Any]:
     models: dict[str, Any] = {
         "logistic": Pipeline([
             ("imputer", SimpleImputer(strategy="median")),
@@ -617,7 +642,7 @@ def make_models() -> dict[str, Any]:
             ("model", RandomForestClassifier(
                 n_estimators=120, max_depth=5, min_samples_leaf=14,
                 max_features="sqrt", class_weight="balanced_subsample",
-                random_state=RANDOM_SEED, n_jobs=-1,
+                random_state=RANDOM_SEED, n_jobs=parallel_jobs,
             )),
         ]),
         "neural_network": Pipeline([
@@ -664,8 +689,8 @@ def make_models() -> dict[str, Any]:
 
 
 class V2Ensemble:
-    def __init__(self) -> None:
-        self.models = make_models()
+    def __init__(self, *, parallel_jobs: int = -1) -> None:
+        self.models = make_models(parallel_jobs=parallel_jobs)
         self.feature_names: list[str] = []
         self.feature_groups: dict[str, list[str]] = {}
         self.feature_reference_values: dict[str, float] = {}

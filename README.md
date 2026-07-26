@@ -508,3 +508,13 @@ The ordinary command evaluates only development folds. The final holdout remains
 unless `--unlock-holdout` is supplied after the candidate configuration is frozen. Reports
 are written to `reports/v2_4_validation/`. See
 `docs/V2_4_VALIDATION_FRAMEWORK.md` for methodology and promotion gates.
+
+### V2.4 recent-form optimization
+
+Run the leakage-safe recent-form ablation and exponential-decay comparison with:
+
+```bash
+sports-supermodel-optimize-form
+```
+
+The optimizer keeps the final holdout locked and writes generated evidence to `reports/v2_4_recent_form/`.

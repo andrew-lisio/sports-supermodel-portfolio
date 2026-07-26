@@ -1,0 +1,74 @@
+version: 1
+bootstrap_iterations: 500
+selection:
+  minimum_log_loss_improvement: 0.00005
+  minimum_brier_improvement: 0.00002
+  maximum_accuracy_regression: 0.005
+  maximum_auc_regression: 0.003
+  maximum_ece_regression: 0.005
+
+candidates:
+  - name: v2_3_3_reference
+    baseline: true
+    description: Frozen V2.3.3 recent-form contract.
+    windows: [5, 10, 20]
+    include_momentum: false
+    include_ewm: true
+    include_last_game: true
+    ewm_alpha: 0.18
+
+  - name: phase3_full_alpha_018
+    description: Phase 3 full multi-horizon form with the original exponential decay.
+    windows: [3, 5, 10, 20]
+    include_momentum: true
+    include_ewm: true
+    include_last_game: true
+    ewm_alpha: 0.18
+
+  - name: phase3_no_momentum
+    description: Adds the three-game window without explicit 3-versus-10 momentum fields.
+    windows: [3, 5, 10, 20]
+    include_momentum: false
+    include_ewm: true
+    include_last_game: true
+    ewm_alpha: 0.18
+
+  - name: phase3_3_10_20
+    description: Removes the correlated five-game window while retaining short, medium, and long horizons.
+    windows: [3, 10, 20]
+    include_momentum: true
+    include_ewm: true
+    include_last_game: true
+    ewm_alpha: 0.18
+
+  - name: phase3_5_10_20_no_last
+    description: Tests whether the explicit previous-game block adds value beyond rolling and exponential form.
+    windows: [5, 10, 20]
+    include_momentum: false
+    include_ewm: true
+    include_last_game: false
+    ewm_alpha: 0.18
+
+  - name: phase3_full_alpha_010
+    description: Slower exponential decay with full multi-horizon form.
+    windows: [3, 5, 10, 20]
+    include_momentum: true
+    include_ewm: true
+    include_last_game: true
+    ewm_alpha: 0.10
+
+  - name: phase3_full_alpha_025
+    description: Faster exponential decay with full multi-horizon form.
+    windows: [3, 5, 10, 20]
+    include_momentum: true
+    include_ewm: true
+    include_last_game: true
+    ewm_alpha: 0.25
+
+  - name: phase3_full_alpha_035
+    description: Aggressive exponential decay with full multi-horizon form.
+    windows: [3, 5, 10, 20]
+    include_momentum: true
+    include_ewm: true
+    include_last_game: true
+    ewm_alpha: 0.35
