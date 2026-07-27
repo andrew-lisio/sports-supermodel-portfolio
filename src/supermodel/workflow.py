@@ -8,6 +8,8 @@ import os
 import subprocess
 from typing import Iterable
 
+import yaml
+
 import pandas as pd
 
 from ._version import __version__
@@ -81,6 +83,23 @@ def _repository_commit() -> str:
         ).strip()
     except (OSError, subprocess.SubprocessError):
         return "unknown"
+
+
+def _candidate_model_commit() -> str:
+    """Return the frozen predictive-code commit independently of UI-only commits."""
+
+    explicit = os.environ.get("SPORTS_SUPERMODEL_MODEL_COMMIT")
+    if explicit:
+        return explicit
+    config_path = Path("config/final_candidate.yaml")
+    try:
+        payload = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        configured = (payload.get("candidate") or {}).get("model_commit")
+        if configured:
+            return str(configured)
+    except (OSError, TypeError, yaml.YAMLError):
+        pass
+    return _repository_commit()
 
 
 def capture_official_slate(
@@ -319,7 +338,8 @@ def record_prediction_evidence(
                 "away_team": context.away_team,
                 "home_team": context.home_team,
                 "model_version": __version__,
-                "candidate_commit": _repository_commit(),
+                "candidate_commit": _candidate_model_commit(),
+                "repository_commit": _repository_commit(),
                 "away_probability": float(
                     row.get("shadow_away_probability", row["away_probability"])
                 ),
@@ -402,7 +422,8 @@ def combine_production_and_shadow(
     combined = production.merge(shadow_view[keep], on="game_pk", how="inner", validate="one_to_one")
     combined["production_model_version"] = "2.3.3"
     combined["shadow_model_version"] = __version__
-    combined["shadow_candidate_commit"] = _repository_commit()
+    combined["shadow_candidate_commit"] = _candidate_model_commit()
+    combined["shadow_repository_commit"] = _repository_commit()
     combined["production_shadow_disagree"] = (
         combined["pick"].astype(str) != combined["shadow_pick"].astype(str)
     )

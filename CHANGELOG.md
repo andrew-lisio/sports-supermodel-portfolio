@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — Local interface redesign
+
+- Replaced the raw editable odds table with automatic official-slate loading and matchup cards.
+- Added visible pregame/locked status, simplified controls, and an app-style confidence board.
+- Shows V2.3.3 production and V2.4 RC1 shadow probabilities, seven-model overlap, disagreement, and simulated score together.
+- Moved full tables, feature sensitivity, downloads, and artifact paths behind an advanced section.
+- Removed technical runtime-path controls from the normal interface.
+- Separated the frozen predictive model commit from later UI-only repository commits so prospective cohorts remain tied to `c09db37`.
+
 ## 2.4.0.rc1 — Final code-complete candidate
 
 - Squashed the complete V2.4 implementation above the protected `ceda10d` rollback point.

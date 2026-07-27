@@ -143,15 +143,9 @@ python -m pip install -e ".[ui,dev]"
 sports-supermodel-ui
 ```
 
-The command opens a local Streamlit page. In the browser:
+The command opens the redesigned local interface. The official slate loads automatically for the selected date. Enter both moneyline prices on the matchup cards, leave unwanted games unchecked, acknowledge the recreational-use notice, and click **Run full slate analysis**. Games at or past scheduled start are visibly locked.
 
-1. Choose the slate date.
-2. Click **Fetch official MLB slate**.
-3. Enter both moneyline prices in the editable table.
-4. Uncheck or leave both odds cells blank for games you want to skip.
-5. Acknowledge the recreational-use notice.
-6. Click **Run every model and simulate the slate**.
-7. Review the confidence-first rankings and download CSV/JSON results.
+The confidence board presents V2.3.3 production picks beside V2.4 RC1 shadow probabilities, seven-model overlap, disagreement status, and 100,000-simulation score estimates. Full tables, attribution diagnostics, downloads, and reproducibility paths are kept under the advanced-results section.
 
 Alternative launch command:
 
