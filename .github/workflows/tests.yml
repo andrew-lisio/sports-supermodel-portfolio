@@ -2,7 +2,7 @@ name: tests
 
 on:
   push:
-    branches: [main, "v2.4-development"]
+    branches: [main, "v2.4-development", "v2.4-accelerated-integration"]
   pull_request:
 
 jobs:
@@ -26,4 +26,6 @@ jobs:
       - name: Test
         run: pytest
       - name: CLI smoke test
-        run: sports-supermodel --help
+        run: |
+          sports-supermodel --help
+          sports-supermodel-registry

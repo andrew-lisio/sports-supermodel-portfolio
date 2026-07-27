@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import gc
 import re
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
@@ -352,6 +353,7 @@ def run_opponent_adjusted_experiments(
     experiment_plan: OpponentAdjustedExperimentPlan,
     *,
     model_factory: Callable[[], Any] = V2Ensemble,
+    candidate_workers: int = 1,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
     """Evaluate adjusted-form candidates against the frozen V2.4 contract."""
 
@@ -360,11 +362,13 @@ def run_opponent_adjusted_experiments(
         recent_form_alpha=V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
         include_opponent_adjusted_recent_form=True,
     )
-    predictions_by_name: dict[str, pd.DataFrame] = {}
-    folds: list[pd.DataFrame] = []
-    rows: list[dict[str, Any]] = []
+    if candidate_workers <= 0:
+        raise ValueError("candidate_workers must be positive")
+    candidate_workers = min(candidate_workers, len(experiment_plan.candidates))
 
-    for contract in experiment_plan.candidates:
+    def evaluate_contract(
+        contract: OpponentAdjustedFormContract,
+    ) -> tuple[str, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
         predictions, candidate_folds = _run_walk_forward(
             features,
             contract,
@@ -373,30 +377,39 @@ def run_opponent_adjusted_experiments(
         )
         if predictions.empty:
             raise RuntimeError(f"Candidate {contract.name} produced no predictions")
-        predictions_by_name[contract.name] = predictions
-        folds.append(candidate_folds)
         metrics = probability_metrics(
             predictions["a_win"],
             predictions["probability"],
             bins=validation_plan.calibration_bins,
         )
-        rows.append(
-            {
-                "candidate": contract.name,
-                "description": contract.description,
-                "baseline": contract.baseline,
-                "include_adjusted_form": contract.include_adjusted_form,
-                "windows": ",".join(str(value) for value in contract.windows),
-                "include_momentum": contract.include_momentum,
-                "opponent_adjusted_feature_count": (
-                    opponent_adjusted_feature_count(features, contract)
-                ),
-                "runtime_seconds": float(
-                    candidate_folds["runtime_seconds"].fillna(0).sum()
-                ),
-                **metrics,
-            }
-        )
+        row = {
+            "candidate": contract.name,
+            "description": contract.description,
+            "baseline": contract.baseline,
+            "include_adjusted_form": contract.include_adjusted_form,
+            "windows": ",".join(str(value) for value in contract.windows),
+            "include_momentum": contract.include_momentum,
+            "opponent_adjusted_feature_count": opponent_adjusted_feature_count(
+                features, contract
+            ),
+            "runtime_seconds": float(candidate_folds["runtime_seconds"].fillna(0).sum()),
+            **metrics,
+        }
+        return contract.name, predictions, candidate_folds, row
+
+    contracts = list(experiment_plan.candidates)
+    if candidate_workers == 1:
+        evaluated = [evaluate_contract(contract) for contract in contracts]
+    else:
+        with ThreadPoolExecutor(
+            max_workers=candidate_workers,
+            thread_name_prefix="supermodel-opponent-candidate",
+        ) as executor:
+            evaluated = list(executor.map(evaluate_contract, contracts))
+
+    predictions_by_name = {name: predictions for name, predictions, _, _ in evaluated}
+    folds = [candidate_folds for _, _, candidate_folds, _ in evaluated]
+    rows = [row for _, _, _, row in evaluated]
 
     summary = pd.DataFrame(rows)
     baseline_predictions = predictions_by_name[experiment_plan.baseline.name]

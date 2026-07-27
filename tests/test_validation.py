@@ -203,3 +203,99 @@ def test_validation_plan_keeps_holdout_separate(tmp_path: Path) -> None:
     assert plan.development_windows[0].role == "development"
     assert plan.holdout_window is not None
     assert plan.holdout_window.role == "holdout"
+
+
+def test_promotion_gates_accept_structured_pending_evidence() -> None:
+    baseline = {
+        "n": 1000,
+        "accuracy": 0.55,
+        "brier": 0.25,
+        "log_loss": 0.69,
+        "auc": 0.56,
+        "ece": 0.04,
+        "coverage": 1.0,
+    }
+    candidate = {
+        "n": 1000,
+        "accuracy": 0.56,
+        "brier": 0.24,
+        "log_loss": 0.68,
+        "auc": 0.565,
+        "ece": 0.035,
+        "coverage": 1.0,
+    }
+    config = {
+        "requirements": {
+            "minimum_walk_forward_games": 1000,
+            "brier_improvement_required": True,
+            "log_loss_improvement_required": True,
+            "auc_not_worse_by_more_than": 0.005,
+            "accuracy_not_worse_by_more_than": 0.01,
+            "ece_not_worse_by_more_than": 0.01,
+            "coverage_not_worse_by_more_than": 0.01,
+            "minimum_prospective_games": 500,
+        }
+    }
+    report = evaluate_promotion_gates(
+        baseline_metrics=baseline,
+        candidate_metrics=candidate,
+        gate_config=config,
+        evidence={
+            "prospective_games": {
+                "status": "PENDING",
+                "observed": 27,
+                "detail": "Collected 27 of 500 required games.",
+            }
+        },
+    )
+    row = next(
+        item for item in report["gates"] if item["gate"] == "minimum_prospective_games"
+    )
+    assert report["overall_status"] == "PENDING"
+    assert row["status"] == "PENDING"
+    assert row["observed"] == 27
+    assert row["detail"] == "Collected 27 of 500 required games."
+
+
+def test_structured_evidence_cannot_bypass_configured_minimum() -> None:
+    baseline = {
+        "n": 1000,
+        "accuracy": 0.55,
+        "brier": 0.25,
+        "log_loss": 0.69,
+        "auc": 0.56,
+        "ece": 0.04,
+        "coverage": 1.0,
+    }
+    candidate = {
+        "n": 1000,
+        "accuracy": 0.56,
+        "brier": 0.24,
+        "log_loss": 0.68,
+        "auc": 0.565,
+        "ece": 0.035,
+        "coverage": 1.0,
+    }
+    config = {
+        "requirements": {
+            "minimum_walk_forward_games": 1000,
+            "minimum_prospective_games": 500,
+        }
+    }
+    report = evaluate_promotion_gates(
+        baseline_metrics=baseline,
+        candidate_metrics=candidate,
+        gate_config=config,
+        evidence={
+            "prospective_games": {
+                "status": "PASS",
+                "observed": 1,
+                "detail": "Untrusted low threshold.",
+            }
+        },
+    )
+    row = next(
+        item for item in report["gates"] if item["gate"] == "minimum_prospective_games"
+    )
+    assert row["status"] == "FAIL"
+    assert report["overall_status"] == "FAIL"

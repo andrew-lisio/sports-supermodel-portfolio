@@ -247,8 +247,11 @@ class ImmutableSnapshotStore:
         }
         body = _canonical_bytes(envelope)
         digest = sha256(body).hexdigest()
-        safe_kind = kind.replace("/", "_")
-        safe_identity = identity.replace("/", "_").replace("\\", "_")
+        windows_invalid = '<>:"/\\|?*'
+        safe_kind = "".join("_" if char in windows_invalid else char for char in kind)
+        safe_identity = "".join(
+            "_" if char in windows_invalid else char for char in identity
+        )
         directory = self.root / safe_kind / capture_time.strftime("%Y/%m/%d") / safe_identity
         directory.mkdir(parents=True, exist_ok=True)
         filename = f"{capture_time.strftime('%Y%m%dT%H%M%SZ')}_{digest[:16]}.json"
@@ -300,6 +303,68 @@ class ImmutableSnapshotStore:
             payload=payload,
             source=source,
             identity=str(game_pk),
+        )
+
+    def write_starter_pregame(
+        self,
+        *,
+        game_pk: int,
+        game_datetime: str | datetime,
+        side: str,
+        pitcher_id: int,
+        payload: dict[str, Any],
+        captured_at: str | datetime,
+        source: str,
+    ) -> Path:
+        """Write an immutable point-in-time starter-stat snapshot.
+
+        The identity is the official game, side, and MLB person ID. A probable-starter
+        change therefore creates a new immutable identity rather than rewriting the prior
+        capture. Post-start records fail closed.
+        """
+
+        capture_time = _parse_capture_time(captured_at)
+        scheduled_time = _parse_capture_time(game_datetime)
+        if capture_time > scheduled_time:
+            raise ScheduleIntegrityError(
+                "Starting-pitcher snapshot was captured after game start"
+            )
+        if side not in {"away", "home"}:
+            raise ScheduleIntegrityError("Starting-pitcher side must be away or home")
+        if int(game_pk) <= 0 or int(pitcher_id) <= 0:
+            raise ScheduleIntegrityError("Starting-pitcher identity must use positive IDs")
+        if int(payload.get("game_pk", game_pk)) != int(game_pk):
+            raise ScheduleIntegrityError(
+                "Starting-pitcher snapshot game_pk does not match identity"
+            )
+        if str(payload.get("side", side)) != side:
+            raise ScheduleIntegrityError(
+                "Starting-pitcher snapshot side does not match identity"
+            )
+        if int(payload.get("pitcher_id", pitcher_id)) != int(pitcher_id):
+            raise ScheduleIntegrityError(
+                "Starting-pitcher snapshot pitcher_id does not match identity"
+            )
+        supplied_game_time = payload.get("scheduled_start")
+        if supplied_game_time is not None and _parse_capture_time(
+            supplied_game_time
+        ) != scheduled_time:
+            raise ScheduleIntegrityError(
+                "Starting-pitcher snapshot scheduled_start does not match identity"
+            )
+        normalized = dict(payload)
+        normalized["game_pk"] = int(game_pk)
+        normalized["side"] = side
+        normalized["pitcher_id"] = int(pitcher_id)
+        normalized["scheduled_start"] = scheduled_time.isoformat().replace(
+            "+00:00", "Z"
+        )
+        return self.write(
+            kind="mlb_starter_pregame",
+            captured_at=capture_time,
+            payload=normalized,
+            source=source,
+            identity=f"{int(game_pk)}:{side}:{int(pitcher_id)}",
         )
 
     def write_schedule(

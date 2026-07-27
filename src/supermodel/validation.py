@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from hashlib import sha256
 from pathlib import Path
@@ -313,6 +314,7 @@ def _fold_metric_row(
     candidate_metrics: Mapping[str, Any],
     baseline_runtime_seconds: float,
     candidate_runtime_seconds: float,
+    fold_wall_seconds: float | None = None,
 ) -> dict[str, Any]:
     return {
         "window": window.name,
@@ -323,6 +325,7 @@ def _fold_metric_row(
         "validation_n": validation_n,
         "baseline_runtime_seconds": baseline_runtime_seconds,
         "candidate_runtime_seconds": candidate_runtime_seconds,
+        "fold_wall_seconds": fold_wall_seconds,
         **{f"baseline_{key}": value for key, value in baseline_metrics.items()},
         **{f"candidate_{key}": value for key, value in candidate_metrics.items()},
     }
@@ -352,6 +355,19 @@ def _assert_matched_feature_rows(
         ) from exc
 
 
+
+def _fit_and_predict(
+    model_factory: Callable[[], Any],
+    train: pd.DataFrame,
+    validation: pd.DataFrame,
+) -> tuple[np.ndarray, dict[str, np.ndarray], float]:
+    model = model_factory()
+    started = perf_counter()
+    model.fit(train)
+    probability, components = model.predict_proba(validation)
+    runtime = perf_counter() - started
+    return probability, components, runtime
+
 def run_matched_walk_forward(
     features: pd.DataFrame,
     windows: Iterable[ValidationWindow],
@@ -359,6 +375,7 @@ def run_matched_walk_forward(
     model_factory: Callable[[], Any] = V2Ensemble,
     calibration_bins: int = 10,
     baseline_features: pd.DataFrame | None = None,
+    comparison_workers: int = 1,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Run V2.3.3 and V2.4 on identical chronological validation games.
 
@@ -369,6 +386,8 @@ def run_matched_walk_forward(
     baseline frame retains backward compatibility for tests and older callers.
     """
 
+    if comparison_workers not in {1, 2}:
+        raise ValueError("comparison_workers must be 1 or 2")
     if "date" not in features or "a_win" not in features:
         raise ValueError("features must contain date and a_win columns")
     frame = features.copy()
@@ -427,19 +446,38 @@ def run_matched_walk_forward(
         baseline_train = freeze_v23_feature_contract(baseline_train_source)
         baseline_validation = freeze_v23_feature_contract(baseline_validation_source)
 
-        baseline_model = model_factory()
-        baseline_start = perf_counter()
-        baseline_model.fit(baseline_train)
-        baseline_probability, baseline_components = baseline_model.predict_proba(
-            baseline_validation
-        )
-        baseline_runtime = perf_counter() - baseline_start
-
-        candidate_model = model_factory()
-        candidate_start = perf_counter()
-        candidate_model.fit(train)
-        candidate_probability, candidate_components = candidate_model.predict_proba(validation)
-        candidate_runtime = perf_counter() - candidate_start
+        fold_started = perf_counter()
+        if comparison_workers == 1:
+            baseline_probability, baseline_components, baseline_runtime = _fit_and_predict(
+                model_factory, baseline_train, baseline_validation
+            )
+            candidate_probability, candidate_components, candidate_runtime = _fit_and_predict(
+                model_factory, train, validation
+            )
+        else:
+            with ThreadPoolExecutor(
+                max_workers=2,
+                thread_name_prefix="supermodel-compare",
+            ) as executor:
+                baseline_future = executor.submit(
+                    _fit_and_predict,
+                    model_factory,
+                    baseline_train,
+                    baseline_validation,
+                )
+                candidate_future = executor.submit(
+                    _fit_and_predict,
+                    model_factory,
+                    train,
+                    validation,
+                )
+                baseline_probability, baseline_components, baseline_runtime = (
+                    baseline_future.result()
+                )
+                candidate_probability, candidate_components, candidate_runtime = (
+                    candidate_future.result()
+                )
+        fold_wall_seconds = perf_counter() - fold_started
 
         result = validation[_prediction_identity_columns(validation)].copy()
         result["window"] = window.name
@@ -477,6 +515,7 @@ def run_matched_walk_forward(
             candidate_metrics=candidate_metrics,
             baseline_runtime_seconds=baseline_runtime,
             candidate_runtime_seconds=candidate_runtime,
+            fold_wall_seconds=fold_wall_seconds,
         )
         row["status"] = "completed"
         folds.append(row)
@@ -494,6 +533,7 @@ def run_locked_holdout(
     model_factory: Callable[[], Any] = V2Ensemble,
     calibration_bins: int = 10,
     baseline_features: pd.DataFrame | None = None,
+    comparison_workers: int = 1,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     if window.role != "holdout":
         raise ValueError("run_locked_holdout requires a holdout window")
@@ -503,6 +543,7 @@ def run_locked_holdout(
         model_factory=model_factory,
         calibration_bins=calibration_bins,
         baseline_features=baseline_features,
+        comparison_workers=comparison_workers,
     )
 
 
@@ -698,15 +739,38 @@ def evaluate_promotion_gates(
         requirement = requirements.get(requirement_name)
         if requirement in (None, False, 0):
             continue
-        observed = evidence.get(evidence_name)
-        if requirement_name == "minimum_prospective_games":
+        raw_evidence = evidence.get(evidence_name)
+        detail = "Release evidence gate."
+        explicit_status: str | None = None
+        if isinstance(raw_evidence, Mapping):
+            observed = raw_evidence.get("observed")
+            detail = str(raw_evidence.get("detail") or detail)
+            status_value = raw_evidence.get("status")
+            if status_value is not None:
+                explicit_status = str(status_value).upper()
+                if explicit_status not in {"PASS", "FAIL", "PENDING"}:
+                    raise ValueError(
+                        f"Invalid evidence status {status_value!r} for {evidence_name}"
+                    )
+        else:
+            observed = raw_evidence
+
+        if explicit_status is not None:
+            status = explicit_status
+            if explicit_status == "PASS":
+                if requirement_name == "minimum_prospective_games":
+                    if observed is None or int(observed) < int(requirement):
+                        status = "FAIL"
+                elif observed is not None and not bool(observed):
+                    status = "FAIL"
+        elif requirement_name == "minimum_prospective_games":
             if observed is None:
                 status = "PENDING"
             else:
                 status = "PASS" if int(observed) >= int(requirement) else "FAIL"
         else:
             status = "PENDING" if observed is None else ("PASS" if bool(observed) else "FAIL")
-        add(requirement_name, status, observed, requirement, "Release evidence gate.")
+        add(requirement_name, status, observed, requirement, detail)
 
     statuses = {row["status"] for row in rows}
     overall = "FAIL" if "FAIL" in statuses else ("PENDING" if "PENDING" in statuses else "PASS")

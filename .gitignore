@@ -51,3 +51,7 @@ reports/v2_4_recent_form/
 
 # Generated V2.4 opponent-adjusted form experiment outputs
 reports/v2_4_opponent_form/
+
+# Generated V2.4 validation variants and prospective evidence
+reports/v2_4_validation*/
+runtime/evidence/

@@ -1,3 +1,16 @@
+from ._version import __version__
+from .evidence import (
+    EvidenceIntegrityError,
+    ProspectiveEvidenceLedger,
+    audit_prospective_evidence,
+    write_evidence_report,
+)
+from .execution import (
+    ExecutionPlan,
+    ExecutionProfile,
+    load_execution_profile,
+    resolve_execution_plan,
+)
 from .feature_attribution import (
     AttributionInputError,
     leave_group_at_reference_sensitivity,
@@ -17,6 +30,16 @@ from .game_registry import (
     ScheduleIntegrityError,
     index_by_game_pk,
     parse_mlb_schedule,
+)
+from .model_registry import (
+    EXPECTED_MODEL_COUNT,
+    MODEL_DISPLAY_NAMES,
+    MODEL_ORDER,
+    MODEL_REGISTRY,
+    ModelRegistration,
+    ModelRegistryError,
+    registry_snapshot,
+    validate_runtime_models,
 )
 from .model_contract import (
     ModelFeatureContract,
@@ -58,6 +81,14 @@ from .odds_input import (
     parse_user_odds,
     write_moneyline_template,
 )
+from .starter_features import (
+    STARTER_SNAPSHOT_KIND,
+    audit_starter_snapshots,
+    export_starter_training_rows,
+    latest_starter_training_rows,
+    parse_innings_pitched,
+    parse_pitcher_season_stats,
+)
 from .workflow import (
     CapturedSlate,
     WorkflowResult,
@@ -65,10 +96,25 @@ from .workflow import (
     evaluate_captured_slate,
 )
 
-__version__ = "2.4.0.dev7"
 
 __all__ = [
     "__version__",
+    "EvidenceIntegrityError",
+    "ProspectiveEvidenceLedger",
+    "audit_prospective_evidence",
+    "write_evidence_report",
+    "ExecutionPlan",
+    "ExecutionProfile",
+    "load_execution_profile",
+    "resolve_execution_plan",
+    "EXPECTED_MODEL_COUNT",
+    "MODEL_DISPLAY_NAMES",
+    "MODEL_ORDER",
+    "MODEL_REGISTRY",
+    "ModelRegistration",
+    "ModelRegistryError",
+    "registry_snapshot",
+    "validate_runtime_models",
     "ModelFeatureContract",
     "V23_FEATURE_CONTRACT",
     "V24_CANDIDATE_FEATURE_CONTRACT",
@@ -117,4 +163,10 @@ __all__ = [
     "feature_group_for",
     "group_feature_names",
     "validate_feature_groups",
+    "STARTER_SNAPSHOT_KIND",
+    "audit_starter_snapshots",
+    "export_starter_training_rows",
+    "latest_starter_training_rows",
+    "parse_innings_pitched",
+    "parse_pitcher_season_stats",
 ]

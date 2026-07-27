@@ -1,5 +1,5 @@
 production_branch: main
-candidate_branch: v2.4-development
+candidate_branch: v2.4-final-candidate
 requirements:
   minimum_walk_forward_games: 1000
   brier_improvement_required: true

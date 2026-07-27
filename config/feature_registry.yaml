@@ -44,3 +44,30 @@ note_v2_3: >-
   These fields are derived only from the most recently completed game before the
   target date. They are trained alongside the existing season, rolling-window,
   exponentially weighted, rest, schedule-density and starter-proxy features.
+
+point_in_time_collection_v2_4_rc1:
+  - official_probable_starter_person_id
+  - season_ERA_WHIP_innings_games_started
+  - transparent_FIP_proxy
+  - K_rate_BB_rate_KminusBB
+  - K9_BB9_HR9_H9_ground_to_air
+  - immutable_raw_pitcher_payload_sha256
+  - probable_starter_change_history
+note_v2_4_rc1: >-
+  These fields are now collected and audited before first pitch. They are exported for
+  future chronological training but are not treated as a validated predictive upgrade
+  until historical coverage and all V2.4 promotion gates are satisfied.
+
+point_in_time_advanced_collection_v2_4_rc1:
+  - posted_lineup_OBP_SLG_OPS_ISO_BB_K_and_transparent_wOBA_proxy
+  - public_team_pitching_ERA_WHIP_proxies
+  - recent_reliever_pitch_and_innings_workload
+  - closer_availability_proxy_when_save_hold_markers_exist
+  - public_team_fielding_percentage_and_errors_per_game
+  - official_weather_roof_wind_and_bounded_run_environment_proxy
+  - recent_venue_distance_time_zones_and_schedule_density_travel_proxy
+note_advanced_v2_4_rc1: >-
+  These values are captured before first pitch and stored in immutable snapshots. The
+  frozen retrospective V2.4 model does not claim historical training coverage for them.
+  Their prospective numerical influence is restricted to a versioned adaptive shadow
+  overlay that remains inactive unless chronological probability-quality gates pass.

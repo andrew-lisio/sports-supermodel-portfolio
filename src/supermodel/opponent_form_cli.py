@@ -7,6 +7,7 @@ from typing import Any
 
 import pandas as pd
 
+from .execution import load_execution_profile, resolve_execution_plan
 from .mlb_v2 import V2Ensemble, load_team_logs, reconstruct_games
 from .opponent_form import (
     load_opponent_adjusted_experiment_plan,
@@ -33,6 +34,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--output-dir", type=Path, default=Path("reports/v2_4_opponent_form")
     )
+    parser.add_argument(
+        "--execution-config",
+        type=Path,
+        default=Path("config/execution.yaml"),
+    )
+    parser.add_argument("--profile", default=None)
+    parser.add_argument("--workers", type=int, default=None)
     return parser.parse_args(argv)
 
 
@@ -115,14 +123,26 @@ def main(argv: list[str] | None = None) -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     validation_plan = load_validation_plan(args.validation_plan)
     experiment_plan = load_opponent_adjusted_experiment_plan(args.experiment_plan)
+    execution_profile = load_execution_profile(args.execution_config, profile=args.profile)
+    execution_plan = resolve_execution_plan(
+        execution_profile,
+        workload="experiment",
+        total_workers=args.workers,
+        candidate_count=len(experiment_plan.candidates),
+    )
     games = reconstruct_games(load_team_logs(args.data_dir))
     summary, comparisons, folds, selection = run_opponent_adjusted_experiments(
         games,
         validation_plan,
         experiment_plan,
-        model_factory=lambda: V2Ensemble(parallel_jobs=1),
+        model_factory=lambda: V2Ensemble(
+            model_workers=execution_plan.model_workers,
+            estimator_threads=execution_plan.estimator_threads,
+        ),
+        candidate_workers=execution_plan.candidate_workers,
     )
     predictions = selection.pop("predictions")
+    selection["execution"] = execution_plan.as_dict()
     summary.to_csv(args.output_dir / "candidate_summary.csv", index=False)
     comparisons.to_csv(args.output_dir / "paired_comparisons.csv", index=False)
     folds.to_csv(args.output_dir / "fold_metrics.csv", index=False)

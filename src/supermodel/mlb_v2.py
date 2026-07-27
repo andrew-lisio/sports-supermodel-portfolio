@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable
@@ -9,7 +10,6 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from sklearn.base import clone
 from sklearn.calibration import calibration_curve
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
@@ -20,9 +20,11 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
+from .execution import available_cpu_count
 from .feature_attribution import leave_group_at_reference_sensitivity
 from .feature_registry import group_feature_names, validate_feature_groups
 from .model_contract import V24_CANDIDATE_FEATURE_CONTRACT
+from .model_registry import MODEL_ORDER, validate_runtime_models
 
 warnings.filterwarnings("ignore")
 
@@ -764,7 +766,26 @@ class EloPythModel:
         return np.column_stack([1-p, p])
 
 
-def make_models(*, parallel_jobs: int = -1) -> dict[str, Any]:
+def make_models(
+    *,
+    model_workers: int | None = None,
+    estimator_threads: int = 1,
+    parallel_jobs: int | None = None,
+) -> dict[str, Any]:
+    """Construct the frozen seven-model registry in canonical order.
+
+    ``parallel_jobs`` is retained as a compatibility alias for older callers. It now
+    controls native estimator threads only; independent model-level parallelism is
+    handled by :class:`V2Ensemble`.
+    """
+
+    if parallel_jobs is not None:
+        estimator_threads = parallel_jobs
+    if estimator_threads == -1:
+        estimator_threads = max(1, model_workers or 1)
+    if estimator_threads <= 0:
+        raise ValueError("estimator_threads must be positive or -1")
+
     models: dict[str, Any] = {
         "logistic": Pipeline([
             ("imputer", SimpleImputer(strategy="median")),
@@ -776,7 +797,7 @@ def make_models(*, parallel_jobs: int = -1) -> dict[str, Any]:
             ("model", RandomForestClassifier(
                 n_estimators=120, max_depth=5, min_samples_leaf=14,
                 max_features="sqrt", class_weight="balanced_subsample",
-                random_state=RANDOM_SEED, n_jobs=parallel_jobs,
+                random_state=RANDOM_SEED, n_jobs=estimator_threads,
             )),
         ]),
         "neural_network": Pipeline([
@@ -795,36 +816,59 @@ def make_models(*, parallel_jobs: int = -1) -> dict[str, Any]:
             n_estimators=100, max_depth=3, learning_rate=0.035,
             subsample=0.8, colsample_bytree=0.75, reg_lambda=4.0,
             min_child_weight=8, eval_metric="logloss", random_state=RANDOM_SEED,
-            n_jobs=1, tree_method="hist",
+            n_jobs=estimator_threads, tree_method="hist",
         )
     if LGBMClassifier is not None:
         models["lightgbm"] = LGBMClassifier(
             n_estimators=100, num_leaves=11, max_depth=4, learning_rate=0.035,
             min_child_samples=20, reg_lambda=4.0, reg_alpha=0.5,
-            verbosity=-1, random_state=RANDOM_SEED, n_jobs=1,
+            verbosity=-1, random_state=RANDOM_SEED, n_jobs=estimator_threads,
         )
     if CatBoostClassifier is not None:
         models["catboost"] = CatBoostClassifier(
             iterations=100, depth=4, learning_rate=0.035, l2_leaf_reg=6,
-            verbose=False, random_seed=RANDOM_SEED, allow_writing_files=False, thread_count=1,
+            verbose=False, random_seed=RANDOM_SEED, allow_writing_files=False, thread_count=estimator_threads,
         )
-    expected = {
-        "logistic", "random_forest", "neural_network", "elo_pyth",
-        "xgboost", "lightgbm", "catboost",
-    }
-    missing = sorted(expected.difference(models))
+    missing = [name for name in MODEL_ORDER if name not in models]
     if missing:
         raise RuntimeError(
             "The complete seven-model ensemble is required. Missing components: "
             + ", ".join(missing)
             + ". Install the dependencies declared in pyproject.toml."
         )
+    # Rebuild in canonical order before validation so optional import order can never
+    # silently change component weighting or reporting.
+    models = {name: models[name] for name in MODEL_ORDER}
+    validate_runtime_models(models)
     return models
 
 
 class V2Ensemble:
-    def __init__(self, *, parallel_jobs: int = -1) -> None:
-        self.models = make_models(parallel_jobs=parallel_jobs)
+    def __init__(
+        self,
+        *,
+        model_workers: int | None = None,
+        estimator_threads: int = 1,
+        parallel_jobs: int | None = None,
+    ) -> None:
+        if parallel_jobs is not None:
+            # Backward-compatible interpretation: one outer worker and the requested
+            # native estimator budget. Existing experiment callers pass 1.
+            estimator_threads = parallel_jobs
+            if model_workers is None:
+                model_workers = 1
+        self.model_workers = max(
+            1,
+            min(
+                int(model_workers or available_cpu_count()),
+                len(MODEL_ORDER),
+            ),
+        )
+        self.estimator_threads = estimator_threads
+        self.models = make_models(
+            model_workers=self.model_workers,
+            estimator_threads=estimator_threads,
+        )
         self.feature_names: list[str] = []
         self.feature_groups: dict[str, list[str]] = {}
         self.feature_reference_values: dict[str, float] = {}
@@ -848,10 +892,21 @@ class V2Ensemble:
         Xc, yc = core[self.feature_names], core["a_win"]
         Xcal, ycal = cal[self.feature_names], cal["a_win"]
 
-        cal_probs: dict[str, np.ndarray] = {}
-        for name, model in self.models.items():
+        def fit_component(item: tuple[str, Any]) -> tuple[str, np.ndarray]:
+            name, model = item
             model.fit(Xc, yc)
-            cal_probs[name] = model.predict_proba(Xcal)[:, 1]
+            return name, model.predict_proba(Xcal)[:, 1]
+
+        items = list(self.models.items())
+        if self.model_workers == 1:
+            fitted = [fit_component(item) for item in items]
+        else:
+            with ThreadPoolExecutor(
+                max_workers=self.model_workers,
+                thread_name_prefix="supermodel-fit",
+            ) as executor:
+                fitted = list(executor.map(fit_component, items))
+        cal_probs = dict(fitted)
 
         briers = {name: brier_score_loss(ycal, p) for name, p in cal_probs.items()}
         raw_w = {name: math.exp(-10.0 * b) for name, b in briers.items()}
@@ -875,7 +930,21 @@ class V2Ensemble:
 
     def component_probabilities(self, df: pd.DataFrame) -> dict[str, np.ndarray]:
         X = df[self.feature_names]
-        return {name: model.predict_proba(X)[:, 1] for name, model in self.models.items()}
+
+        def predict_component(item: tuple[str, Any]) -> tuple[str, np.ndarray]:
+            name, model = item
+            return name, model.predict_proba(X)[:, 1]
+
+        items = list(self.models.items())
+        if self.model_workers == 1 or len(df) < 2:
+            predicted = [predict_component(item) for item in items]
+        else:
+            with ThreadPoolExecutor(
+                max_workers=self.model_workers,
+                thread_name_prefix="supermodel-predict",
+            ) as executor:
+                predicted = list(executor.map(predict_component, items))
+        return dict(predicted)
 
     def predict_proba(self, df: pd.DataFrame) -> tuple[np.ndarray, dict[str, np.ndarray]]:
         comp = self.component_probabilities(df)

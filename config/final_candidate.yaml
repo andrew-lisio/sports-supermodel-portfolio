@@ -1,0 +1,45 @@
+schema_version: 1
+candidate:
+  version: 2.4.0.rc1
+  production_anchor: 2.3.3
+  branch: v2.4-final-candidate
+  rollback_commit: ceda10db74dbb8b083cb4150807300eec86bed83
+  promotion_status: PENDING
+execution:
+  production_track: v2.3.3
+  shadow_track: v2.4.0.rc1
+  winner_models_required: 7
+  monte_carlo_simulations_default: 100000
+  record_exact_git_commit: true
+  background_execution: false
+advanced_context:
+  immutable_point_in_time_snapshot: true
+  fail_closed_on_missing_optional_sources: true
+  official_mlb_inputs:
+    - probable_starter_identity_and_public_season_stats
+    - posted_lineup_public_season_aggregates
+    - recent_reliever_workload
+    - team_pitching_and_fielding_proxies
+    - weather_roof_and_wind
+    - recent_travel_and_time_zone_load
+  provider_ready_but_not_fabricated:
+    - Statcast_xERA_xFIP_SIERA_and_pitch_quality
+    - projected_injury_WAR
+    - FRV_OAA_and_catcher_framing
+    - umpire_factors
+adaptive_shadow_overlay:
+  minimum_graded_games: 60
+  chronological_validation_fraction: 0.25
+  minimum_validation_games: 20
+  maximum_home_logit_adjustment: 0.35
+  activation_requires_brier_improvement: true
+  maximum_log_loss_regression: 0.002
+  inactive_behavior: preserve_base_v2_4_probability
+promotion:
+  retrospective_gates_file: config/merge_gates.yaml
+  prospective_games_required: 500
+  closing_line_tracking_required: true
+  schedule_integrity_required: true
+  target_leakage_tests_required: true
+  point_in_time_provenance_required: true
+  final_holdout_required: true

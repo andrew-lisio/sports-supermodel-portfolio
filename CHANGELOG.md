@@ -1,5 +1,46 @@
 # Changelog
 
+## 2.4.0.rc1 — Final code-complete candidate
+
+- Squashed the complete V2.4 implementation above the protected `ceda10d` rollback point.
+- Runs frozen V2.3.3 as production and the exact V2.4 candidate as a parallel shadow track.
+- Records both prediction tracks, the candidate Git commit, immutable inputs, closing lines, and outcomes in the prospective evidence ledger.
+- Added point-in-time public lineup aggregates, recent bullpen workload, team pitching/fielding proxies, weather/roof/wind normalization, and travel/time-zone context.
+- Added a bounded adaptive V2.4 shadow overlay that activates only after chronological Brier/log-loss gates pass; otherwise the base candidate probability is preserved.
+- Added browser and CLI production-versus-shadow reporting.
+- Preserved fail-closed behavior for unavailable Statcast, injury, advanced defense, catcher, and umpire sources.
+- V2.4 remains `PENDING`; code completion does not bypass the 500-game prospective, CLV, integrity, provenance, or final-holdout gates.
+
+
+## 2.4.0.dev11 — Consolidated accelerated candidate
+
+- Consolidated the accelerated execution, prospective evidence, and point-in-time starter work onto one cumulative candidate branch.
+- Set the promotion-gate candidate branch to `v2.4-accelerated-integration`.
+- Preserved `v2.4-development` as the rollback point and left `main` unchanged.
+- Retained the locked final holdout and `PENDING` promotion status until prospective evidence gates pass.
+- No predictive feature, calibration, or seven-model ensemble behavior changed from `2.4.0.dev10`.
+
+
+
+## 2.4.0.dev10
+
+- Added immutable point-in-time starting-pitcher snapshots keyed by official `gamePk`, side, and MLB person ID.
+- Corrected baseball innings parsing so `.1` and `.2` represent one and two outs.
+- Added normalized starter collection fields and raw-payload SHA-256 preservation.
+- Added starter-change detection, integrity auditing, and latest-pregame training-row export.
+- Bound starter snapshots into prospective prediction evidence and expanded provenance checks.
+- Preserved the existing predictive feature contract; Phase 7 makes no new accuracy claim.
+
+
+## 2.4.0.dev9
+
+- Added a hash-chained, append-only prospective evidence ledger keyed by official `gamePk`.
+- Live workflow predictions now preserve snapshot hashes and point-in-time provenance.
+- Added separate closing-line and outcome events plus an evidence audit CLI.
+- Wired structured evidence reports into V2.4 promotion gates while preserving `PENDING`
+  status during prospective accumulation.
+- Ignored generated validation variants such as `reports/v2_4_validation_final/`.
+
 ## V2.3.3 — schedule-integrity hotfix
 
 - Reconciles repeated MLB schedule rows for the same `gamePk` when away/home team IDs agree.
@@ -102,3 +143,11 @@
 - Added last-game fields to live evaluation artifacts for auditability.
 - Re-evaluated the July 21 slate with data through July 20.
 - Chronological same-sample validation improved Brier/log loss/AUC but reduced raw accuracy; V2.3 remains experimental.
+
+## 2.4.0.dev8 - Accelerated integration
+
+- Added a canonical, fail-closed seven-model registry.
+- Added CPU-aware accelerated and serial execution profiles.
+- Parallelized independent ensemble components, matched baseline/candidate fits, and
+  bounded candidate experiments without changing prediction contracts.
+- Added execution metadata and serial-equivalence tests.

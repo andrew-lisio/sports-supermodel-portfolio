@@ -49,6 +49,26 @@ class PregameContext:
     home_starter_whip: float | None = None
     away_starter_innings: float | None = None
     home_starter_innings: float | None = None
+    away_starter_games_started: float | None = None
+    home_starter_games_started: float | None = None
+    away_starter_k_rate: float | None = None
+    home_starter_k_rate: float | None = None
+    away_starter_bb_rate: float | None = None
+    home_starter_bb_rate: float | None = None
+    away_starter_k_per_9: float | None = None
+    home_starter_k_per_9: float | None = None
+    away_starter_bb_per_9: float | None = None
+    home_starter_bb_per_9: float | None = None
+    away_starter_hr_per_9: float | None = None
+    home_starter_hr_per_9: float | None = None
+    away_starter_hits_per_9: float | None = None
+    home_starter_hits_per_9: float | None = None
+    away_starter_ground_to_air: float | None = None
+    home_starter_ground_to_air: float | None = None
+    away_starter_stats_snapshot_path: str | None = None
+    home_starter_stats_snapshot_path: str | None = None
+    away_starter_stats_snapshot_sha256: str | None = None
+    home_starter_stats_snapshot_sha256: str | None = None
     away_starter_xfip: float | None = None
     home_starter_xfip: float | None = None
     away_starter_siera: float | None = None
@@ -81,6 +101,22 @@ class PregameContext:
     home_lineup_wrc_plus: float | None = None
     away_lineup_xwoba: float | None = None
     home_lineup_xwoba: float | None = None
+    away_lineup_obp: float | None = None
+    home_lineup_obp: float | None = None
+    away_lineup_slg: float | None = None
+    home_lineup_slg: float | None = None
+    away_lineup_ops: float | None = None
+    home_lineup_ops: float | None = None
+    away_lineup_woba_proxy: float | None = None
+    home_lineup_woba_proxy: float | None = None
+    away_lineup_iso: float | None = None
+    home_lineup_iso: float | None = None
+    away_lineup_bb_rate: float | None = None
+    home_lineup_bb_rate: float | None = None
+    away_lineup_k_rate: float | None = None
+    home_lineup_k_rate: float | None = None
+    away_lineup_stats_coverage: float | None = None
+    home_lineup_stats_coverage: float | None = None
     away_platoon_edge: float | None = None
     home_platoon_edge: float | None = None
     away_injury_war: float | None = None
@@ -89,6 +125,14 @@ class PregameContext:
     home_bullpen_xfip: float | None = None
     away_bullpen_siera: float | None = None
     home_bullpen_siera: float | None = None
+    away_bullpen_era_proxy: float | None = None
+    home_bullpen_era_proxy: float | None = None
+    away_bullpen_whip_proxy: float | None = None
+    home_bullpen_whip_proxy: float | None = None
+    away_bullpen_recent_pitches: float | None = None
+    home_bullpen_recent_pitches: float | None = None
+    away_bullpen_recent_innings: float | None = None
+    home_bullpen_recent_innings: float | None = None
     away_bullpen_fatigue: float | None = None
     home_bullpen_fatigue: float | None = None
     away_closer_available: float | None = None
@@ -111,6 +155,10 @@ class PregameContext:
     home_defense_frv: float | None = None
     away_defense_oaa: float | None = None
     home_defense_oaa: float | None = None
+    away_defense_fielding_pct: float | None = None
+    home_defense_fielding_pct: float | None = None
+    away_defense_errors_per_game: float | None = None
+    home_defense_errors_per_game: float | None = None
     away_catcher_framing: float | None = None
     home_catcher_framing: float | None = None
     away_baserunning_runs: float | None = None
@@ -125,10 +173,20 @@ class PregameContext:
     home_close_implied: float | None = None
     reverse_line_move: float | None = None
 
+    # One combined immutable context snapshot containing all optional advanced inputs.
+    advanced_snapshot_path: str | None = None
+    advanced_snapshot_sha256: str | None = None
+
     provenance: dict[str, str] = field(default_factory=dict)
 
     def to_record(self) -> dict[str, Any]:
-        return asdict(self)
+        record = asdict(self)
+        # Local filesystem paths are runtime transport details, not portable feature
+        # provenance. Snapshot digests remain in the immutable context envelope.
+        record.pop("away_starter_stats_snapshot_path", None)
+        record.pop("home_starter_stats_snapshot_path", None)
+        record.pop("advanced_snapshot_path", None)
+        return record
 
 
 class FeatureProvider(Protocol):

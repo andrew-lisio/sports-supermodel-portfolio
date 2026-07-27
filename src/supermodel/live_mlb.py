@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from hashlib import sha256
 import json
 import math
 from pathlib import Path
@@ -14,6 +15,17 @@ from urllib.request import Request, urlopen
 import numpy as np
 import pandas as pd
 
+from ._version import __version__
+from .advanced_features import (
+    advanced_snapshot_payload,
+    aggregate_lineup_stats,
+    derive_travel_load,
+    derive_weather_features,
+    parse_recent_bullpen_usage,
+    parse_team_fielding_stats,
+    parse_team_pitching_stats,
+    parse_venue_location,
+)
 from .game_registry import ImmutableSnapshotStore, parse_mlb_schedule
 from .mlb_v2 import (
     PoissonScoreModel,
@@ -22,6 +34,10 @@ from .mlb_v2 import (
 )
 from .mlb_v2 import simulate_poisson_score_distribution
 from .providers import PregameContext
+from .starter_features import (
+    build_starter_snapshot_payload,
+    parse_pitcher_season_stats as parse_point_in_time_pitcher_stats,
+)
 from .odds_input import ManualMoneyline, load_moneylines
 from .market import (
     american_implied_probability,
@@ -67,12 +83,12 @@ class MLBStatsHTTPClient:
         base_url: str = "https://statsapi.mlb.com/api",
         timeout_seconds: float = 20.0,
         retries: int = 2,
-        user_agent: str = "SportsSuperModel/2.3.3 (+recreational research use)",
+        user_agent: str | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
         self.retries = retries
-        self.user_agent = user_agent
+        self.user_agent = user_agent or f"SportsSuperModel/{__version__} (+recreational research use)"
 
     def _get_json(self, path: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         query = urlencode({k: v for k, v in (params or {}).items() if v is not None})
@@ -121,6 +137,35 @@ class MLBStatsHTTPClient:
             {"stats": "season", "group": "pitching", "season": int(season)},
         )
 
+    def person_hitting_stats(self, person_id: int, season: int) -> dict[str, Any]:
+        return self._get_json(
+            f"v1/people/{int(person_id)}/stats",
+            {"stats": "season", "group": "hitting", "season": int(season)},
+        )
+
+    def people_hitting_stats(self, person_ids: list[int], season: int) -> dict[str, Any]:
+        ids = sorted({int(value) for value in person_ids if int(value) > 0})
+        if not ids:
+            return {"people": []}
+        return self._get_json(
+            "v1/people",
+            {
+                "personIds": ",".join(str(value) for value in ids),
+                "hydrate": f"stats(group=[hitting],type=[season],season={int(season)})",
+            },
+        )
+
+    def team_stats(self, team_id: int, season: int, group: str) -> dict[str, Any]:
+        if group not in {"pitching", "fielding", "hitting"}:
+            raise ValueError("group must be pitching, fielding, or hitting")
+        return self._get_json(
+            f"v1/teams/{int(team_id)}/stats",
+            {"stats": "season", "group": group, "season": int(season)},
+        )
+
+    def venue(self, venue_id: int) -> dict[str, Any]:
+        return self._get_json(f"v1/venues/{int(venue_id)}")
+
     def recent_team_schedule(self, team_id: int, end_date: str, days: int = 4) -> dict[str, Any]:
         end = datetime.fromisoformat(end_date).date()
         start = end - timedelta(days=days)
@@ -131,7 +176,7 @@ class MLBStatsHTTPClient:
                 "teamId": int(team_id),
                 "startDate": start.isoformat(),
                 "endDate": end.isoformat(),
-                "hydrate": "linescore",
+                "hydrate": "linescore,venue",
             },
         )
 
@@ -157,34 +202,9 @@ def _float_stat(stat: dict[str, Any], key: str) -> float | None:
 
 
 def parse_pitcher_season_stats(payload: dict[str, Any]) -> dict[str, float | None]:
-    """Parse a public season-pitching response into available V2 context fields."""
+    """Backward-compatible public parser for point-in-time season statistics."""
 
-    stat = _first_stat_split(payload)
-    innings = _float_stat(stat, "inningsPitched")
-    strikeouts = _float_stat(stat, "strikeOuts")
-    walks = _float_stat(stat, "baseOnBalls")
-    hit_batters = _float_stat(stat, "hitBatsmen") or 0.0
-    home_runs = _float_stat(stat, "homeRuns")
-    batters_faced = _float_stat(stat, "battersFaced")
-    era = _float_stat(stat, "era")
-    whip = _float_stat(stat, "whip")
-
-    fip = None
-    if innings and innings > 0 and None not in (strikeouts, walks, home_runs):
-        # A fixed in-season constant is used only as an interpretable proxy. It is
-        # preserved in provenance and is not represented as Statcast xERA.
-        fip = (13.0 * home_runs + 3.0 * (walks + hit_batters) - 2.0 * strikeouts) / innings + 3.10
-    k_minus_bb = None
-    if batters_faced and batters_faced > 0 and None not in (strikeouts, walks):
-        k_minus_bb = 100.0 * (strikeouts - walks) / batters_faced
-
-    return {
-        "starter_fip": fip,
-        "starter_k_minus_bb": k_minus_bb,
-        "season_era": era,
-        "season_whip": whip,
-        "season_innings": innings,
-    }
+    return parse_point_in_time_pitcher_stats(payload)
 
 
 def _team_boxscore(feed: dict[str, Any], side: str) -> dict[str, Any]:
@@ -254,6 +274,269 @@ def apply_pitcher_stats_to_context(
     context.home_starter_whip = home["season_whip"]
     context.away_starter_innings = away["season_innings"]
     context.home_starter_innings = home["season_innings"]
+    context.away_starter_games_started = away["games_started"]
+    context.home_starter_games_started = home["games_started"]
+    context.away_starter_k_rate = away["starter_k_rate"]
+    context.home_starter_k_rate = home["starter_k_rate"]
+    context.away_starter_bb_rate = away["starter_bb_rate"]
+    context.home_starter_bb_rate = home["starter_bb_rate"]
+    context.away_starter_k_per_9 = away["starter_k_per_9"]
+    context.home_starter_k_per_9 = home["starter_k_per_9"]
+    context.away_starter_bb_per_9 = away["starter_bb_per_9"]
+    context.home_starter_bb_per_9 = home["starter_bb_per_9"]
+    context.away_starter_hr_per_9 = away["starter_hr_per_9"]
+    context.home_starter_hr_per_9 = home["starter_hr_per_9"]
+    context.away_starter_hits_per_9 = away["starter_hits_per_9"]
+    context.home_starter_hits_per_9 = home["starter_hits_per_9"]
+    context.away_starter_ground_to_air = away["starter_ground_to_air"]
+    context.home_starter_ground_to_air = home["starter_ground_to_air"]
+    return context
+
+
+def _optional_client_call(client: Any, method_name: str, *args: Any) -> dict[str, Any] | None:
+    method = getattr(client, method_name, None)
+    if method is None:
+        return None
+    try:
+        payload = method(*args)
+    except Exception:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _people_hitting_payloads(payload: dict[str, Any] | None) -> dict[int, dict[str, Any]]:
+    if not payload:
+        return {}
+    output: dict[int, dict[str, Any]] = {}
+    for person in payload.get("people", []) or []:
+        person_id = person.get("id")
+        stats = person.get("stats")
+        if person_id is None or not isinstance(stats, list):
+            continue
+        output[int(person_id)] = {"stats": stats}
+    return output
+
+
+def _recent_completed_games(
+    schedule_payload: dict[str, Any] | None,
+    *,
+    target_date: str,
+    exclude_game_pk: int,
+) -> list[tuple[int, dict[str, Any]]]:
+    if not schedule_payload:
+        return []
+    target = datetime.fromisoformat(target_date).date()
+    rows: list[tuple[int, dict[str, Any]]] = []
+    for date_block in schedule_payload.get("dates", []):
+        block_date = datetime.fromisoformat(str(date_block.get("date"))).date()
+        days_ago = max(0, (target - block_date).days - 1)
+        for game in date_block.get("games", []):
+            if int(game.get("gamePk") or -1) == int(exclude_game_pk):
+                continue
+            status = game.get("status") or {}
+            detailed = str(status.get("detailedState") or "").lower()
+            abstract = str(status.get("abstractGameState") or "").lower()
+            if "final" not in detailed and "final" not in abstract and "completed" not in detailed:
+                continue
+            rows.append((days_ago, game))
+    return sorted(rows, key=lambda item: (item[0], int(item[1].get("gamePk") or 0)))
+
+
+def _assign_lineup_aggregate(context: PregameContext, side: str, aggregate: Any) -> None:
+    setattr(context, f"{side}_lineup_obp", aggregate.on_base_percentage)
+    setattr(context, f"{side}_lineup_slg", aggregate.slugging_percentage)
+    setattr(context, f"{side}_lineup_ops", aggregate.ops)
+    setattr(context, f"{side}_lineup_woba_proxy", aggregate.woba_proxy)
+    setattr(context, f"{side}_lineup_iso", aggregate.isolated_power)
+    setattr(context, f"{side}_lineup_bb_rate", aggregate.walk_rate)
+    setattr(context, f"{side}_lineup_k_rate", aggregate.strikeout_rate)
+    setattr(context, f"{side}_lineup_stats_coverage", aggregate.coverage)
+
+
+def enrich_advanced_context(
+    context: PregameContext,
+    *,
+    client: Any,
+    season: int,
+    capture_time: datetime,
+    snapshot_store: ImmutableSnapshotStore,
+    hitter_cache: dict[int, dict[str, Any]],
+    team_stats_cache: dict[tuple[int, str], dict[str, Any]],
+    venue_cache: dict[int, dict[str, Any]],
+    recent_schedule_cache: dict[int, dict[str, Any]],
+    live_feed_cache: dict[int, dict[str, Any]],
+) -> PregameContext:
+    """Collect optional point-in-time context while failing closed on unavailable feeds.
+
+    The official schedule/live/starter capture remains mandatory. Every advanced source
+    is optional and separately marked in provenance, so an unavailable endpoint never
+    creates a fabricated value or prevents a valid baseline prediction.
+    """
+
+    raw_sources: dict[str, Any] = {}
+
+    weather = derive_weather_features(
+        temperature_f=context.temperature_f,
+        wind_description=context.wind_description,
+        roof_status=context.roof_status,
+        condition=context.weather_condition,
+    )
+    for name in ("weather_run_factor", "air_density", "wind_out_component", "rain_risk"):
+        setattr(context, name, weather.get(name))
+    context.provenance["weather_park"] = "mlb_stats_api:live_feed:derived_bounded_proxy"
+    raw_sources["weather_normalized"] = weather
+
+    for side in ("away", "home"):
+        lineup_ids = list(getattr(context, f"{side}_lineup_ids"))
+        lineup_payloads: list[dict[str, Any] | None] = []
+        if lineup_ids:
+            lineup_ids = lineup_ids[:9]
+            uncached = [person_id for person_id in lineup_ids if person_id not in hitter_cache]
+            if uncached:
+                batch = _optional_client_call(
+                    client, "people_hitting_stats", uncached, int(season)
+                )
+                hitter_cache.update(_people_hitting_payloads(batch))
+            for person_id in lineup_ids:
+                if person_id not in hitter_cache:
+                    payload = _optional_client_call(
+                        client, "person_hitting_stats", int(person_id), int(season)
+                    )
+                    if payload is not None:
+                        hitter_cache[person_id] = payload
+                lineup_payloads.append(hitter_cache.get(person_id))
+            aggregate = aggregate_lineup_stats(lineup_payloads)
+            _assign_lineup_aggregate(context, side, aggregate)
+            raw_sources[f"{side}_lineup_stats"] = {
+                "person_ids": lineup_ids[:9],
+                "payloads": lineup_payloads,
+                "aggregate": aggregate.__dict__,
+            }
+            context.provenance[f"lineup_stats_{side}"] = (
+                "mlb_stats_api:v1/people/stats:season:hitting"
+                if aggregate.valid_player_count
+                else "mlb_stats_api:lineup_posted_stats_unavailable"
+            )
+        else:
+            context.provenance[f"lineup_stats_{side}"] = "mlb_stats_api:lineup_not_posted"
+
+        team_id = getattr(context, f"{side}_team_id")
+        if team_id is None:
+            continue
+        for group in ("pitching", "fielding"):
+            key = (int(team_id), group)
+            if key not in team_stats_cache:
+                payload = _optional_client_call(client, "team_stats", int(team_id), int(season), group)
+                if payload is not None:
+                    team_stats_cache[key] = payload
+            payload = team_stats_cache.get(key)
+            if payload is None:
+                context.provenance[f"team_{group}_{side}"] = "mlb_stats_api:unavailable"
+                continue
+            raw_sources[f"{side}_team_{group}"] = payload
+            if group == "pitching":
+                parsed = parse_team_pitching_stats(payload)
+                setattr(context, f"{side}_bullpen_era_proxy", parsed["era"])
+                setattr(context, f"{side}_bullpen_whip_proxy", parsed["whip"])
+            else:
+                parsed = parse_team_fielding_stats(payload)
+                setattr(context, f"{side}_defense_fielding_pct", parsed["fielding_percentage"])
+                setattr(context, f"{side}_defense_errors_per_game", parsed["errors_per_game"])
+            context.provenance[f"team_{group}_{side}"] = (
+                f"mlb_stats_api:v1/teams/{int(team_id)}/stats:season:{group}"
+            )
+
+        if int(team_id) not in recent_schedule_cache:
+            payload = _optional_client_call(
+                client, "recent_team_schedule", int(team_id), context.game_date, 4
+            )
+            if payload is not None:
+                recent_schedule_cache[int(team_id)] = payload
+        recent_schedule = recent_schedule_cache.get(int(team_id))
+        recent_games = _recent_completed_games(
+            recent_schedule,
+            target_date=context.game_date,
+            exclude_game_pk=int(context.game_pk or -1),
+        )
+        recent_feeds: list[tuple[int, dict[str, Any]]] = []
+        for days_ago, game in recent_games[:4]:
+            game_pk = game.get("gamePk")
+            if game_pk is None:
+                continue
+            if int(game_pk) not in live_feed_cache:
+                payload = _optional_client_call(client, "live_feed", int(game_pk))
+                if payload is not None:
+                    live_feed_cache[int(game_pk)] = payload
+            feed = live_feed_cache.get(int(game_pk))
+            if feed is not None:
+                recent_feeds.append((days_ago, feed))
+        usage = parse_recent_bullpen_usage(recent_feeds, team_id=int(team_id))
+        setattr(context, f"{side}_bullpen_recent_pitches", usage.relief_pitches_weighted)
+        setattr(context, f"{side}_bullpen_recent_innings", usage.relief_innings_weighted)
+        setattr(context, f"{side}_bullpen_fatigue", usage.fatigue)
+        setattr(context, f"{side}_closer_available", usage.closer_available)
+        raw_sources[f"{side}_recent_schedule"] = recent_schedule
+        raw_sources[f"{side}_recent_game_feeds"] = recent_feeds
+        raw_sources[f"{side}_bullpen_usage"] = usage.__dict__
+        context.provenance[f"bullpen_usage_{side}"] = (
+            "mlb_stats_api:recent_live_feeds"
+            if usage.games_observed
+            else "mlb_stats_api:no_completed_recent_games"
+        )
+
+        previous_venue_payload = None
+        previous_game = recent_games[0][1] if recent_games else None
+        previous_venue_id = int(((previous_game or {}).get("venue") or {}).get("id") or 0)
+        current_venue_id = int(context.venue_id or 0)
+        if current_venue_id:
+            if current_venue_id not in venue_cache:
+                payload = _optional_client_call(client, "venue", current_venue_id)
+                if payload is not None:
+                    venue_cache[current_venue_id] = payload
+            current_venue_payload = venue_cache.get(current_venue_id)
+        else:
+            current_venue_payload = None
+        if previous_venue_id:
+            if previous_venue_id not in venue_cache:
+                payload = _optional_client_call(client, "venue", previous_venue_id)
+                if payload is not None:
+                    venue_cache[previous_venue_id] = payload
+            previous_venue_payload = venue_cache.get(previous_venue_id)
+        if current_venue_payload and previous_venue_payload:
+            current_venue = parse_venue_location(current_venue_payload)
+            previous_venue = parse_venue_location(previous_venue_payload)
+            rest_days = float(recent_games[0][0] + 1) if recent_games else None
+            travel = derive_travel_load(
+                previous_venue=previous_venue,
+                current_venue=current_venue,
+                rest_days=rest_days,
+                games_last3=float(sum(days_ago <= 2 for days_ago, _ in recent_games)),
+            )
+            setattr(context, f"{side}_travel_fatigue", travel.fatigue)
+            setattr(context, f"{side}_time_zones_crossed", travel.time_zones_crossed)
+            raw_sources[f"{side}_travel"] = {
+                "previous_venue": previous_venue.__dict__,
+                "current_venue": current_venue.__dict__,
+                "load": travel.__dict__,
+            }
+            context.provenance[f"travel_{side}"] = "mlb_stats_api:venue+recent_schedule"
+        else:
+            context.provenance[f"travel_{side}"] = "mlb_stats_api:venue_context_unavailable"
+
+    payload = advanced_snapshot_payload(context, raw_sources)
+    advanced_path = snapshot_store.write(
+        kind="mlb_advanced_pregame",
+        captured_at=capture_time,
+        payload=payload,
+        source="mlb_stats_api:multi_endpoint_advanced_context",
+        identity=str(int(context.game_pk)),
+    )
+    advanced_digest = sha256(advanced_path.read_bytes()).hexdigest()
+    context.advanced_snapshot_path = str(advanced_path)
+    context.advanced_snapshot_sha256 = advanced_digest
+    context.provenance["advanced_context"] = (
+        f"mlb_stats_api:multi_endpoint:sha256:{advanced_digest}"
+    )
     return context
 
 
@@ -271,15 +554,107 @@ def context_to_external_feature_record(context: PregameContext) -> dict[str, Any
         return away - home if team_a_is_away else home - away
 
     team_a_is_away = context.away_team < context.home_team
-    return {
+    record: dict[str, Any] = {
         "date": context.game_date,
         "game_pk": context.game_pk,
         "away_team": context.away_team,
         "home_team": context.home_team,
-        "starter_fip_diff": diff(context.away_starter_fip, context.home_starter_fip, team_a_is_away),
-        "starter_k_minus_bb_diff": diff(context.away_k_minus_bb, context.home_k_minus_bb, team_a_is_away),
         "lineup_confirmed": float(context.lineups_confirmed),
     }
+    paired_fields = {
+        "starter_fip": (context.away_starter_fip, context.home_starter_fip),
+        "starter_k_minus_bb": (context.away_k_minus_bb, context.home_k_minus_bb),
+        "starter_xera": (context.away_starter_xera, context.home_starter_xera),
+        "starter_xfip": (context.away_starter_xfip, context.home_starter_xfip),
+        "starter_siera": (context.away_starter_siera, context.home_starter_siera),
+        "lineup_obp": (context.away_lineup_obp, context.home_lineup_obp),
+        "lineup_slg": (context.away_lineup_slg, context.home_lineup_slg),
+        "lineup_ops": (context.away_lineup_ops, context.home_lineup_ops),
+        "lineup_woba_proxy": (
+            context.away_lineup_woba_proxy,
+            context.home_lineup_woba_proxy,
+        ),
+        "lineup_iso": (context.away_lineup_iso, context.home_lineup_iso),
+        "lineup_bb_rate": (context.away_lineup_bb_rate, context.home_lineup_bb_rate),
+        "lineup_k_rate": (context.away_lineup_k_rate, context.home_lineup_k_rate),
+        "lineup_stats_coverage": (
+            context.away_lineup_stats_coverage,
+            context.home_lineup_stats_coverage,
+        ),
+        "injury_war": (context.away_injury_war, context.home_injury_war),
+        "bullpen_xfip": (context.away_bullpen_xfip, context.home_bullpen_xfip),
+        "bullpen_siera": (context.away_bullpen_siera, context.home_bullpen_siera),
+        "bullpen_era_proxy": (
+            context.away_bullpen_era_proxy,
+            context.home_bullpen_era_proxy,
+        ),
+        "bullpen_whip_proxy": (
+            context.away_bullpen_whip_proxy,
+            context.home_bullpen_whip_proxy,
+        ),
+        "bullpen_recent_pitches": (
+            context.away_bullpen_recent_pitches,
+            context.home_bullpen_recent_pitches,
+        ),
+        "bullpen_recent_innings": (
+            context.away_bullpen_recent_innings,
+            context.home_bullpen_recent_innings,
+        ),
+        "bullpen_fatigue": (
+            context.away_bullpen_fatigue,
+            context.home_bullpen_fatigue,
+        ),
+        "closer_available": (
+            context.away_closer_available,
+            context.home_closer_available,
+        ),
+        "travel_fatigue": (
+            context.away_travel_fatigue,
+            context.home_travel_fatigue,
+        ),
+        "time_zones_crossed": (
+            context.away_time_zones_crossed,
+            context.home_time_zones_crossed,
+        ),
+        "defense_frv": (context.away_defense_frv, context.home_defense_frv),
+        "defense_oaa": (context.away_defense_oaa, context.home_defense_oaa),
+        "defense_fielding_pct": (
+            context.away_defense_fielding_pct,
+            context.home_defense_fielding_pct,
+        ),
+        "defense_errors_per_game": (
+            context.away_defense_errors_per_game,
+            context.home_defense_errors_per_game,
+        ),
+        "catcher_framing": (
+            context.away_catcher_framing,
+            context.home_catcher_framing,
+        ),
+        "baserunning_runs": (
+            context.away_baserunning_runs,
+            context.home_baserunning_runs,
+        ),
+    }
+    for name, (away_value, home_value) in paired_fields.items():
+        value = diff(away_value, home_value, team_a_is_away)
+        if value is not None:
+            record[f"{name}_diff"] = value
+
+    for name in (
+        "umpire_run_factor",
+        "umpire_k_factor",
+        "park_run_factor",
+        "park_hr_factor",
+        "weather_run_factor",
+        "air_density",
+        "wind_out_component",
+        "rain_risk",
+        "reverse_line_move",
+    ):
+        value = getattr(context, name)
+        if value is not None:
+            record[name] = float(value)
+    return record
 
 
 def capture_live_slate(
@@ -289,11 +664,17 @@ def capture_live_slate(
     snapshot_store: ImmutableSnapshotStore,
     captured_at: datetime | None = None,
 ) -> tuple[Path, list[Path], list[PregameContext]]:
-    """Fetch and freeze the official schedule plus available per-game pregame data."""
+    """Fetch and freeze official schedule, starter, and pregame context snapshots.
+
+    Starting-pitcher source payloads are written as separate immutable snapshots before
+    they are summarized into the game context. This preserves the exact public payload,
+    official person identity, capture time, and scheduled start for future retraining.
+    """
 
     capture_time = captured_at or datetime.now(timezone.utc)
-    if capture_time.tzinfo is None:
+    if capture_time.tzinfo is None or capture_time.utcoffset() is None:
         raise ValueError("captured_at must be timezone-aware")
+    capture_time = capture_time.astimezone(timezone.utc)
     schedule_payload = client.schedule(game_date)
     schedule_path = snapshot_store.write_schedule(
         raw_payload=schedule_payload,
@@ -303,6 +684,14 @@ def capture_live_slate(
     contexts: list[PregameContext] = []
     paths: list[Path] = []
     season = int(game_date[:4])
+    identity_source = "mlb_stats_api:v1/schedule+v1.1/game/feed/live"
+    stats_source = "mlb_stats_api:v1/people/stats:season"
+    hitter_cache: dict[int, dict[str, Any]] = {}
+    team_stats_cache: dict[tuple[int, str], dict[str, Any]] = {}
+    venue_cache: dict[int, dict[str, Any]] = {}
+    recent_schedule_cache: dict[int, dict[str, Any]] = {}
+    live_feed_cache: dict[int, dict[str, Any]] = {}
+
     for record in parse_mlb_schedule(schedule_payload):
         context = PregameContext(
             game_date=record.official_date,
@@ -324,23 +713,82 @@ def capture_live_slate(
             home_probable_pitcher_name=record.home_probable_pitcher_name,
         )
         feed = client.live_feed(record.game_pk)
+        live_feed_cache[int(record.game_pk)] = feed
         enrich_context_from_live_feed(context, feed)
-        away_stats = (
-            client.person_pitching_stats(context.away_probable_pitcher_id, season)
-            if context.away_probable_pitcher_id else {}
-        )
-        home_stats = (
-            client.person_pitching_stats(context.home_probable_pitcher_id, season)
-            if context.home_probable_pitcher_id else {}
-        )
-        apply_pitcher_stats_to_context(context, away_payload=away_stats, home_payload=home_stats)
-        context.provenance.update({
-            "schedule": "mlb_stats_api:v1/schedule",
-            "live_feed": "mlb_stats_api:v1.1/game/feed/live",
-            "pitcher_stats": "mlb_stats_api:v1/people/stats:season",
-        })
         game_start = datetime.fromisoformat(record.game_datetime.replace("Z", "+00:00"))
+
+        away_stats: dict[str, Any] = {}
+        home_stats: dict[str, Any] = {}
+        context.provenance.update(
+            {
+                "schedule": "mlb_stats_api:v1/schedule",
+                "live_feed": "mlb_stats_api:v1.1/game/feed/live",
+                "starter_identity": identity_source,
+                "pitcher_stats": f"{stats_source}:immutable_snapshot",
+            }
+        )
+
         if capture_time <= game_start:
+            for side in ("away", "home"):
+                pitcher_id = getattr(context, f"{side}_probable_pitcher_id")
+                pitcher_name = getattr(context, f"{side}_probable_pitcher_name")
+                team_id = getattr(context, f"{side}_team_id")
+                if pitcher_id is None or team_id is None:
+                    context.provenance[f"starter_stats_{side}"] = (
+                        "mlb_stats_api:not_posted_before_capture"
+                    )
+                    continue
+                raw_stats = client.person_pitching_stats(int(pitcher_id), season)
+                starter_payload = build_starter_snapshot_payload(
+                    game_pk=record.game_pk,
+                    scheduled_start=record.game_datetime,
+                    side=side,
+                    team_id=int(team_id),
+                    pitcher_id=int(pitcher_id),
+                    pitcher_name=pitcher_name,
+                    season=season,
+                    identity_source=identity_source,
+                    raw_payload=raw_stats,
+                )
+                starter_path = snapshot_store.write_starter_pregame(
+                    game_pk=record.game_pk,
+                    game_datetime=record.game_datetime,
+                    side=side,
+                    pitcher_id=int(pitcher_id),
+                    payload=starter_payload,
+                    captured_at=capture_time,
+                    source=stats_source,
+                )
+                starter_digest = sha256(starter_path.read_bytes()).hexdigest()
+                setattr(context, f"{side}_starter_stats_snapshot_path", str(starter_path))
+                setattr(
+                    context,
+                    f"{side}_starter_stats_snapshot_sha256",
+                    starter_digest,
+                )
+                context.provenance[f"starter_stats_{side}"] = (
+                    f"{stats_source}:sha256:{starter_digest}"
+                )
+                if side == "away":
+                    away_stats = raw_stats
+                else:
+                    home_stats = raw_stats
+
+            apply_pitcher_stats_to_context(
+                context, away_payload=away_stats, home_payload=home_stats
+            )
+            enrich_advanced_context(
+                context,
+                client=client,
+                season=season,
+                capture_time=capture_time,
+                snapshot_store=snapshot_store,
+                hitter_cache=hitter_cache,
+                team_stats_cache=team_stats_cache,
+                venue_cache=venue_cache,
+                recent_schedule_cache=recent_schedule_cache,
+                live_feed_cache=live_feed_cache,
+            )
             path = snapshot_store.write_pregame(
                 game_pk=record.game_pk,
                 game_datetime=record.game_datetime,
@@ -349,6 +797,10 @@ def capture_live_slate(
                 source="mlb_stats_api_live_capture",
             )
             paths.append(path)
+        else:
+            context.provenance["starter_stats_away"] = "not_captured_after_start"
+            context.provenance["starter_stats_home"] = "not_captured_after_start"
+
         contexts.append(context)
     return schedule_path, paths, contexts
 
@@ -402,8 +854,20 @@ def evaluate_live_slate(
     rows: list[dict[str, Any]] = []
 
     for idx, (_, feature_row) in enumerate(future_features.iterrows()):
+        environment_factor = 1.0
+        for name in ("weather_run_factor", "park_run_factor"):
+            value = feature_row.get(f"live_{name}", 0.0)
+            missing = feature_row.get(f"missing_{name}", 1.0)
+            if float(missing) < 0.5 and value is not None and np.isfinite(float(value)):
+                numeric = float(value)
+                if numeric > 0.0:
+                    environment_factor *= numeric
+        environment_factor = float(np.clip(environment_factor, 0.80, 1.20))
         simulation = simulate_poisson_score_distribution(
-            expected_runs_a[idx], expected_runs_b[idx], config.simulations, rng
+            expected_runs_a[idx] * environment_factor,
+            expected_runs_b[idx] * environment_factor,
+            config.simulations,
+            rng,
         )
         score_p_a = simulation["team_a_win_probability"]
         blended_a = (
@@ -534,6 +998,7 @@ def evaluate_live_slate(
             "home_last_blowout_loss": home_last_blowout_loss,
             "home_last_was_shutout": home_last_was_shutout,
             "simulations": config.simulations,
+            "environment_run_factor": environment_factor,
         }
         row.update({f"p_{name}_{away}": prob for name, prob in component_away.items()})
         row.update({

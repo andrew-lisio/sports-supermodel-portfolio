@@ -10,8 +10,9 @@ from typing import Any
 
 import pandas as pd
 
-from . import __version__
-from .mlb_v2 import build_pregame_features, load_team_logs, reconstruct_games
+from ._version import __version__
+from .execution import load_execution_profile, resolve_execution_plan
+from .mlb_v2 import V2Ensemble, build_pregame_features, load_team_logs, reconstruct_games
 from .model_contract import V23_FEATURE_CONTRACT, V24_CANDIDATE_FEATURE_CONTRACT
 from .validation import (
     calibration_table,
@@ -45,10 +46,35 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--output-dir", type=Path, default=Path("reports/v2_4_validation")
     )
     parser.add_argument(
+        "--execution-config",
+        type=Path,
+        default=Path("config/execution.yaml"),
+    )
+    parser.add_argument(
+        "--profile",
+        default=None,
+        help="Execution profile name from config/execution.yaml.",
+    )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Override the total CPU worker budget for this run.",
+    )
+    parser.add_argument(
         "--bootstrap-iterations",
         type=int,
         default=None,
         help="Override the bootstrap count in the validation plan.",
+    )
+    parser.add_argument(
+        "--evidence-report",
+        type=Path,
+        default=None,
+        help=(
+            "Machine-readable prospective evidence report produced by "
+            "sports-supermodel-evidence audit."
+        ),
     )
     parser.add_argument(
         "--unlock-holdout",
@@ -89,6 +115,16 @@ def _json_safe(value: Any) -> Any:
 
 def _write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(_json_safe(payload), indent=2, allow_nan=True), encoding="utf-8")
+
+
+def _load_release_evidence(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {}
+    document = json.loads(path.read_text(encoding="utf-8"))
+    evidence = document.get("gate_evidence", document)
+    if not isinstance(evidence, dict):
+        raise ValueError("Evidence report must contain a gate_evidence object")
+    return dict(evidence)
 
 
 def _format_metric(value: Any, *, percentage: bool = False) -> str:
@@ -181,6 +217,8 @@ def _markdown_report(
             f"- Git commit: `{summary['metadata']['git_commit']}`",
             f"- Data fingerprint: `{summary['metadata']['data_fingerprint']}`",
             f"- Generated at: `{summary['metadata']['generated_at_utc']}`",
+            f"- Execution profile: `{summary['metadata']['execution']['profile']}`",
+            f"- Total worker budget: `{summary['metadata']['execution']['total_workers']}`",
             "",
         ]
     )
@@ -206,6 +244,19 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     started = perf_counter()
     plan = load_validation_plan(args.plan)
+    execution_profile = load_execution_profile(
+        args.execution_config,
+        profile=args.profile,
+    )
+    execution_plan = resolve_execution_plan(
+        execution_profile,
+        workload="validation",
+        total_workers=args.workers,
+    )
+    model_factory = lambda: V2Ensemble(
+        model_workers=execution_plan.model_workers,
+        estimator_threads=execution_plan.estimator_threads,
+    )
     bootstrap_iterations = (
         args.bootstrap_iterations
         if args.bootstrap_iterations is not None
@@ -231,8 +282,10 @@ def main(argv: list[str] | None = None) -> int:
     predictions, folds = run_matched_walk_forward(
         candidate_features,
         plan.development_windows,
+        model_factory=model_factory,
         calibration_bins=plan.calibration_bins,
         baseline_features=baseline_features,
+        comparison_workers=execution_plan.comparison_workers,
     )
     if predictions.empty:
         raise RuntimeError("No development predictions were produced")
@@ -266,8 +319,10 @@ def main(argv: list[str] | None = None) -> int:
         holdout_predictions, holdout_folds = run_locked_holdout(
             candidate_features,
             plan.holdout_window,
+            model_factory=model_factory,
             calibration_bins=plan.calibration_bins,
             baseline_features=baseline_features,
+            comparison_workers=execution_plan.comparison_workers,
         )
         if holdout_predictions.empty:
             holdout_summary = {"status": "unavailable"}
@@ -280,22 +335,22 @@ def main(argv: list[str] | None = None) -> int:
             }
 
     gate_config = load_merge_gates(args.merge_gates)
+    release_evidence = _load_release_evidence(args.evidence_report)
+    release_evidence["final_holdout_passed"] = (
+        None
+        if holdout_summary is None or holdout_summary.get("status") != "evaluated"
+        else (
+            holdout_summary["candidate"]["brier"]
+            < holdout_summary["baseline"]["brier"]
+            and holdout_summary["candidate"]["log_loss"]
+            < holdout_summary["baseline"]["log_loss"]
+        )
+    )
     gate_report = evaluate_promotion_gates(
         baseline_metrics=metric_summary["baseline"],
         candidate_metrics=metric_summary["candidate"],
         gate_config=gate_config,
-        evidence={
-            "final_holdout_passed": (
-                None
-                if holdout_summary is None or holdout_summary.get("status") != "evaluated"
-                else (
-                    holdout_summary["candidate"]["brier"]
-                    < holdout_summary["baseline"]["brier"]
-                    and holdout_summary["candidate"]["log_loss"]
-                    < holdout_summary["baseline"]["log_loss"]
-                )
-            )
-        },
+        evidence=release_evidence,
     )
 
     metadata = {
@@ -314,8 +369,10 @@ def main(argv: list[str] | None = None) -> int:
         "candidate_recent_form_alpha": V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
         "validation_plan": str(args.plan),
         "merge_gates": str(args.merge_gates),
+        "evidence_report": str(args.evidence_report) if args.evidence_report else None,
         "bootstrap_iterations": bootstrap_iterations,
         "holdout_unlocked": bool(args.unlock_holdout),
+        "execution": execution_plan.as_dict(),
         "runtime_seconds": perf_counter() - started,
     }
     summary = {

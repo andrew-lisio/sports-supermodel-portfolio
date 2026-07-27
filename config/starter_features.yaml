@@ -1,0 +1,3 @@
+snapshot_root: runtime/snapshots
+audit_report: runtime/evidence/starter_snapshot_audit.json
+training_export: runtime/evidence/starter_training_rows.csv

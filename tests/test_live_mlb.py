@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -174,6 +175,12 @@ def test_capture_live_slate_writes_immutable_snapshots(tmp_path):
     assert schedule_path.exists()
     assert len(pregame_paths) == 1 and pregame_paths[0].exists()
     assert contexts[0].game_pk == 999
+    assert contexts[0].advanced_snapshot_path is not None
+    assert Path(contexts[0].advanced_snapshot_path).exists()
+    assert contexts[0].advanced_snapshot_sha256 is not None
+    assert contexts[0].provenance["advanced_context"].endswith(
+        contexts[0].advanced_snapshot_sha256
+    )
 
 
 def test_confidence_ranking_and_market_analysis_have_no_staking(monkeypatch):

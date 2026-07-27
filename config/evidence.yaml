@@ -1,0 +1,12 @@
+schema_version: 1
+ledger: runtime/evidence/prospective.jsonl
+report: runtime/evidence/evidence_report.json
+minimum_prospective_games: 500
+required_provenance_keys:
+  - schedule
+  - live_feed
+  - pitcher_stats
+  - starter_identity
+  - starter_stats_away
+  - starter_stats_home
+  - market_input

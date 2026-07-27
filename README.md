@@ -1,5 +1,8 @@
 # Sports SuperModel
 
+> **V2.4 implementation status:** the code-complete release candidate lives on `v2.4-final-candidate` as one squashed commit above rollback commit `ceda10d`. `main` remains V2.3.3 production. V2.4 promotion is still `PENDING` until prospective, CLV, integrity, provenance, calibration, and final-holdout gates pass.
+
+
 Sports SuperModel is an experimental, reproducible MLB game-prediction research project. It combines seven winner models, a calibrated ensemble, a separate Poisson score model, immutable pregame snapshots, and Monte Carlo simulation.
 
 > **Current release: V2.3.3 — schedule-integrity hotfix for the open-input, prediction-only release.** Users no longer need to send sportsbook screenshots to another person. The repository includes a local browser interface, an interactive terminal workflow, and CSV/JSON import tools for entering two-way moneylines directly. Bankroll management, wager sizing, exposure limits, and the Kelly criterion are not part of the active engine.
@@ -44,11 +47,11 @@ The live pipeline:
 5. Loads historical MLB team game logs.
 6. Reconstructs canonical historical games and attaches official home/away identity when recoverable.
 7. Builds pregame-only features without using information from the target game.
-8. Fits seven winner-model components and a separate two-sided Poisson score model.
-9. Runs the configured Monte Carlo score simulations and final probability draws.
-10. Ranks games by confidence and model agreement.
+8. Runs frozen V2.3.3 production and the exact V2.4 candidate as separately versioned seven-model tracks.
+9. Runs the configured Monte Carlo score simulations and final probability draws for both tracks.
+10. Keeps production rankings primary and attaches V2.4 shadow probabilities, disagreements, and candidate commit.
 11. Compares model probabilities with no-vig and raw market-implied probabilities.
-12. Writes CSV, JSON, optional two-leg comparison, and immutable input artifacts.
+12. Writes CSV, JSON, optional two-leg production comparison, immutable inputs, and prospective evidence.
 
 The engine ends at prediction and market comparison. It does **not** recommend how much money to risk.
 
@@ -105,6 +108,10 @@ For every evaluated game, the default run performs:
 - Available official batting orders
 - Lineup-confirmation status
 - Temperature, condition, wind description, and roof status when supplied by the public feed
+- Posted-lineup public season aggregates with explicit player coverage
+- Recent reliever pitches/innings and bounded fatigue/availability proxies
+- Public team pitching and fielding proxies
+- Recent venue distance, time-zone movement, rest, and schedule-density travel proxy
 
 ### Provider-ready but not fully historically trained
 
@@ -442,11 +449,28 @@ V2.3.3 contains a schedule-integrity hotfix and retains the V2.3.2 input workflo
 - User-entered odds are preserved separately from public MLB context.
 - No screenshot OCR is required or used by the application.
 
+## Point-in-time starting-pitcher collection
+
+The V2.4 final candidate freezes the exact public season-stat payload for each posted
+probable starter before first pitch. The immutable snapshot is keyed by official `gamePk`,
+side, and MLB person ID, and is bound into prospective prediction evidence.
+
+```bash
+sports-supermodel-starters audit
+sports-supermodel-starters export
+```
+
+The export is a future-training dataset. Starter and other advanced context may influence
+only the separately versioned adaptive V2.4 shadow overlay after its chronological
+activation gate passes; they do not rewrite the frozen retrospective contract. See
+`docs/V2_4_FINAL_CANDIDATE.md`.
+
 ## Known limitations
 
 - Historical team logs do not contain every advanced point-in-time input supported by the schema.
 - Starter features still include team-result proxies and are not a complete pitch-level projection system.
-- Bullpen availability, individual batter projections, breaking injuries, weather, and roof decisions are not yet fully trained numerical inputs.
+- Public lineup, bullpen, weather, fielding, and travel context is captured prospectively, but its adaptive numerical influence remains self-gated until chronological evidence passes.
+- Complete Statcast pitch quality, projected injury WAR, FRV/OAA, catcher framing, and umpire factors still require trustworthy point-in-time providers.
 - Public feeds can be incomplete, delayed, revised, unavailable, or subject to provider terms.
 - The project does not fetch sportsbook prices automatically; users must enter or import a lawful source of two-way odds.
 - Original schedules may differ from later postponements or rescheduled games.
@@ -455,20 +479,18 @@ V2.3.3 contains a schedule-integrity hotfix and retains the V2.3.2 input workflo
 - Market prices can move immediately after entry.
 - A local browser interface is not the same as a hardened production web service. Do not expose it publicly without authentication, security, privacy, and legal review.
 
-## Roadmap toward V2.4
+## V2.4 release-candidate boundary
 
-Planned work includes:
+The final candidate implements the repository-side V2.4 roadmap in one squashed commit:
+accelerated seven-model execution, selected recent-form behavior, attribution, immutable
+prospective evidence, starter and advanced point-in-time collection, production/shadow
+dual execution, and a fail-closed prospective adaptive overlay. See
+[docs/V2_4_FINAL_CANDIDATE.md](docs/V2_4_FINAL_CANDIDATE.md).
 
-- Walk-forward decay selection for the 1/3/5/10-game recent-form engine (multi-horizon features are now implemented on the V2.4 branch)
-- Individual confirmed-lineup projections
-- Pitcher-specific FIP/xFIP/SIERA/xERA and pitch-quality model
-- Bullpen availability and leverage-usage model
-- Weather, park, roof, travel, defense, and injury integration
-- Category-level prediction attribution
-- Improved calibration and prospective tracking
-- Learned ensemble weighting under strict walk-forward validation
-
-V2.4 should be developed on a separate branch and should not replace the stable V2.3.3 input release until it passes the repository's validation and data-integrity gates.
+Unavailable point-in-time sources—such as complete Statcast pitch-quality history, projected
+injury WAR, FRV/OAA, catcher framing, and umpire factors—remain provider-ready and neutral
+rather than being fabricated. V2.4 cannot replace stable V2.3.3 until its prospective and
+locked-holdout promotion gates pass.
 
 ## Contributing
 
@@ -531,3 +553,36 @@ sports-supermodel-optimize-opponent-form
 ```
 
 This compares the frozen V2.4 alpha-0.25 contract against several opponent-adjusted rolling-window variants on the same chronological development games. The final holdout remains locked, and opponent adjustment is not activated unless it clears the configured probability-quality and regression gates. See `docs/V2_4_OPPONENT_ADJUSTED_FORM.md`.
+
+### V2.4 accelerated integration
+
+The final `v2.4-final-candidate` branch includes CPU-budgeted parallel execution for the
+complete seven-model ensemble, matched validation, and candidate experiments. It preserves
+the frozen feature contracts and locked holdout. See `docs/V2_4_FINAL_CANDIDATE.md` and
+inspect the runtime model registry with:
+
+```bash
+sports-supermodel-registry
+```
+
+Audit the append-only prospective evidence ledger:
+
+```powershell
+sports-supermodel-evidence audit
+```
+
+See `docs/V2_4_PHASE6B_EVIDENCE_PIPELINE.md` for closing-line, outcome, provenance, and
+validation-gate workflows.
+
+### V2.4 production/shadow and adaptive status
+
+A normal live run keeps V2.3.3 in the primary output columns and adds V2.4 fields with a
+`shadow_` prefix. Inspect the self-gated prospective overlay with:
+
+```bash
+sports-supermodel-adaptive show
+```
+
+The overlay cannot alter V2.4 until enough graded prospective games exist and its
+chronological activation test passes. No background predictions occur while the program is
+not running.

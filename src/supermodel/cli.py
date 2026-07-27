@@ -18,8 +18,8 @@ def build_parser() -> argparse.ArgumentParser:
         prog="sports-supermodel",
         description=(
             "Fetch an official MLB slate, accept user-entered two-way moneylines, run "
-            "the V2.3.3 seven-model ensemble and Poisson simulation, and rank the games. "
-            "No bankroll or wager sizing is produced."
+            "V2.3.3 as the production model and V2.4 as a versioned shadow candidate, "
+            "and rank the production picks. No bankroll or wager sizing is produced."
         ),
     )
     parser.add_argument("--date", required=True, help="Slate date in YYYY-MM-DD format")
@@ -48,6 +48,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--data-dir", type=Path, default=Path("data/2026"))
     parser.add_argument("--snapshot-dir", type=Path, default=Path("runtime/snapshots"))
     parser.add_argument("--output-dir", type=Path, default=Path("runtime/reports"))
+    parser.add_argument(
+        "--evidence-ledger",
+        type=Path,
+        default=Path("runtime/evidence/prospective.jsonl"),
+        help="Append prediction evidence to this hash-chained JSONL ledger.",
+    )
+    parser.add_argument(
+        "--adaptive-overlay",
+        type=Path,
+        default=Path("runtime/models/v2_4_adaptive_overlay.json"),
+        help=(
+            "Versioned V2.4 shadow overlay artifact. It stays PENDING or INACTIVE until "
+            "its chronological activation gate passes."
+        ),
+    )
     parser.add_argument("--simulations", type=int, default=100_000)
     parser.add_argument("--top-n", type=int, default=5)
     parser.add_argument(
@@ -93,6 +108,8 @@ def run(args: argparse.Namespace) -> WorkflowResult | Path:
         data_dir=args.data_dir,
         snapshot_dir=args.snapshot_dir,
         output_dir=args.output_dir,
+        evidence_ledger=args.evidence_ledger,
+        adaptive_overlay_path=args.adaptive_overlay,
         simulations=args.simulations,
         top_n=args.top_n,
         home_field_logit_adjustment=args.home_field_logit_adjustment,
@@ -111,15 +128,15 @@ def _print_evaluation(evaluation: pd.DataFrame) -> None:
         "pick_probability",
         "model_overlap",
         "model_count",
+        "shadow_pick",
+        "shadow_pick_probability",
+        "shadow_model_overlap",
+        "production_shadow_disagree",
+        "shadow_adaptive_overlay_status",
         "simulated_away_runs",
         "simulated_home_runs",
         "edge_vs_no_vig",
-        "edge_vs_break_even",
         "fair_odds",
-        "top_supporting_group",
-        "top_supporting_sensitivity",
-        "top_opposing_group",
-        "top_opposing_sensitivity",
         "lineups_confirmed",
     ]
     available = [column for column in display_columns if column in evaluation.columns]
@@ -141,6 +158,8 @@ def main() -> None:
         result.parlay_path,
         result.json_path,
         result.market_snapshot_path,
+        result.evidence_ledger_path,
+        result.adaptive_overlay_path,
     ]:
         if path is not None:
             print(path)

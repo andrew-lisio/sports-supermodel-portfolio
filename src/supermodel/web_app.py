@@ -52,8 +52,8 @@ def render_app() -> None:
     st.set_page_config(page_title="Sports SuperModel", page_icon="⚾", layout="wide")
     st.title("⚾ Sports SuperModel")
     st.caption(
-        "Prediction-only MLB research interface · seven winner models · Poisson score model · "
-        "Monte Carlo simulation · no Kelly criterion or stake sizing"
+        "V2.3.3 production plus V2.4 shadow · seven winner models per track · "
+        "Poisson score model · Monte Carlo simulation · no Kelly criterion or stake sizing"
     )
 
     with st.expander("Important recreational-use notice", expanded=True):
@@ -81,6 +81,12 @@ def render_app() -> None:
         data_dir = st.text_input("Historical data directory", value="data/2026")
         snapshot_dir = st.text_input("Snapshot directory", value="runtime/snapshots")
         output_dir = st.text_input("Output directory", value="runtime/reports")
+        evidence_ledger = st.text_input(
+            "Prospective evidence ledger", value="runtime/evidence/prospective.jsonl"
+        )
+        adaptive_overlay = st.text_input(
+            "V2.4 adaptive overlay", value="runtime/models/v2_4_adaptive_overlay.json"
+        )
         st.caption("Run the app from the repository root so these relative paths resolve correctly.")
 
     capture_key = f"captured:{game_date}"
@@ -186,6 +192,8 @@ def render_app() -> None:
                 data_dir=Path(data_dir),
                 snapshot_dir=Path(snapshot_dir),
                 output_dir=Path(output_dir),
+                evidence_ledger=Path(evidence_ledger),
+                adaptive_overlay_path=Path(adaptive_overlay),
                 simulations=int(simulations),
                 top_n=int(top_n),
                 include_parlays=include_parlays,
@@ -196,7 +204,7 @@ def render_app() -> None:
             return
 
     st.success("Evaluation complete")
-    st.subheader("Confidence-first rankings")
+    st.subheader("Confidence-first production rankings with V2.4 shadow comparison")
     display_columns = [
         "confidence_rank",
         "away_team",
@@ -206,6 +214,12 @@ def render_app() -> None:
         "pick_probability",
         "model_overlap",
         "model_count",
+        "shadow_pick",
+        "shadow_pick_probability",
+        "shadow_model_overlap",
+        "production_shadow_disagree",
+        "shadow_adaptive_overlay_status",
+        "shadow_adaptive_overlay_training_games",
         "simulated_away_runs",
         "simulated_home_runs",
         "fair_odds",
@@ -220,6 +234,10 @@ def render_app() -> None:
     display = result.evaluation[available].copy()
     if "pick_probability" in display:
         display["pick_probability_pct"] = 100.0 * display.pop("pick_probability")
+    if "shadow_pick_probability" in display:
+        display["shadow_pick_probability_pct"] = 100.0 * display.pop(
+            "shadow_pick_probability"
+        )
     if "edge_vs_no_vig" in display:
         display["edge_vs_no_vig_pct"] = 100.0 * display.pop("edge_vs_no_vig")
     if "top_supporting_sensitivity" in display:
@@ -238,6 +256,9 @@ def render_app() -> None:
             "pick_probability_pct": st.column_config.NumberColumn(
                 "Pick probability", format="%.1f%%"
             ),
+            "shadow_pick_probability_pct": st.column_config.NumberColumn(
+                "V2.4 shadow probability", format="%.1f%%"
+            ),
             "edge_vs_no_vig_pct": st.column_config.NumberColumn(
                 "Edge vs no-vig", format="%.1f%%"
             ),
@@ -250,14 +271,15 @@ def render_app() -> None:
         },
     )
     st.caption(
-        "Downloadable files store probabilities and edges as decimals. Feature-group values "
-        "are non-additive ensemble sensitivities, not causal contributions."
+        "Primary pick/probability/rank columns are V2.3.3 production. Columns prefixed "
+        "`shadow_` are the exact V2.4 candidate. Downloadable files store decimals. "
+        "Feature-group values are non-additive sensitivities, not causal contributions."
     )
 
     sensitivity_columns = [
         column
         for column in result.evaluation.columns
-        if column.startswith("ensemble_pick_sensitivity_")
+        if column.startswith("shadow_ensemble_pick_sensitivity_")
     ]
     if sensitivity_columns:
         with st.expander("Feature-group sensitivity details"):
@@ -269,7 +291,7 @@ def render_app() -> None:
             selected = result.evaluation.loc[game_labels[selected_label]]
             sensitivity = pd.DataFrame({
                 "feature_group": [
-                    column.removeprefix("ensemble_pick_sensitivity_")
+                    column.removeprefix("shadow_ensemble_pick_sensitivity_")
                     for column in sensitivity_columns
                 ],
                 "effect_on_pick_probability_pp": [
@@ -323,6 +345,8 @@ def render_app() -> None:
                     result.parlay_path,
                     result.json_path,
                     result.market_snapshot_path,
+                    result.evidence_ledger_path,
+                    result.adaptive_overlay_path,
                     captured.schedule_path,
                 ]
                 if path is not None

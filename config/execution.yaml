@@ -1,0 +1,22 @@
+version: 1
+default_profile: accelerated
+
+profiles:
+  accelerated:
+    # "auto" respects the CPU affinity visible to the Python process.
+    total_workers: auto
+    # The winner ensemble contains exactly seven independent model components.
+    max_model_workers: 7
+    # Matched V2.3.3 and V2.4 fits may run together during validation.
+    comparison_workers: 2
+    # Candidate experiments are memory-heavy, so cap outer candidate concurrency.
+    max_candidate_workers: 2
+    # Native estimators stay single-threaded when outer parallelism is active.
+    estimator_threads: 1
+
+  serial:
+    total_workers: 1
+    max_model_workers: 1
+    comparison_workers: 1
+    max_candidate_workers: 1
+    estimator_threads: 1

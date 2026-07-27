@@ -40,3 +40,15 @@ If historical source data cannot distinguish two games, the pipeline excludes th
 `config/feature_registry.yaml` identifies fields that are populated historically and fields that are only provider-ready. Provider-ready fields remain neutral when point-in-time historical values are absent.
 
 This avoids retrospective leakage but means a captured live field may not yet influence the fitted probability.
+
+
+## Starting-pitcher snapshots
+
+Phase 7 stores the raw public season-stat response separately from the game context under
+`runtime/snapshots/mlb_starter_pregame/`. The official game, side, team, and MLB person
+identity are part of the immutable envelope. A probable-starter change creates an
+additional snapshot rather than replacing the first one.
+
+Run `sports-supermodel-starters audit` to verify timestamps, identities, raw-payload
+hashes, normalized values, and envelope digests. Run `sports-supermodel-starters export`
+to produce one latest valid pregame row per game and side for future training.

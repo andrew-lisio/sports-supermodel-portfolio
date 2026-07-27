@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import gc
 import re
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
@@ -315,17 +316,24 @@ def run_recent_form_experiments(
     experiment_plan: RecentFormExperimentPlan,
     *,
     model_factory: Callable[[], Any] = V2Ensemble,
+    candidate_workers: int = 1,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
-    features_by_alpha: dict[float, pd.DataFrame] = {}
-    predictions_by_name: dict[str, pd.DataFrame] = {}
-    folds: list[pd.DataFrame] = []
-    rows: list[dict[str, Any]] = []
+    if candidate_workers <= 0:
+        raise ValueError("candidate_workers must be positive")
+    candidate_workers = min(candidate_workers, len(experiment_plan.candidates))
 
+    # Feature construction is deterministic and cached once per unique EWM alpha.
+    # Candidate model fitting can then run concurrently without rebuilding state.
+    features_by_alpha: dict[float, pd.DataFrame] = {}
     for contract in experiment_plan.candidates:
         if contract.ewm_alpha not in features_by_alpha:
             features_by_alpha[contract.ewm_alpha] = build_pregame_features(
                 games, recent_form_alpha=contract.ewm_alpha
             )
+
+    def evaluate_contract(
+        contract: RecentFormContract,
+    ) -> tuple[str, pd.DataFrame, pd.DataFrame, dict[str, Any]]:
         features = features_by_alpha[contract.ewm_alpha]
         predictions, candidate_folds = run_contract_walk_forward(
             features,
@@ -335,28 +343,39 @@ def run_recent_form_experiments(
         )
         if predictions.empty:
             raise RuntimeError(f"Candidate {contract.name} produced no predictions")
-        predictions_by_name[contract.name] = predictions
-        folds.append(candidate_folds)
         metrics = probability_metrics(
             predictions["a_win"],
             predictions["probability"],
             bins=validation_plan.calibration_bins,
         )
-        rows.append(
-            {
-                "candidate": contract.name,
-                "description": contract.description,
-                "baseline": contract.baseline,
-                "ewm_alpha": contract.ewm_alpha,
-                "windows": ",".join(str(value) for value in contract.windows),
-                "include_momentum": contract.include_momentum,
-                "include_ewm": contract.include_ewm,
-                "include_last_game": contract.include_last_game,
-                "recent_form_feature_count": recent_form_feature_count(features, contract),
-                "runtime_seconds": float(candidate_folds["runtime_seconds"].fillna(0).sum()),
-                **metrics,
-            }
-        )
+        row = {
+            "candidate": contract.name,
+            "description": contract.description,
+            "baseline": contract.baseline,
+            "ewm_alpha": contract.ewm_alpha,
+            "windows": ",".join(str(value) for value in contract.windows),
+            "include_momentum": contract.include_momentum,
+            "include_ewm": contract.include_ewm,
+            "include_last_game": contract.include_last_game,
+            "recent_form_feature_count": recent_form_feature_count(features, contract),
+            "runtime_seconds": float(candidate_folds["runtime_seconds"].fillna(0).sum()),
+            **metrics,
+        }
+        return contract.name, predictions, candidate_folds, row
+
+    contracts = list(experiment_plan.candidates)
+    if candidate_workers == 1:
+        evaluated = [evaluate_contract(contract) for contract in contracts]
+    else:
+        with ThreadPoolExecutor(
+            max_workers=candidate_workers,
+            thread_name_prefix="supermodel-form-candidate",
+        ) as executor:
+            evaluated = list(executor.map(evaluate_contract, contracts))
+
+    predictions_by_name = {name: predictions for name, predictions, _, _ in evaluated}
+    folds = [candidate_folds for _, _, candidate_folds, _ in evaluated]
+    rows = [row for _, _, _, row in evaluated]
 
     summary = pd.DataFrame(rows)
     baseline_predictions = predictions_by_name[experiment_plan.baseline.name]
