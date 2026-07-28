@@ -3,6 +3,7 @@ candidate:
   version: 2.4.0.rc2
   production_anchor: 2.3.3
   branch: v2.4-live-freshness-fix
+  model_commit: 9ab48cd16d5581613d868d4a15bfc758b818675a
   rollback_commit: ceda10db74dbb8b083cb4150807300eec86bed83
   promotion_status: PENDING
 execution:
