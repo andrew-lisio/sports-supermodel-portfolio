@@ -1,3 +1,11 @@
+## 2.4.0.rc2
+
+- Automatically backfill official completed MLB games through the day before every slate.
+- Persist refreshed results in a local runtime cache and record freshness metadata in evidence.
+- Fail closed on API refresh failure or unresolved prior-date games instead of using stale history.
+- Preserve raw ensemble predictions while excluding component/score conflicts and low-confidence rows from top picks.
+- Add `sports-supermodel-history` preflight command.
+
 # Changelog
 
 ## Unreleased — Local interface redesign

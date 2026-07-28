@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
@@ -34,6 +34,7 @@ from .mlb_v2 import (
 )
 from .mlb_v2 import simulate_poisson_score_distribution
 from .providers import PregameContext
+from .selection_policy import SelectionPolicy, apply_selection_policy
 from .starter_features import (
     build_starter_snapshot_payload,
     parse_pitcher_season_stats as parse_point_in_time_pitcher_stats,
@@ -60,6 +61,7 @@ class LiveEvaluationConfig:
     score_simulation_weight: float = 0.20
     home_field_logit_adjustment: float = 0.0
     top_n: int = 5
+    selection_policy: SelectionPolicy = field(default_factory=SelectionPolicy)
 
     def __post_init__(self) -> None:
         if self.simulations <= 0:
@@ -125,6 +127,17 @@ class MLBStatsHTTPClient:
                 "startDate": start_date,
                 "endDate": end_date,
                 "hydrate": "team,venue",
+            },
+        )
+
+    def completed_schedule_range(self, start_date: str, end_date: str) -> dict[str, Any]:
+        return self._get_json(
+            "v1/schedule",
+            {
+                "sportId": 1,
+                "startDate": start_date,
+                "endDate": end_date,
+                "hydrate": "team,venue,linescore,probablePitcher",
             },
         )
 
@@ -1008,13 +1021,11 @@ def evaluate_live_slate(
         rows.append(row)
 
     frame = pd.DataFrame(rows)
-    frame = frame.sort_values(
-        ["confidence_score", "pick_probability", "model_overlap"],
-        ascending=[False, False, False],
-    ).reset_index(drop=True)
-    frame["confidence_rank"] = np.arange(1, len(frame) + 1)
-    frame["is_top_pick"] = frame["confidence_rank"] <= config.top_n
-    return frame
+    return apply_selection_policy(
+        frame,
+        top_n=config.top_n,
+        policy=config.selection_policy,
+    )
 
 
 

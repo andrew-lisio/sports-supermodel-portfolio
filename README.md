@@ -1,6 +1,6 @@
 # Sports SuperModel
 
-> **V2.4 implementation status:** the code-complete release candidate lives on `v2.4-final-candidate` as one squashed commit above rollback commit `ceda10d`. `main` remains V2.3.3 production. V2.4 promotion is still `PENDING` until prospective, CLV, integrity, provenance, calibration, and final-holdout gates pass.
+> **V2.4 implementation status:** RC2 lives on `v2.4-live-freshness-fix`, with V2.3.3 still anchored on `main`. RC2 automatically refreshes official completed games through the prior day, fails closed rather than using stale history, and removes ensemble/consensus conflicts from the top-pick list. Promotion remains `PENDING` until prospective, CLV, integrity, provenance, calibration, and final-holdout gates pass.
 
 
 Sports SuperModel is an experimental, reproducible MLB game-prediction research project. It combines seven winner models, a calibrated ensemble, a separate Poisson score model, immutable pregame snapshots, and Monte Carlo simulation.
@@ -145,7 +145,7 @@ sports-supermodel-ui
 
 The command opens the redesigned local interface. The official slate loads automatically for the selected date. Enter both moneyline prices on the matchup cards, leave unwanted games unchecked, acknowledge the recreational-use notice, and click **Run full slate analysis**. Games at or past scheduled start are visibly locked.
 
-The confidence board presents V2.3.3 production picks beside V2.4 RC1 shadow probabilities, seven-model overlap, disagreement status, and 100,000-simulation score estimates. Full tables, attribution diagnostics, downloads, and reproducibility paths are kept under the advanced-results section.
+The confidence board presents V2.3.3 production picks beside V2.4 RC2 shadow probabilities, seven-model overlap, disagreement status, and 100,000-simulation score estimates. Full tables, attribution diagnostics, downloads, and reproducibility paths are kept under the advanced-results section.
 
 Alternative launch command:
 

@@ -55,6 +55,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Append prediction evidence to this hash-chained JSONL ledger.",
     )
     parser.add_argument(
+        "--history-cache",
+        type=Path,
+        default=Path("runtime/data/mlb_completed_games.csv"),
+        help=(
+            "Local cache of official completed games appended after the repository seed. "
+            "The run fails closed if this cache cannot be refreshed through the prior day."
+        ),
+    )
+    parser.add_argument(
         "--adaptive-overlay",
         type=Path,
         default=Path("runtime/models/v2_4_adaptive_overlay.json"),
@@ -110,6 +119,7 @@ def run(args: argparse.Namespace) -> WorkflowResult | Path:
         output_dir=args.output_dir,
         evidence_ledger=args.evidence_ledger,
         adaptive_overlay_path=args.adaptive_overlay,
+        history_cache_path=args.history_cache,
         simulations=args.simulations,
         top_n=args.top_n,
         home_field_logit_adjustment=args.home_field_logit_adjustment,
@@ -121,6 +131,9 @@ def run(args: argparse.Namespace) -> WorkflowResult | Path:
 def _print_evaluation(evaluation: pd.DataFrame) -> None:
     display_columns = [
         "confidence_rank",
+        "selection_rank",
+        "selection_status",
+        "selection_reasons",
         "away_team",
         "home_team",
         "pick",
@@ -138,6 +151,8 @@ def _print_evaluation(evaluation: pd.DataFrame) -> None:
         "edge_vs_no_vig",
         "fair_odds",
         "lineups_confirmed",
+        "history_freshness_status",
+        "history_checked_through",
     ]
     available = [column for column in display_columns if column in evaluation.columns]
     print(evaluation[available].to_string(index=False))
@@ -152,6 +167,13 @@ def main() -> None:
         return
 
     _print_evaluation(result.evaluation)
+    refresh = result.history_refresh_report
+    print(
+        "\nHistory freshness: "
+        f"{refresh.status}; checked through {refresh.checked_through_date}; "
+        f"backfilled {refresh.backfilled_games} new games; "
+        f"cache={refresh.cache_path}"
+    )
     print("\nArtifacts:")
     for path in [
         result.csv_path,

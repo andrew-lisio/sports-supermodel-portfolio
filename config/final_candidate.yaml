@@ -1,14 +1,13 @@
 schema_version: 1
 candidate:
-  version: 2.4.0.rc1
+  version: 2.4.0.rc2
   production_anchor: 2.3.3
-  branch: v2.4-final-candidate
-  model_commit: c09db37bf6fa5a636ed53e14143218eb41781243
+  branch: v2.4-live-freshness-fix
   rollback_commit: ceda10db74dbb8b083cb4150807300eec86bed83
   promotion_status: PENDING
 execution:
   production_track: v2.3.3
-  shadow_track: v2.4.0.rc1
+  shadow_track: v2.4.0.rc2
   winner_models_required: 7
   monte_carlo_simulations_default: 100000
   record_exact_git_commit: true
@@ -44,3 +43,18 @@ promotion:
   target_leakage_tests_required: true
   point_in_time_provenance_required: true
   final_holdout_required: true
+
+history_freshness:
+  automatic_completed_game_refresh: true
+  persistent_runtime_cache: runtime/data/mlb_completed_games.csv
+  checked_through: prior_day
+  fail_closed_on_api_error: true
+  fail_closed_on_unresolved_prior_game: true
+  same_day_results_excluded: true
+selection_policy:
+  preserve_raw_ensemble_prediction: true
+  minimum_top_pick_probability: 0.53
+  minimum_top_pick_overlap: 4
+  reject_component_consensus_conflict: true
+  reject_projected_score_conflict_at_runs: 0.20
+  never_force_five_picks: true

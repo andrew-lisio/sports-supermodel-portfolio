@@ -20,6 +20,7 @@ from .adaptive_overlay import (
 from .advanced_features import context_feature_vector
 from .evidence import ProspectiveEvidenceLedger
 from .game_registry import ImmutableSnapshotStore, ScheduleIntegrityError, parse_mlb_schedule
+from .history_refresh import HistoryRefreshReport, refresh_completed_history
 from .live_mlb import (
     LiveEvaluationConfig,
     MLBStatsHTTPClient,
@@ -69,6 +70,7 @@ class WorkflowResult:
     market_snapshot_path: Path
     evidence_ledger_path: Path
     adaptive_overlay_path: Path
+    history_refresh_report: HistoryRefreshReport
 
 
 def _repository_commit() -> str:
@@ -386,6 +388,12 @@ def record_prediction_evidence(
                     and context.home_starter_stats_snapshot_sha256
                 ),
                 "advanced_snapshot_sha256": context.advanced_snapshot_sha256,
+                "history_freshness_status": row.get("history_freshness_status"),
+                "history_checked_through": row.get("history_checked_through"),
+                "history_latest_completed_date": row.get("history_latest_completed_date"),
+                "history_backfilled_games": int(row.get("history_backfilled_games", 0)),
+                "selection_status": row.get("shadow_selection_status", row.get("selection_status")),
+                "selection_reasons": row.get("shadow_selection_reasons", row.get("selection_reasons")),
                 "prediction_artifact": str(prediction_artifact),
             },
         )
@@ -444,6 +452,7 @@ def evaluate_captured_slate(
     output_dir: str | Path = "runtime/reports",
     evidence_ledger: str | Path = "runtime/evidence/prospective.jsonl",
     adaptive_overlay_path: str | Path = "runtime/models/v2_4_adaptive_overlay.json",
+    history_cache_path: str | Path = "runtime/data/mlb_completed_games.csv",
     simulations: int = 100_000,
     top_n: int = 5,
     home_field_logit_adjustment: float = 0.0,
@@ -481,14 +490,22 @@ def evaluate_captured_slate(
     logs = load_team_logs(data_dir)
     games = reconstruct_games(logs)
     history_start = pd.to_datetime(games["date"]).min().date().isoformat()
-    history_end = (pd.Timestamp(captured_slate.game_date) - pd.Timedelta(days=1)).date().isoformat()
-    history_schedule_payload = api_client.schedule_range(history_start, history_end)
+    base_history_end = pd.to_datetime(games["date"]).max().date().isoformat()
+    history_schedule_payload = api_client.schedule_range(history_start, base_history_end)
     store.write_schedule(
         raw_payload=history_schedule_payload,
         captured_at=market_timestamp,
         source="mlb_stats_api:v1/schedule:historical_identity_backfill",
     )
     games = attach_official_home_away(games, parse_mlb_schedule(history_schedule_payload))
+    games, history_refresh_report = refresh_completed_history(
+        games,
+        slate_date=captured_slate.game_date,
+        client=api_client,
+        snapshot_store=store,
+        captured_at=market_timestamp,
+        cache_path=history_cache_path,
+    )
     candidate_historical_features = build_pregame_features(
         games,
         recent_form_alpha=V24_CANDIDATE_FEATURE_CONTRACT.recent_form_alpha,
@@ -559,6 +576,13 @@ def evaluate_captured_slate(
         top_n=top_n,
     )
     evaluation = combine_production_and_shadow(production_evaluation, shadow_evaluation)
+    history_record = history_refresh_report.to_record()
+    evaluation["history_freshness_status"] = history_refresh_report.status
+    evaluation["history_checked_through"] = history_refresh_report.checked_through_date
+    evaluation["history_latest_completed_date"] = history_refresh_report.latest_completed_date
+    evaluation["history_backfilled_games"] = history_refresh_report.backfilled_games
+    evaluation["history_cached_games"] = history_refresh_report.cached_games
+    evaluation["history_refresh_metadata"] = [history_record] * len(evaluation)
     parlays = None
     if include_parlays:
         parlays = evaluate_top_pick_parlays(production_evaluation, simulations=simulations)
@@ -594,4 +618,5 @@ def evaluate_captured_slate(
         market_snapshot_path=market_snapshot_path,
         evidence_ledger_path=ledger_path,
         adaptive_overlay_path=Path(adaptive_overlay_path),
+        history_refresh_report=history_refresh_report,
     )

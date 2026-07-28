@@ -16,6 +16,7 @@ from sklearn.preprocessing import StandardScaler
 from .advanced_features import CONTEXT_FEATURE_NAMES, context_feature_vector, utc_now_text, write_json_atomic
 from .evidence import ProspectiveEvidenceLedger
 from .market import american_implied_probability, no_vig_probabilities, probability_to_american
+from .selection_policy import apply_selection_policy
 
 
 ADAPTIVE_SCHEMA_VERSION = 1
@@ -415,10 +416,4 @@ def apply_overlay_to_evaluation(
             }
         )
         rows.append(row)
-    result = pd.DataFrame(rows).sort_values(
-        ["confidence_score", "pick_probability", "model_overlap"],
-        ascending=[False, False, False],
-    ).reset_index(drop=True)
-    result["confidence_rank"] = np.arange(1, len(result) + 1)
-    result["is_top_pick"] = result["confidence_rank"] <= int(top_n)
-    return result
+    return apply_selection_policy(pd.DataFrame(rows), top_n=int(top_n))

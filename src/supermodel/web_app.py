@@ -208,10 +208,10 @@ def _inject_branding(st) -> None:
         <div class="ssm-hero">
           <div class="ssm-eyebrow">MLB decision intelligence</div>
           <div class="ssm-title">Sports SuperModel</div>
-          <p class="ssm-subtitle">Production-grade V2.3.3 analysis with V2.4 RC1 shadow tracking on the same slate.</p>
+          <p class="ssm-subtitle">Production-grade V2.3.3 analysis with V2.4 RC2 shadow tracking on the same slate.</p>
           <div class="ssm-status-grid">
             <div class="ssm-status"><div class="ssm-status-label">Production</div><div class="ssm-status-value">V2.3.3</div></div>
-            <div class="ssm-status"><div class="ssm-status-label">Shadow</div><div class="ssm-status-value">V2.4 RC1</div></div>
+            <div class="ssm-status"><div class="ssm-status-label">Shadow</div><div class="ssm-status-value">V2.4 RC2</div></div>
             <div class="ssm-status"><div class="ssm-status-label">Ensemble</div><div class="ssm-status-value">7 models per track</div></div>
             <div class="ssm-status"><div class="ssm-status-label">Simulation</div><div class="ssm-status-value">100,000 per game</div></div>
           </div>
@@ -335,7 +335,18 @@ def _render_result_cards(st, evaluation: pd.DataFrame, *, top_n: int) -> None:
     if evaluation.empty:
         st.warning("The model returned no eligible games.")
         return
-    ranked = evaluation.sort_values("confidence_rank").head(top_n)
+    if "is_top_pick" in evaluation.columns:
+        ranked = evaluation[evaluation["is_top_pick"]].copy()
+        sort_column = "selection_rank" if "selection_rank" in ranked.columns else "confidence_rank"
+        ranked = ranked.sort_values(sort_column).head(top_n)
+    else:
+        ranked = evaluation.sort_values("confidence_rank").head(top_n)
+    if ranked.empty:
+        st.warning(
+            "No games passed the consensus and confidence gates. Review the complete "
+            "table for PASS/CONFLICT matchups rather than forcing five picks."
+        )
+        return
     for _, row in ranked.iterrows():
         disagree = bool(row.get("production_shadow_disagree", False))
         production_pick = row.get("pick", "—")
@@ -349,7 +360,7 @@ def _render_result_cards(st, evaluation: pd.DataFrame, *, top_n: int) -> None:
         st.markdown(
             f"""
             <div class="ssm-result-card">
-              <div class="ssm-rank">Confidence rank #{int(row.get('confidence_rank', 0))}</div>
+              <div class="ssm-rank">Top-pick rank #{int(row.get('selection_rank', row.get('confidence_rank', 0)))}</div>
               <div class="ssm-pick">{production_pick} <span class="ssm-small">{row.get('pick_odds', '—')}</span></div>
               <div class="ssm-small">{row.get('away_team', 'Away')} at {row.get('home_team', 'Home')} · Simulated score: {simulated_score}</div>
               <div style="margin-top:.8rem; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.65rem">
@@ -368,6 +379,9 @@ def _render_result_cards(st, evaluation: pd.DataFrame, *, top_n: int) -> None:
 def _results_table(evaluation: pd.DataFrame) -> pd.DataFrame:
     display_columns = [
         "confidence_rank",
+        "selection_rank",
+        "selection_status",
+        "selection_reasons",
         "away_team",
         "home_team",
         "pick",
@@ -384,6 +398,8 @@ def _results_table(evaluation: pd.DataFrame) -> pd.DataFrame:
         "fair_odds",
         "edge_vs_no_vig",
         "lineups_confirmed",
+        "history_freshness_status",
+        "history_checked_through",
     ]
     available = [column for column in display_columns if column in evaluation.columns]
     display = evaluation[available].copy()
@@ -611,7 +627,7 @@ def render_app() -> None:
             return
 
         with st.spinner(
-            "Running V2.3.3 production, V2.4 RC1 shadow, all seven models, and "
+            "Running V2.3.3 production, V2.4 RC2 shadow, all seven models, and "
             "100,000 simulations per game…"
         ):
             try:
@@ -637,14 +653,14 @@ def render_app() -> None:
     if result is None:
         with st.expander("Method and data safeguards"):
             st.markdown(
-                "V2.3.3 remains the production track. V2.4 RC1 runs on the same captured slate "
+                "V2.3.3 remains the production track. V2.4 RC2 runs on the same captured slate "
                 "in shadow mode and writes versioned prospective evidence. Each track uses the "
                 "canonical seven-model ensemble; score probabilities use 100,000 simulations per game."
             )
         return
     st.markdown('<div class="ssm-section-title">Confidence board</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="ssm-section-copy">Official selections are ranked by V2.3.3 production confidence, with V2.4 RC1 shown beside them.</div>',
+        '<div class="ssm-section-copy">Official selections are ranked by V2.3.3 production confidence, with V2.4 RC2 shown beside them.</div>',
         unsafe_allow_html=True,
     )
     _render_result_cards(st, result.evaluation, top_n=int(top_n))
