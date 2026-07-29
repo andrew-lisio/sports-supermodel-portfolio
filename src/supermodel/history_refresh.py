@@ -97,11 +97,26 @@ def _team_fields(game: dict[str, Any], side: str) -> tuple[str, float, str]:
         raise HistoryFreshnessError(
             f"Completed gamePk={game.get('gamePk')} is missing the {side} abbreviation"
         )
+
+    # MLB's schedule response normally exposes the final score at
+    # ``teams.<side>.score``. Some finalized games, however, omit that field while
+    # still returning the authoritative total under the hydrated linescore. This
+    # occurred for gamePk=823519 (PIT 0, NYY 2) and caused the freshness preflight
+    # to fail even though the game was complete. Prefer the normal schedule field,
+    # then fall back to ``linescore.teams.<side>.runs`` without treating a zero as
+    # missing. The run remains fail-closed if neither official location has a score.
     score = block.get("score")
     if score is None:
-        raise HistoryFreshnessError(
-            f"Completed gamePk={game.get('gamePk')} is missing the {side} score"
+        linescore_team = (
+            (((game.get("linescore") or {}).get("teams") or {}).get(side)) or {}
         )
+        score = linescore_team.get("runs")
+    if score is None:
+        raise HistoryFreshnessError(
+            f"Completed gamePk={game.get('gamePk')} is missing the {side} score "
+            "in both teams and linescore payloads"
+        )
+
     probable = block.get("probablePitcher") or {}
     starter = probable.get("fullName")
     if not starter:

@@ -102,6 +102,32 @@ def test_parse_completed_schedule_games_prefers_final_duplicate():
     assert frame.iloc[0].a_starter == "Away Starter"
 
 
+def test_parse_completed_schedule_games_falls_back_to_linescore_runs():
+    game = _game(823519, "2026-07-22", away="PIT", home="NYY", away_score=0, home_score=2)
+    del game["teams"]["away"]["score"]
+    del game["teams"]["home"]["score"]
+    game["linescore"] = {
+        "teams": {
+            "away": {"runs": 0},
+            "home": {"runs": 2},
+        }
+    }
+
+    frame, blocking = parse_completed_schedule_games(
+        {"dates": [{"date": "2026-07-22", "games": [game]}]}
+    )
+
+    assert blocking == []
+    assert len(frame) == 1
+    row = frame.iloc[0]
+    assert int(row.game_pk) == 823519
+    # Canonical alphabetical ordering keeps NYY as team_a and PIT as team_b.
+    assert row.team_a == "NYY"
+    assert float(row.a_runs) == 2.0
+    assert float(row.b_runs) == 0.0
+    assert int(row.a_win) == 1
+
+
 def test_refresh_completed_history_persists_and_reuses_cache(tmp_path):
     client = FakeClient(_payload(_game(200, "2026-07-20")))
     store = ImmutableSnapshotStore(tmp_path / "snapshots")
