@@ -392,8 +392,36 @@ def record_prediction_evidence(
                 "history_checked_through": row.get("history_checked_through"),
                 "history_latest_completed_date": row.get("history_latest_completed_date"),
                 "history_backfilled_games": int(row.get("history_backfilled_games", 0)),
-                "selection_status": row.get("shadow_selection_status", row.get("selection_status")),
-                "selection_reasons": row.get("shadow_selection_reasons", row.get("selection_reasons")),
+                "selection_policy_version": row.get(
+                    "shadow_selection_policy_version", row.get("selection_policy_version")
+                ),
+                "selection_policy_mode": row.get(
+                    "shadow_selection_policy_mode", row.get("selection_policy_mode")
+                ),
+                "production_raw_pick": row.get("pick"),
+                "production_selection_status": row.get("selection_status"),
+                "production_selection_reasons": row.get("selection_reasons"),
+                "production_component_consensus_pick": row.get("component_consensus_pick"),
+                "production_projected_score_pick": row.get("projected_score_pick"),
+                "shadow_raw_pick": row.get("shadow_pick", row.get("pick")),
+                "shadow_selection_status": row.get(
+                    "shadow_selection_status", row.get("selection_status")
+                ),
+                "shadow_selection_reasons": row.get(
+                    "shadow_selection_reasons", row.get("selection_reasons")
+                ),
+                "shadow_component_consensus_pick": row.get(
+                    "shadow_component_consensus_pick", row.get("component_consensus_pick")
+                ),
+                "shadow_projected_score_pick": row.get(
+                    "shadow_projected_score_pick", row.get("projected_score_pick")
+                ),
+                "selection_status": row.get(
+                    "shadow_selection_status", row.get("selection_status")
+                ),
+                "selection_reasons": row.get(
+                    "shadow_selection_reasons", row.get("selection_reasons")
+                ),
                 "prediction_artifact": str(prediction_artifact),
             },
         )

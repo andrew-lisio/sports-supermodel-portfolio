@@ -68,6 +68,9 @@ def test_conflicted_ensemble_is_preserved_but_removed_from_top_picks():
     assert baltimore["component_consensus_pick"] == "DET"
     assert baltimore["projected_score_pick"] == "DET"
     assert baltimore["selection_status"] == "PASS"
+    assert baltimore["selection_policy_version"] == "rc2-conflict-gate-v1"
+    assert baltimore["selection_policy_mode"] == "PROVISIONAL_RECOMMENDATION_GATE"
+    assert int(baltimore["selection_reason_count"]) >= 1
     assert "COMPONENT_CONSENSUS_CONFLICT" in baltimore["selection_reasons"]
     assert not bool(baltimore["is_top_pick"])
 

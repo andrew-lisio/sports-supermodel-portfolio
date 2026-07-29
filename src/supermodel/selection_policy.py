@@ -6,6 +6,10 @@ import numpy as np
 import pandas as pd
 
 
+SELECTION_POLICY_VERSION = "rc2-conflict-gate-v1"
+SELECTION_POLICY_MODE = "PROVISIONAL_RECOMMENDATION_GATE"
+
+
 @dataclass(frozen=True)
 class SelectionPolicy:
     """Conservative eligibility policy for surfaced top picks.
@@ -18,6 +22,7 @@ class SelectionPolicy:
     minimum_pick_probability: float = 0.53
     minimum_model_overlap: int = 4
     score_conflict_margin_runs: float = 0.20
+    version: str = SELECTION_POLICY_VERSION
 
     def __post_init__(self) -> None:
         if not 0.5 <= self.minimum_pick_probability < 1.0:
@@ -106,8 +111,11 @@ def apply_selection_policy(
                     score_pick != pick
                     and score_margin >= policy.score_conflict_margin_runs
                 ),
+                "selection_policy_version": policy.version,
+                "selection_policy_mode": SELECTION_POLICY_MODE,
                 "selection_status": "ELIGIBLE" if eligible else "PASS",
                 "selection_reasons": ";".join(reasons),
+                "selection_reason_count": len(reasons),
                 "eligible_for_top_pick": eligible,
             }
         )

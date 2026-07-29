@@ -1,3 +1,11 @@
+## 2.4.0.rc2.post1
+
+- Keep the RC2 automatic completed-game refresh and fail-closed stale-data protection unchanged.
+- Version the conflict filter as a provisional recommendation gate rather than a second prediction model.
+- Record production and shadow raw picks, filter statuses, exact triggers, component consensus, and projected-score direction in prospective evidence.
+- Add `sports-supermodel-conflicts` to grade helpful passes, false passes, accepted-pick accuracy, coverage, and trigger-level results.
+- Keep the filter thresholds unchanged until a larger prospective cohort supports retuning.
+
 ## 2.4.0.rc2
 
 - Automatically backfill official completed MLB games through the day before every slate.

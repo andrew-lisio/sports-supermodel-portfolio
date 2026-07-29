@@ -565,6 +565,17 @@ Audit the append-only prospective evidence ledger:
 sports-supermodel-evidence audit
 ```
 
+Audit whether the provisional conflict gate is improving the surfaced recommendation set
+without hiding the raw predictions:
+
+```powershell
+sports-supermodel-conflicts
+```
+
+The conflict audit reports helpful passes, false passes, accepted-pick accuracy, coverage,
+and performance by exact trigger. It does not automatically retune thresholds. See
+`docs/V2_4_CONFLICT_FILTER_AUDIT.md`.
+
 See `docs/V2_4_PHASE6B_EVIDENCE_PIPELINE.md` for closing-line, outcome, provenance, and
 validation-gate workflows.
 

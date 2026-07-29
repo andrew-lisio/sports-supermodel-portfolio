@@ -1,6 +1,6 @@
 schema_version: 1
 candidate:
-  version: 2.4.0.rc2
+  version: 2.4.0.rc2.post1
   production_anchor: 2.3.3
   branch: v2.4-live-freshness-fix
   model_commit: 9ab48cd16d5581613d868d4a15bfc758b818675a
@@ -8,7 +8,7 @@ candidate:
   promotion_status: PENDING
 execution:
   production_track: v2.3.3
-  shadow_track: v2.4.0.rc2
+  shadow_track: v2.4.0.rc2.post1
   winner_models_required: 7
   monte_carlo_simulations_default: 100000
   record_exact_git_commit: true
@@ -59,3 +59,8 @@ selection_policy:
   reject_component_consensus_conflict: true
   reject_projected_score_conflict_at_runs: 0.20
   never_force_five_picks: true
+  policy_version: rc2-conflict-gate-v1
+  mode: PROVISIONAL_RECOMMENDATION_GATE
+  preserve_raw_prediction_for_grading: true
+  prospective_audit_command: sports-supermodel-conflicts
+  automatic_threshold_retuning: false
