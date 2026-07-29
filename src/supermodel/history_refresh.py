@@ -18,6 +18,12 @@ class HistoryFreshnessError(ScheduleIntegrityError):
 class HistoryRefreshClient(Protocol):
     def completed_schedule_range(self, start_date: str, end_date: str) -> dict[str, Any]: ...
 
+    # These endpoints are used only when MLB's range schedule response marks a game
+    # final but omits both team scores. Implementations may expose one or both.
+    def live_feed(self, game_pk: int) -> dict[str, Any]: ...
+
+    def boxscore(self, game_pk: int) -> dict[str, Any]: ...
+
 
 @dataclass(frozen=True)
 class HistoryRefreshReport:
@@ -89,7 +95,43 @@ def _is_nonblocking_nonfinal(game: dict[str, Any]) -> bool:
     return any(token in text for token in ("postpon", "cancel", "suspend"))
 
 
-def _team_fields(game: dict[str, Any], side: str) -> tuple[str, float, str]:
+def _score_from_payload(payload: dict[str, Any], side: str) -> float | None:
+    """Read an official team run total from schedule, feed, or boxscore shapes.
+
+    MLB occasionally marks a game final in the range schedule response while omitting
+    both ``teams.<side>.score`` and the hydrated schedule ``linescore``. The per-game
+    live feed and boxscore endpoints still normally contain the official final total.
+    Zero is a valid score and must never be treated as missing.
+    """
+
+    candidate_paths = (
+        (("teams", side, "score")),
+        (("linescore", "teams", side, "runs")),
+        (("liveData", "linescore", "teams", side, "runs")),
+        (("liveData", "boxscore", "teams", side, "teamStats", "batting", "runs")),
+        (("teams", side, "teamStats", "batting", "runs")),
+    )
+    for path in candidate_paths:
+        value: Any = payload
+        for key in path:
+            if not isinstance(value, dict):
+                value = None
+                break
+            value = value.get(key)
+        if value is not None:
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                continue
+    return None
+
+
+def _team_fields(
+    game: dict[str, Any],
+    side: str,
+    *,
+    fallback_payload: dict[str, Any] | None = None,
+) -> tuple[str, float, str]:
     block = (game.get("teams") or {}).get(side) or {}
     team = block.get("team") or {}
     abbreviation = team.get("abbreviation")
@@ -98,33 +140,69 @@ def _team_fields(game: dict[str, Any], side: str) -> tuple[str, float, str]:
             f"Completed gamePk={game.get('gamePk')} is missing the {side} abbreviation"
         )
 
-    # MLB's schedule response normally exposes the final score at
-    # ``teams.<side>.score``. Some finalized games, however, omit that field while
-    # still returning the authoritative total under the hydrated linescore. This
-    # occurred for gamePk=823519 (PIT 0, NYY 2) and caused the freshness preflight
-    # to fail even though the game was complete. Prefer the normal schedule field,
-    # then fall back to ``linescore.teams.<side>.runs`` without treating a zero as
-    # missing. The run remains fail-closed if neither official location has a score.
-    score = block.get("score")
-    if score is None:
-        linescore_team = (
-            (((game.get("linescore") or {}).get("teams") or {}).get(side)) or {}
-        )
-        score = linescore_team.get("runs")
+    score = _score_from_payload(game, side)
+    if score is None and fallback_payload is not None:
+        score = _score_from_payload(fallback_payload, side)
     if score is None:
         raise HistoryFreshnessError(
             f"Completed gamePk={game.get('gamePk')} is missing the {side} score "
-            "in both teams and linescore payloads"
+            "in schedule, live-feed, and boxscore payloads"
         )
 
     probable = block.get("probablePitcher") or {}
-    starter = probable.get("fullName")
-    if not starter:
-        starter = f"Unknown:{int(game['gamePk'])}:{side}"
+    starter = probable.get("fullName") or ""
     return str(abbreviation), float(score), str(starter)
 
 
-def parse_completed_schedule_games(payload: dict[str, Any]) -> tuple[pd.DataFrame, list[int]]:
+def _missing_final_score_game_pks(payload: dict[str, Any]) -> list[int]:
+    """Return final games whose range-schedule record lacks either team score."""
+
+    missing: set[int] = set()
+    for date_block in payload.get("dates", []):
+        for game in date_block.get("games", []):
+            if not _is_final(game):
+                continue
+            if _score_from_payload(game, "away") is None or _score_from_payload(game, "home") is None:
+                missing.add(int(game["gamePk"]))
+    return sorted(missing)
+
+
+def _fetch_score_fallback(
+    client: HistoryRefreshClient,
+    game_pk: int,
+) -> tuple[dict[str, Any], str]:
+    """Fetch an official per-game payload containing both final run totals."""
+
+    errors: list[str] = []
+    for method_name, source in (
+        ("live_feed", "mlb_stats_api:v1.1/game/feed/live:completed_history_score_fallback"),
+        ("boxscore", "mlb_stats_api:v1/game/boxscore:completed_history_score_fallback"),
+    ):
+        method = getattr(client, method_name, None)
+        if method is None:
+            errors.append(f"{method_name}=unavailable")
+            continue
+        try:
+            candidate = method(int(game_pk))
+        except Exception as exc:
+            errors.append(f"{method_name}={exc}")
+            continue
+        away = _score_from_payload(candidate, "away")
+        home = _score_from_payload(candidate, "home")
+        if away is not None and home is not None:
+            return candidate, source
+        errors.append(f"{method_name}=missing scores")
+    raise HistoryFreshnessError(
+        f"Completed gamePk={game_pk} is missing scores in the range schedule, and "
+        f"official per-game fallbacks failed ({'; '.join(errors)})"
+    )
+
+
+def parse_completed_schedule_games(
+    payload: dict[str, Any],
+    *,
+    score_fallback_payloads: dict[int, dict[str, Any]] | None = None,
+) -> tuple[pd.DataFrame, list[int]]:
     """Convert official completed schedule rows into the canonical game format.
 
     The schedule response is authoritative for identity, final score, home/away, and the
@@ -150,8 +228,13 @@ def parse_completed_schedule_games(payload: dict[str, Any]) -> tuple[pd.DataFram
                 blocking.append(game_pk)
             continue
 
-        away, away_runs, away_starter = _team_fields(game, "away")
-        home, home_runs, home_starter = _team_fields(game, "home")
+        fallback = (score_fallback_payloads or {}).get(game_pk)
+        away, away_runs, away_starter = _team_fields(
+            game, "away", fallback_payload=fallback
+        )
+        home, home_runs, home_starter = _team_fields(
+            game, "home", fallback_payload=fallback
+        )
         team_a, team_b = sorted((away, home))
         if team_a == away:
             a_runs, b_runs = away_runs, home_runs
@@ -177,7 +260,11 @@ def parse_completed_schedule_games(payload: dict[str, Any]) -> tuple[pd.DataFram
                 "missing_home_away": 0.0,
                 "venue_name": venue.get("name"),
                 "double_header": str(game.get("doubleHeader") or "N"),
-                "source": "mlb_stats_api_completed_schedule",
+                "source": (
+                    "mlb_stats_api_completed_schedule+per_game_score_fallback"
+                    if fallback is not None
+                    else "mlb_stats_api_completed_schedule"
+                ),
             }
         )
     frame = pd.DataFrame(rows, columns=_CACHE_COLUMNS)
@@ -316,7 +403,21 @@ def refresh_completed_history(
             captured_at=captured_at,
             source="mlb_stats_api:v1/schedule:completed_history_refresh",
         )
-        incoming, blocking = parse_completed_schedule_games(payload)
+        score_fallback_payloads: dict[int, dict[str, Any]] = {}
+        for game_pk in _missing_final_score_game_pks(payload):
+            fallback_payload, fallback_source = _fetch_score_fallback(client, game_pk)
+            snapshot_store.write(
+                kind="mlb_completed_game_score_fallback",
+                captured_at=captured_at,
+                payload=fallback_payload,
+                source=fallback_source,
+                identity=str(game_pk),
+            )
+            score_fallback_payloads[game_pk] = fallback_payload
+
+        incoming, blocking = parse_completed_schedule_games(
+            payload, score_fallback_payloads=score_fallback_payloads
+        )
         if blocking:
             raise HistoryFreshnessError(
                 "Prior-date MLB games are not final or explicitly postponed/suspended; "

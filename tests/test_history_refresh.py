@@ -228,3 +228,96 @@ def test_refresh_fails_closed_when_prior_game_is_still_live(tmp_path):
             captured_at=datetime(2026, 7, 21, 1, tzinfo=timezone.utc),
             cache_path=tmp_path / "cache.csv",
         )
+
+
+def test_refresh_fetches_per_game_live_feed_when_range_schedule_omits_scores(tmp_path):
+    game = _game(823519, "2026-07-20", away="PIT", home="NYY", away_score=0, home_score=2)
+    del game["teams"]["away"]["score"]
+    del game["teams"]["home"]["score"]
+
+    class FallbackClient(FakeClient):
+        def __init__(self):
+            super().__init__(_payload(game))
+            self.live_feed_calls: list[int] = []
+            self.boxscore_calls: list[int] = []
+
+        def live_feed(self, game_pk: int) -> dict:
+            self.live_feed_calls.append(game_pk)
+            return {
+                "liveData": {
+                    "linescore": {
+                        "teams": {
+                            "away": {"runs": 0},
+                            "home": {"runs": 2},
+                        }
+                    }
+                }
+            }
+
+        def boxscore(self, game_pk: int) -> dict:
+            self.boxscore_calls.append(game_pk)
+            raise AssertionError("boxscore should not be needed when live feed has scores")
+
+    client = FallbackClient()
+    cache = tmp_path / "runtime" / "mlb_completed_games.csv"
+    merged, report = refresh_completed_history(
+        _base_games(),
+        slate_date="2026-07-21",
+        client=client,
+        snapshot_store=ImmutableSnapshotStore(tmp_path / "snapshots"),
+        captured_at=datetime(2026, 7, 21, 12, tzinfo=timezone.utc),
+        cache_path=cache,
+    )
+
+    assert report.status == "PASS"
+    assert client.live_feed_calls == [823519]
+    assert client.boxscore_calls == []
+    row = merged.loc[merged["game_pk"] == 823519].iloc[0]
+    assert row.team_a == "NYY"
+    assert float(row.a_runs) == 2.0
+    assert float(row.b_runs) == 0.0
+    assert row.source == "mlb_stats_api_completed_schedule+per_game_score_fallback"
+    fallback_snapshots = list(
+        (tmp_path / "snapshots" / "mlb_completed_game_score_fallback").rglob("*.json")
+    )
+    assert len(fallback_snapshots) == 1
+
+
+def test_refresh_uses_boxscore_when_live_feed_omits_scores(tmp_path):
+    game = _game(823519, "2026-07-20", away="PIT", home="NYY", away_score=0, home_score=2)
+    del game["teams"]["away"]["score"]
+    del game["teams"]["home"]["score"]
+
+    class FallbackClient(FakeClient):
+        def __init__(self):
+            super().__init__(_payload(game))
+            self.calls_by_endpoint: list[str] = []
+
+        def live_feed(self, game_pk: int) -> dict:
+            self.calls_by_endpoint.append("live_feed")
+            return {"liveData": {"linescore": {"teams": {}}}}
+
+        def boxscore(self, game_pk: int) -> dict:
+            self.calls_by_endpoint.append("boxscore")
+            return {
+                "teams": {
+                    "away": {"teamStats": {"batting": {"runs": 0}}},
+                    "home": {"teamStats": {"batting": {"runs": 2}}},
+                }
+            }
+
+    client = FallbackClient()
+    merged, report = refresh_completed_history(
+        _base_games(),
+        slate_date="2026-07-21",
+        client=client,
+        snapshot_store=ImmutableSnapshotStore(tmp_path / "snapshots"),
+        captured_at=datetime(2026, 7, 21, 12, tzinfo=timezone.utc),
+        cache_path=tmp_path / "cache.csv",
+    )
+
+    assert report.status == "PASS"
+    assert client.calls_by_endpoint == ["live_feed", "boxscore"]
+    row = merged.loc[merged["game_pk"] == 823519].iloc[0]
+    assert float(row.a_runs) == 2.0
+    assert float(row.b_runs) == 0.0

@@ -144,6 +144,9 @@ class MLBStatsHTTPClient:
     def live_feed(self, game_pk: int) -> dict[str, Any]:
         return self._get_json(f"v1.1/game/{int(game_pk)}/feed/live")
 
+    def boxscore(self, game_pk: int) -> dict[str, Any]:
+        return self._get_json(f"v1/game/{int(game_pk)}/boxscore")
+
     def person_pitching_stats(self, person_id: int, season: int) -> dict[str, Any]:
         return self._get_json(
             f"v1/people/{int(person_id)}/stats",
