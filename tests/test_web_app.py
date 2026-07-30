@@ -83,3 +83,12 @@ def test_context_table_locks_started_games() -> None:
     )
     assert bool(frame.loc[0, "locked"])
     assert not bool(frame.loc[0, "include"])
+
+
+def test_manual_run_is_hidden_unless_explicitly_enabled() -> None:
+    from supermodel.web_app import _manual_run_enabled
+
+    assert not _manual_run_enabled({})
+    assert not _manual_run_enabled({"SPORTS_SUPERMODEL_ENABLE_MANUAL_RUN": "0"})
+    assert _manual_run_enabled({"SPORTS_SUPERMODEL_ENABLE_MANUAL_RUN": "true"})
+    assert _manual_run_enabled({"SPORTS_SUPERMODEL_ENABLE_MANUAL_RUN": "1"})

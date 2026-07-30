@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime, timezone
 import json
 import math
+import os
 from pathlib import Path
 import sys
 from typing import Any
@@ -753,33 +754,75 @@ def _render_line_checker_page(st, *, game_date: str) -> None:
         _render_value_cards(st, [record])
 
 
-def render_app() -> None:
-    st = _require_streamlit()
-    st.set_page_config(
-        page_title="Sports SuperModel",
-        page_icon="⚾",
-        layout="wide",
-        initial_sidebar_state="collapsed",
-    )
-    _inject_branding(st)
+def _manual_run_enabled(environ: dict[str, str] | None = None) -> bool:
+    values = os.environ if environ is None else environ
+    raw = str(values.get("SPORTS_SUPERMODEL_ENABLE_MANUAL_RUN", "")).strip().casefold()
+    return raw in {"1", "true", "yes", "on"}
 
-    page = st.radio(
-        "View",
-        ["Slate Analysis", "High Probability", "Best Value", "Line Checker"],
-        horizontal=True,
-        label_visibility="collapsed",
+
+def _snapshot_moneyline_probabilities(snapshot) -> tuple[float, float]:
+    if snapshot.away_win_probability is not None:
+        return float(snapshot.away_win_probability), float(snapshot.home_win_probability)
+    ties = snapshot.away_runs == snapshot.home_runs
+    away = float((snapshot.away_runs > snapshot.home_runs).mean() + 0.5 * ties.mean())
+    return away, 1.0 - away
+
+
+def _render_published_slate_page(st, *, game_date: str) -> None:
+    st.markdown('<div class="ssm-section-title">Today’s Published Slate</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ssm-section-copy">Read-only results from the latest completed backend simulation snapshot. Visiting this page never starts model training or Monte Carlo work.</div>',
+        unsafe_allow_html=True,
     )
-    if page != "Slate Analysis":
-        platform_date = st.date_input("Slate date", value=date.today(), key="platform-page-date")
-        game_date = platform_date.isoformat()
-        if page == "High Probability":
-            _render_high_probability_page(st, game_date=game_date)
-        elif page == "Best Value":
-            _render_best_value_page(st, game_date=game_date)
-        else:
-            _render_line_checker_page(st, game_date=game_date)
+    snapshots = LocalSimulationSnapshotStore(_SIMULATION_STORE).list_latest(
+        event_date=game_date,
+        model_track="production",
+    )
+    if not snapshots:
+        st.info(
+            "No backend simulation snapshot has been published for this slate date. "
+            "The scheduled publisher will populate this page once provider and worker wiring is enabled."
+        )
         return
 
+    latest_created = max(str(snapshot.created_at) for snapshot in snapshots)
+    first, second, third, fourth = st.columns(4)
+    first.metric("Published games", len(snapshots))
+    second.metric("Simulations per game", f"{max(snapshot.simulations for snapshot in snapshots):,}")
+    third.metric("Production model", snapshots[0].model_version)
+    fourth.metric("Latest snapshot", latest_created.replace("T", " ").replace("Z", " UTC"))
+
+    for snapshot in sorted(snapshots, key=lambda item: (item.created_at, item.game_pk)):
+        away_probability, home_probability = _snapshot_moneyline_probabilities(snapshot)
+        pick = snapshot.away_team if away_probability >= home_probability else snapshot.home_team
+        pick_probability = max(away_probability, home_probability)
+        away_mean = float(snapshot.away_runs.mean())
+        home_mean = float(snapshot.home_runs.mean())
+        freshness = "Fresh" if bool(snapshot.metadata.get("fresh", True)) else "Stale / blocked"
+        conflict = "Conflict" if bool(snapshot.metadata.get("conflict", False)) else "Eligible"
+        st.markdown(
+            f"""
+            <div class="ssm-result-card">
+              <div class="ssm-rank">gamePk {snapshot.game_pk} · {freshness} · {conflict}</div>
+              <div class="ssm-pick">{snapshot.away_team} at {snapshot.home_team}</div>
+              <div class="ssm-small">Latest production pick: {pick} · {_format_probability(pick_probability)}</div>
+              <div style="margin-top:.8rem; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.65rem">
+                <div><div class="ssm-model-label">Away win</div><div class="ssm-model-value">{_format_probability(away_probability)}</div></div>
+                <div><div class="ssm-model-label">Home win</div><div class="ssm-model-value">{_format_probability(home_probability)}</div></div>
+                <div><div class="ssm-model-label">Projected score</div><div class="ssm-model-value">{away_mean:.1f}–{home_mean:.1f}</div></div>
+                <div><div class="ssm-model-label">Snapshot</div><div class="ssm-model-value">{str(snapshot.created_at).replace('T', ' ').replace('Z', ' UTC')}</div></div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+def _render_admin_run_page(st) -> None:
+    st.warning(
+        "Developer-only manual publisher. This control exists for local testing until the "
+        "scheduled backend simulation worker is connected; it is not part of the public user flow."
+    )
     controls = st.container(border=True)
     with controls:
         left, middle, right, action = st.columns([1.15, 1, 1, .8])
@@ -930,6 +973,38 @@ def render_app() -> None:
             "This experimental software is for recreational, educational, and research use only. "
             "It does not guarantee accuracy or profit. Independently verify all inputs and outputs."
         )
+
+
+
+def render_app() -> None:
+    st = _require_streamlit()
+    st.set_page_config(
+        page_title="Sports SuperModel",
+        page_icon="⚾",
+        layout="wide",
+        initial_sidebar_state="collapsed",
+    )
+    _inject_branding(st)
+
+    pages = ["Today’s Slate", "High Probability", "Best Value", "Line Checker"]
+    if _manual_run_enabled():
+        pages.append("Admin Run")
+    page = st.radio("View", pages, horizontal=True, label_visibility="collapsed")
+
+    if page == "Admin Run":
+        _render_admin_run_page(st)
+        return
+
+    platform_date = st.date_input("Slate date", value=date.today(), key="platform-page-date")
+    game_date = platform_date.isoformat()
+    if page == "Today’s Slate":
+        _render_published_slate_page(st, game_date=game_date)
+    elif page == "High Probability":
+        _render_high_probability_page(st, game_date=game_date)
+    elif page == "Best Value":
+        _render_best_value_page(st, game_date=game_date)
+    else:
+        _render_line_checker_page(st, game_date=game_date)
 
 
 def launch() -> None:

@@ -143,16 +143,21 @@ python -m pip install -e ".[ui,dev]"
 sports-supermodel-ui
 ```
 
-The command opens the redesigned local interface. The official slate loads automatically for the selected date. Enter both moneyline prices on the matchup cards, leave unwanted games unchecked, acknowledge the recreational-use notice, and click **Run full slate analysis**. Games at or past scheduled start are visibly locked.
+The command opens the read-only site experience. Public-facing pages display the latest simulation snapshots already published by the backend; visiting or changing pages never trains models or launches Monte Carlo work. The browser exposes four initial views:
 
-Each completed slate run now persists the full 100,000-draw away/home score distributions for both production and shadow tracks, together with the authoritative blended moneyline probabilities and the submitted market quotes. The browser exposes four initial views:
-
-- **Slate Analysis** — the complete V2.3.3 production and V2.4 RC2 shadow workflow;
+- **Today’s Slate** — the latest published V2.3.3 production snapshots for the selected date;
 - **High Probability** — outcomes ranked by raw modeled hit probability, independent of price;
 - **Best Value** — the complete Top 5 rebuilt from one global sportsbook selector;
 - **Line Checker** — a custom moneyline, run line, game total, or team total evaluated against the latest saved simulation distribution, including fair odds and a conservative playable-through price.
 
-The confidence board presents V2.3.3 production picks beside V2.4 RC2 shadow probabilities, seven-model overlap, disagreement status, and 100,000-simulation score estimates. Full tables, attribution diagnostics, downloads, and reproducibility paths are kept under the advanced-results section.
+Until the scheduled simulation publisher is connected, local developers may explicitly enable the temporary manual publisher before launching the app:
+
+```powershell
+$env:SPORTS_SUPERMODEL_ENABLE_MANUAL_RUN = "1"
+sports-supermodel-ui
+```
+
+That adds an **Admin Run** page for local testing. It is hidden by default and is not part of the intended public user flow. Each completed admin or future scheduled run persists the full 100,000-draw away/home score distributions for both production and shadow tracks, together with authoritative blended moneyline probabilities and captured market quotes.
 
 Alternative launch command:
 
