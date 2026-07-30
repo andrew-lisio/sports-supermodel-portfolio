@@ -1165,7 +1165,7 @@ def simulate_score_distribution(
     ties = ar == br
     if ties.any():
         wins[ties] = rng.binomial(1, 0.5, ties.sum())
-    return {
+    result: dict[str, Any] = {
         "team_a_win_probability": float(wins.mean()),
         "team_a_mean_runs": float(ar.mean()),
         "team_b_mean_runs": float(br.mean()),
@@ -1174,6 +1174,10 @@ def simulate_score_distribution(
         "tie_rate_before_resolution": float(ties.mean()),
         "simulations": float(n),
     }
+    if return_draws:
+        result["team_a_runs"] = ar.astype(np.int16, copy=False)
+        result["team_b_runs"] = br.astype(np.int16, copy=False)
+    return result
 
 
 def simulate_poisson_score_distribution(
@@ -1181,7 +1185,9 @@ def simulate_poisson_score_distribution(
     team_b_expected_runs: float,
     n: int,
     rng: np.random.Generator,
-) -> dict[str, float]:
+    *,
+    return_draws: bool = False,
+) -> dict[str, Any]:
     """Simulate a correlated score distribution from trained expected-run inputs."""
 
     if n <= 0:

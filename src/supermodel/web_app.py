@@ -9,7 +9,17 @@ from typing import Any
 
 import pandas as pd
 
+from supermodel.market_schema import MarketQuote, MarketType
+from supermodel.market_store import LocalMarketQuoteStore
 from supermodel.odds_input import OddsInputError, build_moneyline_template, moneylines_from_records
+from supermodel.platform_views import (
+    best_value_records,
+    evaluate_custom_line,
+    high_probability_records,
+    load_market_candidates,
+)
+from supermodel.rankings import BEST_AVAILABLE
+from supermodel.simulation_store import LocalSimulationSnapshotStore
 from supermodel.workflow import capture_official_slate, evaluate_captured_slate
 
 
@@ -18,6 +28,8 @@ _SNAPSHOT_DIR = Path("runtime/snapshots")
 _OUTPUT_DIR = Path("runtime/reports")
 _EVIDENCE_LEDGER = Path("runtime/evidence/prospective.jsonl")
 _ADAPTIVE_OVERLAY = Path("runtime/models/v2_4_adaptive_overlay.json")
+_MARKET_STORE = Path("runtime/markets")
+_SIMULATION_STORE = Path("runtime/simulations")
 _DEFAULT_SIMULATIONS = 100_000
 _DEFAULT_TOP_N = 5
 
@@ -521,6 +533,226 @@ def _render_advanced_results(st, result, captured) -> None:
             )
 
 
+def _format_american_odds(value: Any) -> str:
+    try:
+        odds = int(value)
+    except (TypeError, ValueError):
+        return "—"
+    return f"{odds:+d}"
+
+
+def _market_label(record: dict[str, Any]) -> str:
+    market_type = str(record.get("market_type"))
+    selection = str(record.get("selection", ""))
+    line = record.get("line")
+    team = record.get("team")
+    if market_type == "moneyline":
+        return f"{selection} ML"
+    if market_type == "run_line":
+        return f"{selection} {float(line):+g}"
+    if market_type == "game_total":
+        return f"{selection.title()} {float(line):g}"
+    return f"{team} team total {selection.title()} {float(line):g}"
+
+
+def _render_probability_cards(st, records: list[dict[str, Any]]) -> None:
+    for rank, record in enumerate(records, start=1):
+        st.markdown(
+            f"""
+            <div class="ssm-result-card">
+              <div class="ssm-rank">Probability rank #{rank}</div>
+              <div class="ssm-pick">{_market_label(record)}</div>
+              <div class="ssm-small">{record.get('sportsbook', '—')} · {_format_american_odds(record.get('american_odds'))}</div>
+              <div style="margin-top:.8rem; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem">
+                <div><div class="ssm-model-label">Raw probability</div><div class="ssm-model-value">{_format_probability(record.get('win_probability'))}</div></div>
+                <div><div class="ssm-model-label">Push probability</div><div class="ssm-model-value">{_format_probability(record.get('push_probability'))}</div></div>
+                <div><div class="ssm-model-label">Market type</div><div class="ssm-model-value">{str(record.get('market_type')).replace('_', ' ').title()}</div></div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+def _render_value_cards(st, records: list[dict[str, Any]]) -> None:
+    for rank, record in enumerate(records, start=1):
+        st.markdown(
+            f"""
+            <div class="ssm-result-card">
+              <div class="ssm-rank">Value rank #{rank}</div>
+              <div class="ssm-pick">{_market_label(record)} <span class="ssm-small">{_format_american_odds(record.get('american_odds'))}</span></div>
+              <div class="ssm-small">{record.get('sportsbook', '—')} · Status: {record.get('status', '—')}</div>
+              <div style="margin-top:.8rem; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.65rem">
+                <div><div class="ssm-model-label">Model probability</div><div class="ssm-model-value">{_format_probability(record.get('win_probability'))}</div></div>
+                <div><div class="ssm-model-label">Expected ROI</div><div class="ssm-model-value">{_format_probability(record.get('expected_roi'))}</div></div>
+                <div><div class="ssm-model-label">Fair odds</div><div class="ssm-model-value">{_format_american_odds(record.get('fair_odds'))}</div></div>
+                <div><div class="ssm-model-label">Playable through</div><div class="ssm-model-value">{_format_american_odds(record.get('playable_through_odds'))}</div></div>
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+def _render_high_probability_page(st, *, game_date: str) -> None:
+    st.markdown('<div class="ssm-section-title">High Probability</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ssm-section-copy">Ranks outcomes by raw simulated win probability. Sportsbook price is displayed for context but does not determine rank.</div>',
+        unsafe_allow_html=True,
+    )
+    candidates = load_market_candidates(
+        event_date=game_date,
+        model_track="production",
+        simulation_store_root=_SIMULATION_STORE,
+        market_store_root=_MARKET_STORE,
+    )
+    if not candidates:
+        st.info("No saved simulation-and-market snapshot exists for this slate date yet.")
+        return
+    top_n = int(st.selectbox("Outcomes shown", [5, 10, 20, 50], index=1))
+    records = high_probability_records(candidates, top_n=top_n)
+    _render_probability_cards(st, records)
+
+
+def _render_best_value_page(st, *, game_date: str) -> None:
+    st.markdown('<div class="ssm-section-title">Best Value</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ssm-section-copy">The global sportsbook selector reprices the complete slate and rebuilds the Top 5.</div>',
+        unsafe_allow_html=True,
+    )
+    candidates = load_market_candidates(
+        event_date=game_date,
+        model_track="production",
+        simulation_store_root=_SIMULATION_STORE,
+        market_store_root=_MARKET_STORE,
+    )
+    books = LocalMarketQuoteStore(_MARKET_STORE).sportsbooks(game_date)
+    if not candidates or not books:
+        st.info("No saved sportsbook quotes and simulation snapshots exist for this slate date yet.")
+        return
+    left, middle, right = st.columns([1.2, 1, 1])
+    with left:
+        selected_book = st.selectbox(
+            "Sportsbook",
+            [*books, BEST_AVAILABLE],
+            format_func=lambda value: "Best Available" if value == BEST_AVAILABLE else value,
+        )
+    with middle:
+        minimum_roi_pct = st.number_input(
+            "Minimum projected ROI",
+            min_value=0.0,
+            max_value=20.0,
+            value=2.0,
+            step=0.5,
+        )
+    with right:
+        include_marginal = st.toggle("Include positive edge below threshold", value=False)
+    records = best_value_records(
+        candidates,
+        sportsbook=selected_book,
+        top_n=5,
+        minimum_required_roi=float(minimum_roi_pct) / 100.0,
+        allowed_books=set(books),
+        include_marginal=include_marginal,
+    )
+    if not records:
+        st.warning("No saved markets pass the selected edge and freshness rules.")
+        return
+    _render_value_cards(st, records)
+
+
+def _render_line_checker_page(st, *, game_date: str) -> None:
+    st.markdown('<div class="ssm-section-title">Custom Line Checker</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ssm-section-copy">Evaluate a private or unsupported price against the latest saved 100,000-simulation distribution.</div>',
+        unsafe_allow_html=True,
+    )
+    snapshots = LocalSimulationSnapshotStore(_SIMULATION_STORE).list_latest(
+        event_date=game_date,
+        model_track="production",
+    )
+    if not snapshots:
+        st.info("No production simulation snapshots exist for this slate date yet.")
+        return
+    snapshot_by_label = {
+        f"{snapshot.away_team} at {snapshot.home_team} · gamePk {snapshot.game_pk}": snapshot
+        for snapshot in snapshots
+    }
+    game_label = st.selectbox("Game", list(snapshot_by_label))
+    snapshot = snapshot_by_label[game_label]
+    market_type = MarketType(
+        st.selectbox(
+            "Market",
+            [item.value for item in MarketType],
+            format_func=lambda value: value.replace("_", " ").title(),
+        )
+    )
+    first, second, third = st.columns(3)
+    line: float | None = None
+    team: str | None = None
+    if market_type is MarketType.MONEYLINE:
+        with first:
+            selection = st.selectbox("Selection", [snapshot.away_team, snapshot.home_team])
+    elif market_type is MarketType.RUN_LINE:
+        with first:
+            selection = st.selectbox("Selection", [snapshot.away_team, snapshot.home_team])
+        with second:
+            line = float(st.number_input("Run line", value=-1.5, step=0.5))
+    elif market_type is MarketType.GAME_TOTAL:
+        with first:
+            selection = st.selectbox("Selection", ["OVER", "UNDER"])
+        with second:
+            line = float(st.number_input("Total", value=8.5, step=0.5))
+    else:
+        with first:
+            team = st.selectbox("Team", [snapshot.away_team, snapshot.home_team])
+        with second:
+            selection = st.selectbox("Selection", ["OVER", "UNDER"])
+        with third:
+            line = float(st.number_input("Team total", value=4.5, step=0.5))
+    odds = int(st.number_input("Your American odds", value=-110, step=1))
+    minimum_roi_pct = st.number_input(
+        "Minimum projected ROI required",
+        min_value=0.0,
+        max_value=20.0,
+        value=2.0,
+        step=0.5,
+        key="line-checker-min-roi",
+    )
+    if st.button("Check line", type="primary"):
+        try:
+            quote = MarketQuote(
+                game_pk=snapshot.game_pk,
+                sportsbook="Custom",
+                market_type=market_type,
+                selection=selection,
+                line=line,
+                team=team,
+                american_odds=odds,
+                captured_at=datetime.now(timezone.utc),
+                source="manual",
+                event_date=game_date,
+            )
+            evaluation = evaluate_custom_line(
+                quote=quote,
+                model_track="production",
+                simulation_store_root=_SIMULATION_STORE,
+                minimum_required_roi=float(minimum_roi_pct) / 100.0,
+            )
+        except Exception as exc:
+            st.error(str(exc))
+            return
+        record = {
+            **evaluation.quote.to_record(),
+            "win_probability": evaluation.probability.win,
+            "expected_roi": evaluation.expected_roi,
+            "fair_odds": evaluation.fair_odds,
+            "playable_through_odds": evaluation.playable_through_odds,
+            "status": evaluation.status,
+        }
+        _render_value_cards(st, [record])
+
+
 def render_app() -> None:
     st = _require_streamlit()
     st.set_page_config(
@@ -530,6 +762,23 @@ def render_app() -> None:
         initial_sidebar_state="collapsed",
     )
     _inject_branding(st)
+
+    page = st.radio(
+        "View",
+        ["Slate Analysis", "High Probability", "Best Value", "Line Checker"],
+        horizontal=True,
+        label_visibility="collapsed",
+    )
+    if page != "Slate Analysis":
+        platform_date = st.date_input("Slate date", value=date.today(), key="platform-page-date")
+        game_date = platform_date.isoformat()
+        if page == "High Probability":
+            _render_high_probability_page(st, game_date=game_date)
+        elif page == "Best Value":
+            _render_best_value_page(st, game_date=game_date)
+        else:
+            _render_line_checker_page(st, game_date=game_date)
+        return
 
     controls = st.container(border=True)
     with controls:
@@ -645,6 +894,9 @@ def render_app() -> None:
                     top_n=int(top_n),
                     include_parlays=include_parlays,
                     input_source=f"streamlit_cards:{odds_format}",
+                    sportsbook_name="Custom",
+                    market_store_root=_MARKET_STORE,
+                    simulation_store_root=_SIMULATION_STORE,
                 )
             except Exception as exc:
                 st.error(f"Evaluation failed: {exc}")

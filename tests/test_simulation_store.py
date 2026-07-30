@@ -60,3 +60,23 @@ def test_local_snapshot_store_round_trip(tmp_path):
     assert loaded.snapshot_id == snapshot.snapshot_id
     assert np.array_equal(loaded.away_runs, snapshot.away_runs)
     assert store.latest(77, model_track="production").snapshot_id == snapshot.snapshot_id
+
+
+def test_snapshot_uses_authoritative_blended_moneyline_probability():
+    snapshot = SimulationSnapshot(
+        game_pk=77,
+        away_team="ATL",
+        home_team="MIA",
+        model_track="production",
+        model_version="2.3.3",
+        git_commit="abc123",
+        input_snapshot_hash="input-hash",
+        created_at=datetime(2026, 7, 30, 12, 0, tzinfo=timezone.utc),
+        random_seed=7,
+        away_runs=np.array([0, 0, 0, 10], dtype=int),
+        home_runs=np.array([1, 1, 1, 0], dtype=int),
+        away_win_probability=0.60,
+        home_win_probability=0.40,
+        metadata={"game_date": "2026-07-30"},
+    )
+    assert snapshot.probability_for_quote(_quote()).win == pytest.approx(0.60)

@@ -145,6 +145,13 @@ sports-supermodel-ui
 
 The command opens the redesigned local interface. The official slate loads automatically for the selected date. Enter both moneyline prices on the matchup cards, leave unwanted games unchecked, acknowledge the recreational-use notice, and click **Run full slate analysis**. Games at or past scheduled start are visibly locked.
 
+Each completed slate run now persists the full 100,000-draw away/home score distributions for both production and shadow tracks, together with the authoritative blended moneyline probabilities and the submitted market quotes. The browser exposes four initial views:
+
+- **Slate Analysis** — the complete V2.3.3 production and V2.4 RC2 shadow workflow;
+- **High Probability** — outcomes ranked by raw modeled hit probability, independent of price;
+- **Best Value** — the complete Top 5 rebuilt from one global sportsbook selector;
+- **Line Checker** — a custom moneyline, run line, game total, or team total evaluated against the latest saved simulation distribution, including fair odds and a conservative playable-through price.
+
 The confidence board presents V2.3.3 production picks beside V2.4 RC2 shadow probabilities, seven-model overlap, disagreement status, and 100,000-simulation score estimates. Full tables, attribution diagnostics, downloads, and reproducibility paths are kept under the advanced-results section.
 
 Alternative launch command:
@@ -268,6 +275,9 @@ A live evaluation includes fields such as:
 - previous-game context
 - each component model's team-oriented probability
 - simulation count
+- persistent production and shadow simulation-manifest paths
+- persistent canonical market-quote history
+- push-aware fair odds, expected ROI, and playable-through prices for supported markets
 
 No active output contains bankroll, stake, exposure, or Kelly fields.
 
@@ -283,11 +293,15 @@ No active output contains bankroll, stake, exposure, or Kelly fields.
 ├── reports/                Preserved validation and historical/live outputs
 ├── scripts/                Command wrappers and validation utilities
 ├── snapshots/              Immutable schedule, pregame, and market-input snapshots
+├── runtime/                Incremental data, quote history, and compressed simulations
 ├── src/supermodel/         Installable Python package
 │   ├── cli.py              Terminal interface
 │   ├── web_app.py          Local browser interface
 │   ├── odds_input.py       CSV/JSON/interactive input and validation
-│   ├── workflow.py         Shared end-to-end execution workflow
+│   ├── workflow.py         Shared execution and persistent snapshot workflow
+│   ├── market_store.py     Append-only canonical quote history
+│   ├── platform_views.py   High Probability, Best Value, and Line Checker services
+│   ├── simulation_store.py Compressed score-distribution snapshots
 │   ├── live_mlb.py         Live capture and prediction evaluation
 │   └── mlb_v2.py           Historical features and model stack
 ├── tests/                  Offline automated tests

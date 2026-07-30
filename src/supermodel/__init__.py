@@ -1,6 +1,7 @@
 """Sports SuperModel public package interface."""
 
 from .market_schema import MarketQuote, MarketType, QuoteSource
+from .market_store import LocalMarketQuoteStore
 from .pricing import (
     OutcomeProbability,
     PriceEvaluation,
@@ -8,6 +9,12 @@ from .pricing import (
     expected_roi,
     fair_american_odds,
     playable_through_odds,
+)
+from .platform_views import (
+    best_value_records,
+    evaluate_custom_line,
+    high_probability_records,
+    load_market_candidates,
 )
 from .rankings import BEST_AVAILABLE, MarketCandidate, rank_best_value, rank_high_probability
 from .refresh_orchestrator import PlatformRefreshReport, refresh_platform_data
@@ -209,6 +216,7 @@ __all__ = [
     "MarketQuote",
     "MarketType",
     "QuoteSource",
+    "LocalMarketQuoteStore",
     "OutcomeProbability",
     "PriceEvaluation",
     "evaluate_quote",
@@ -219,6 +227,10 @@ __all__ = [
     "MarketCandidate",
     "rank_best_value",
     "rank_high_probability",
+    "load_market_candidates",
+    "high_probability_records",
+    "best_value_records",
+    "evaluate_custom_line",
     "PlatformRefreshReport",
     "refresh_platform_data",
     "LocalSimulationSnapshotStore",

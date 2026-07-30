@@ -33,6 +33,7 @@ from .live_mlb import (
 )
 from .model_contract import V23_FEATURE_CONTRACT, V24_CANDIDATE_FEATURE_CONTRACT
 from .mlb_v2 import (
+    RANDOM_SEED,
     attach_official_home_away,
     build_future_features,
     build_pregame_features,
@@ -40,8 +41,11 @@ from .mlb_v2 import (
     reconstruct_games,
 )
 from .market import no_vig_probabilities
+from .market_schema import MarketQuote, QuoteSource
+from .market_store import LocalMarketQuoteStore
 from .odds_input import ManualMoneyline
 from .providers import PregameContext
+from .simulation_store import LocalSimulationSnapshotStore, SimulationSnapshot
 from .validation import freeze_v23_feature_contract
 
 
@@ -71,6 +75,8 @@ class WorkflowResult:
     evidence_ledger_path: Path
     adaptive_overlay_path: Path
     history_refresh_report: HistoryRefreshReport
+    market_quote_path: Path | None
+    simulation_manifest_paths: tuple[Path, ...]
 
 
 def _repository_commit() -> str:
@@ -471,6 +477,166 @@ def combine_production_and_shadow(
     ).reset_index(drop=True)
 
 
+def _game_input_snapshot_hash(
+    *,
+    captured_slate: CapturedSlate,
+    game_pk: int,
+    market_snapshot_path: Path,
+) -> str:
+    """Hash the immutable inputs used for one game's canonical simulation snapshot."""
+
+    parts = [captured_slate.schedule_path.read_bytes(), market_snapshot_path.read_bytes()]
+    candidate_paths = (
+        *captured_slate.pregame_paths,
+        *captured_slate.starter_paths,
+        *captured_slate.advanced_paths,
+    )
+    for path in sorted(candidate_paths, key=lambda item: str(item)):
+        envelope = ImmutableSnapshotStore.read(path)
+        payload = envelope.get("payload") or {}
+        identity = envelope.get("identity")
+        path_game_pk = payload.get("game_pk", identity)
+        try:
+            matches = int(path_game_pk) == int(game_pk)
+        except (TypeError, ValueError):
+            matches = False
+        if matches:
+            parts.append(Path(path).read_bytes())
+    return sha256(b"".join(parts)).hexdigest()
+
+
+def _persist_platform_outputs(
+    *,
+    captured_slate: CapturedSlate,
+    evaluation: pd.DataFrame,
+    moneylines: list[ManualMoneyline],
+    market_timestamp: datetime,
+    market_snapshot_path: Path,
+    production_draws: dict[int, tuple[object, object]],
+    shadow_draws: dict[int, tuple[object, object]],
+    sportsbook_name: str,
+    market_store_root: str | Path,
+    simulation_store_root: str | Path,
+) -> tuple[Path | None, tuple[Path, ...]]:
+    quote_store = LocalMarketQuoteStore(market_store_root)
+    context_by_pk = {
+        int(context.game_pk): context
+        for context in captured_slate.contexts
+        if context.game_pk is not None
+    }
+    quotes: list[MarketQuote] = []
+    for line in moneylines:
+        context = None
+        if line.game_pk is not None:
+            context = context_by_pk.get(int(line.game_pk))
+        if context is None:
+            context = next(
+                candidate
+                for candidate in captured_slate.contexts
+                if candidate.game_date == line.game_date
+                and candidate.away_team == line.away_team
+                and candidate.home_team == line.home_team
+            )
+        game_pk = int(context.game_pk)
+        for team, odds in ((context.away_team, line.away_odds), (context.home_team, line.home_odds)):
+            quotes.append(
+                MarketQuote(
+                    game_pk=game_pk,
+                    sportsbook=sportsbook_name,
+                    market_type="moneyline",
+                    selection=team,
+                    american_odds=int(odds),
+                    captured_at=market_timestamp,
+                    source=QuoteSource.MANUAL,
+                    event_date=captured_slate.game_date,
+                )
+            )
+    quote_path = quote_store.save_many(quotes)
+
+    snapshot_store = LocalSimulationSnapshotStore(simulation_store_root)
+    manifests: list[Path] = []
+    for row in evaluation.to_dict("records"):
+        game_pk = int(row["game_pk"])
+        input_hash = _game_input_snapshot_hash(
+            captured_slate=captured_slate,
+            game_pk=game_pk,
+            market_snapshot_path=market_snapshot_path,
+        )
+        away = str(row["away_team"])
+        production_components = {
+            name: float(row[f"p_{name}_{away}"])
+            for name in ("logistic", "random_forest", "neural_network", "elo_pyth", "xgboost", "lightgbm", "catboost")
+            if f"p_{name}_{away}" in row
+        }
+        shadow_components = {
+            name: float(row[f"shadow_p_{name}_{away}"])
+            for name in ("logistic", "random_forest", "neural_network", "elo_pyth", "xgboost", "lightgbm", "catboost")
+            if f"shadow_p_{name}_{away}" in row
+        }
+        common_metadata = {
+            "game_date": captured_slate.game_date,
+            "sportsbook": sportsbook_name,
+            "history_freshness_status": row.get("history_freshness_status"),
+            "history_checked_through": row.get("history_checked_through"),
+            "lineups_confirmed": bool(row.get("lineups_confirmed", False)),
+        }
+        for track, draws, version, commit, away_probability, home_probability, components, status, reasons in (
+            (
+                "production",
+                production_draws,
+                "2.3.3",
+                _repository_commit(),
+                float(row["away_probability"]),
+                float(row["home_probability"]),
+                production_components,
+                row.get("selection_status"),
+                row.get("selection_reasons"),
+            ),
+            (
+                "shadow",
+                shadow_draws,
+                __version__,
+                _candidate_model_commit(),
+                float(row.get("shadow_away_probability", row["away_probability"])),
+                float(row.get("shadow_home_probability", row["home_probability"])),
+                shadow_components,
+                row.get("shadow_selection_status", row.get("selection_status")),
+                row.get("shadow_selection_reasons", row.get("selection_reasons")),
+            ),
+        ):
+            if game_pk not in draws:
+                raise ScheduleIntegrityError(
+                    f"Missing {track} simulation draws for game_pk {game_pk}"
+                )
+            away_runs, home_runs = draws[game_pk]
+            snapshot = SimulationSnapshot(
+                game_pk=game_pk,
+                away_team=row["away_team"],
+                home_team=row["home_team"],
+                model_track=track,
+                model_version=version,
+                git_commit=commit,
+                input_snapshot_hash=input_hash,
+                created_at=market_timestamp,
+                random_seed=RANDOM_SEED,
+                away_runs=away_runs,
+                home_runs=home_runs,
+                away_win_probability=away_probability,
+                home_win_probability=home_probability,
+                component_probabilities=components,
+                metadata={
+                    **common_metadata,
+                    "selection_status": status,
+                    "selection_reasons": reasons,
+                    "conflict": str(status).upper().startswith("PASS"),
+                    "fresh": row.get("history_freshness_status") == "PASS",
+                },
+            )
+            manifest_path, _ = snapshot_store.save(snapshot)
+            manifests.append(manifest_path)
+    return quote_path, tuple(manifests)
+
+
 def evaluate_captured_slate(
     *,
     captured_slate: CapturedSlate,
@@ -488,6 +654,9 @@ def evaluate_captured_slate(
     input_source: str = "user_supplied",
     market_captured_at: datetime | None = None,
     client: MLBStatsHTTPClient | None = None,
+    sportsbook_name: str = "Custom",
+    market_store_root: str | Path = "runtime/markets",
+    simulation_store_root: str | Path = "runtime/simulations",
 ) -> WorkflowResult:
     """Run the complete prediction-only pipeline from a captured official slate."""
 
@@ -576,6 +745,8 @@ def evaluate_captured_slate(
         )
     )
 
+    production_draws: dict[int, tuple[object, object]] = {}
+    shadow_draws: dict[int, tuple[object, object]] = {}
     production_evaluation = evaluate_live_slate(
         historical_features=production_historical_features,
         future_features=production_future_features,
@@ -585,6 +756,7 @@ def evaluate_captured_slate(
             top_n=top_n,
             home_field_logit_adjustment=home_field_logit_adjustment,
         ),
+        simulation_draws=production_draws,
     )
     base_shadow_evaluation = evaluate_live_slate(
         historical_features=candidate_historical_features,
@@ -595,6 +767,7 @@ def evaluate_captured_slate(
             top_n=top_n,
             home_field_logit_adjustment=home_field_logit_adjustment,
         ),
+        simulation_draws=shadow_draws,
     )
     overlay = fit_adaptive_overlay(evidence_ledger, adaptive_overlay_path)
     shadow_evaluation = apply_overlay_to_evaluation(
@@ -623,6 +796,19 @@ def evaluate_captured_slate(
         parlays=parlays,
     )
 
+    market_quote_path, simulation_manifest_paths = _persist_platform_outputs(
+        captured_slate=captured_slate,
+        evaluation=evaluation,
+        moneylines=moneylines,
+        market_timestamp=market_timestamp,
+        market_snapshot_path=market_snapshot_path,
+        production_draws=production_draws,
+        shadow_draws=shadow_draws,
+        sportsbook_name=sportsbook_name,
+        market_store_root=market_store_root,
+        simulation_store_root=simulation_store_root,
+    )
+
     ledger_path = record_prediction_evidence(
         evaluation=evaluation,
         contexts=selected_contexts,
@@ -647,4 +833,6 @@ def evaluate_captured_slate(
         evidence_ledger_path=ledger_path,
         adaptive_overlay_path=Path(adaptive_overlay_path),
         history_refresh_report=history_refresh_report,
+        market_quote_path=market_quote_path,
+        simulation_manifest_paths=simulation_manifest_paths,
     )

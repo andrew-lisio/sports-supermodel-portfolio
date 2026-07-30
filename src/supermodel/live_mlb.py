@@ -7,7 +7,7 @@ import json
 import math
 from pathlib import Path
 import time
-from typing import Any
+from typing import Any, MutableMapping
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -842,6 +842,7 @@ def evaluate_live_slate(
     future_features: pd.DataFrame,
     moneylines: list[ManualMoneyline],
     config: LiveEvaluationConfig | None = None,
+    simulation_draws: MutableMapping[int, tuple[np.ndarray, np.ndarray]] | None = None,
 ) -> pd.DataFrame:
     """Evaluate every supplied game and rank picks by model confidence.
 
@@ -879,11 +880,13 @@ def evaluate_live_slate(
                 if numeric > 0.0:
                     environment_factor *= numeric
         environment_factor = float(np.clip(environment_factor, 0.80, 1.20))
+        simulation_kwargs = {"return_draws": True} if simulation_draws is not None else {}
         simulation = simulate_poisson_score_distribution(
             expected_runs_a[idx] * environment_factor,
             expected_runs_b[idx] * environment_factor,
             config.simulations,
             rng,
+            **simulation_kwargs,
         )
         score_p_a = simulation["team_a_win_probability"]
         blended_a = (
@@ -946,6 +949,14 @@ def evaluate_live_slate(
             line = odds_by_match.get((str(feature_row["date"].date()), away, home))
         if line is None:
             raise KeyError(f"No moneyline supplied for {away}@{home}")
+        if simulation_draws is not None:
+            if game_pk is None or pd.isna(game_pk):
+                raise ValueError("simulation snapshots require an official game_pk")
+            team_a_runs = np.asarray(simulation["team_a_runs"], dtype=np.int16)
+            team_b_runs = np.asarray(simulation["team_b_runs"], dtype=np.int16)
+            away_runs = team_a_runs if team_a_is_away else team_b_runs
+            home_runs = team_b_runs if team_a_is_away else team_a_runs
+            simulation_draws[int(game_pk)] = (away_runs.copy(), home_runs.copy())
 
         away_market, home_market = no_vig_probabilities(line.away_odds, line.home_odds)
         pick_odds = line.away_odds if pick_is_away else line.home_odds
