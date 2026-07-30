@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime
+import os
 from pathlib import Path
 import sys
 from typing import Sequence
+from zoneinfo import ZoneInfo
 
 from .publisher import publish_slate
 
@@ -17,7 +20,10 @@ def build_parser() -> argparse.ArgumentParser:
             "100,000-simulation snapshots."
         ),
     )
-    parser.add_argument("--date", required=True, help="Slate date in YYYY-MM-DD format")
+    parser.add_argument(
+        "--date",
+        help="Slate date in YYYY-MM-DD format; defaults to today in the configured timezone",
+    )
     parser.add_argument("--data-dir", type=Path, default=Path("data/2026"))
     parser.add_argument("--snapshot-dir", type=Path, default=Path("runtime/snapshots"))
     parser.add_argument("--output-dir", type=Path, default=Path("runtime/reports"))
@@ -48,6 +54,27 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--simulations", type=int, default=100_000)
     parser.add_argument("--top-n", type=int, default=5)
+    parser.add_argument(
+        "--bookmakers",
+        default=os.environ.get(
+            "SPORTS_SUPERMODEL_ODDS_BOOKMAKERS", "draftkings,fanduel,hardrockbet"
+        ),
+        help="Comma-separated The Odds API bookmaker keys",
+    )
+    parser.add_argument(
+        "--odds-markets",
+        default="h2h,spreads,totals",
+        help="Comma-separated featured provider market keys",
+    )
+    parser.add_argument(
+        "--require-odds",
+        action="store_true",
+        help="Fail the publisher if a configured odds provider cannot refresh",
+    )
+    parser.add_argument(
+        "--timezone",
+        default=os.environ.get("SPORTS_SUPERMODEL_TIMEZONE", "America/New_York"),
+    )
     parser.add_argument("--force", action="store_true", help="Republish every eligible game")
     parser.add_argument(
         "--skip-refresh",
@@ -70,8 +97,9 @@ def main(argv: Sequence[str] | None = None) -> None:
                 flush=True,
             )
 
+    slate_date = args.date or datetime.now(ZoneInfo(args.timezone)).date().isoformat()
     report = publish_slate(
-        slate_date=args.date,
+        slate_date=slate_date,
         data_dir=args.data_dir,
         snapshot_dir=args.snapshot_dir,
         output_dir=args.output_dir,
@@ -89,6 +117,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         force=args.force,
         refresh=not args.skip_refresh,
         progress_callback=progress,
+        odds_bookmakers=tuple(item.strip() for item in args.bookmakers.split(",") if item.strip()),
+        odds_markets=tuple(item.strip() for item in args.odds_markets.split(",") if item.strip()),
+        require_odds=args.require_odds,
     )
     print(json.dumps(report.to_record(), indent=2))
 

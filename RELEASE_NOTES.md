@@ -45,3 +45,9 @@ The MLB schedule API can return the same official `gamePk` more than once in a m
 ## Predictive-performance claim
 
 This hotfix changes schedule parsing and reliability only. It does not claim an improvement in predictive accuracy or profitability.
+
+## 2.4.0.dev4+platform.foundation.6
+
+This platform-only unit connects licensed featured MLB odds and a hosted publication loop. It does
+not change either predictive track. The worker reruns games only after baseball-input changes and
+reprices saved simulations when sportsbook prices change.

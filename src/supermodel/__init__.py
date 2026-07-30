@@ -2,6 +2,13 @@
 
 from .market_schema import MarketQuote, MarketType, QuoteSource
 from .market_store import LocalMarketQuoteStore
+from .odds_provider import (
+    DEFAULT_BOOKMAKERS,
+    DEFAULT_MARKETS,
+    OddsRefreshReport,
+    TheOddsAPIClient,
+    refresh_the_odds_api,
+)
 from .pricing import (
     OutcomeProbability,
     PriceEvaluation,
@@ -19,6 +26,7 @@ from .platform_views import (
 from .rankings import BEST_AVAILABLE, MarketCandidate, rank_best_value, rank_high_probability
 from .refresh_orchestrator import PlatformRefreshReport, refresh_platform_data
 from .simulation_store import LocalSimulationSnapshotStore, SimulationSnapshot
+from .worker import WorkerPolicy, next_poll_seconds, run_worker
 from ._version import __version__
 from .evidence import (
     EvidenceIntegrityError,
@@ -217,6 +225,11 @@ __all__ = [
     "MarketType",
     "QuoteSource",
     "LocalMarketQuoteStore",
+    "DEFAULT_BOOKMAKERS",
+    "DEFAULT_MARKETS",
+    "OddsRefreshReport",
+    "TheOddsAPIClient",
+    "refresh_the_odds_api",
     "OutcomeProbability",
     "PriceEvaluation",
     "evaluate_quote",
@@ -235,4 +248,7 @@ __all__ = [
     "refresh_platform_data",
     "LocalSimulationSnapshotStore",
     "SimulationSnapshot",
+    "WorkerPolicy",
+    "next_poll_seconds",
+    "run_worker",
 ]

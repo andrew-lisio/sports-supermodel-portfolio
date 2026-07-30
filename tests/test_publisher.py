@@ -119,3 +119,108 @@ def test_publisher_lock_rejects_overlap(tmp_path):
         except RuntimeError as exc:
             assert "already running" in str(exc)
     assert not lock.exists()
+
+
+def test_odds_only_change_reprices_without_resimulation(tmp_path, monkeypatch):
+    from supermodel.odds_provider import OddsHTTPResponse
+
+    schedule = tmp_path / "schedule.json"
+    schedule.write_text("{}", encoding="utf-8")
+    context = _context()
+    captured = CapturedSlate(
+        game_date="2026-07-30",
+        captured_at=NOW,
+        schedule_path=schedule,
+        pregame_paths=(),
+        starter_paths=(),
+        advanced_paths=(),
+        contexts=(context,),
+    )
+    monkeypatch.setattr("supermodel.publisher.capture_official_slate", lambda **kwargs: captured)
+    monkeypatch.setattr("supermodel.publisher.model_data_fingerprint", lambda **kwargs: "model")
+
+    class FakeStore:
+        snapshots = {}
+
+        def __init__(self, root):
+            self.root = root
+
+        def latest(self, game_pk, *, model_track="production"):
+            return self.snapshots.get((game_pk, model_track))
+
+    monkeypatch.setattr("supermodel.publisher.LocalSimulationSnapshotStore", FakeStore)
+    evaluation_calls = []
+
+    def fake_evaluate(**kwargs):
+        evaluation_calls.append(kwargs)
+        for game_pk, input_hash in kwargs["snapshot_input_hashes"].items():
+            for track in ("production", "shadow"):
+                FakeStore.snapshots[(game_pk, track)] = SimpleNamespace(
+                    input_snapshot_hash=input_hash,
+                    simulations=kwargs["simulations"],
+                )
+        artifact = tmp_path / "evaluation.json"
+        artifact.write_text("{}", encoding="utf-8")
+        manifest = tmp_path / "manifest.json"
+        manifest.write_text("{}", encoding="utf-8")
+        return SimpleNamespace(json_path=artifact, simulation_manifest_paths=(manifest,))
+
+    monkeypatch.setattr("supermodel.publisher.evaluate_captured_slate", fake_evaluate)
+
+    class FakeOddsClient:
+        def __init__(self):
+            self.calls = 0
+
+        def fetch_mlb_odds(self, **kwargs):
+            self.calls += 1
+            away_price = -120 if self.calls == 1 else -125
+            return OddsHTTPResponse(
+                payload=[
+                    {
+                        "id": "event",
+                        "commence_time": "2026-07-30T23:00:00Z",
+                        "away_team": "Atlanta Braves",
+                        "home_team": "Miami Marlins",
+                        "bookmakers": [
+                            {
+                                "key": "fanduel",
+                                "title": "FanDuel",
+                                "last_update": f"2026-07-30T12:0{self.calls}:00Z",
+                                "markets": [
+                                    {
+                                        "key": "h2h",
+                                        "outcomes": [
+                                            {"name": "Atlanta Braves", "price": away_price},
+                                            {"name": "Miami Marlins", "price": 105},
+                                        ],
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ],
+                headers={},
+            )
+
+    odds_client = FakeOddsClient()
+    common = dict(
+        slate_date="2026-07-30",
+        data_dir=tmp_path / "data",
+        history_cache_path=tmp_path / "history.csv",
+        publisher_state_path=tmp_path / "state.json",
+        publisher_report_root=tmp_path / "reports",
+        publisher_lock_path=tmp_path / "publisher.lock",
+        market_store_root=tmp_path / "markets",
+        simulation_store_root=tmp_path / "simulations",
+        odds_snapshot_root=tmp_path / "odds",
+        odds_client=odds_client,
+        odds_bookmakers=("fanduel",),
+        refresh=False,
+    )
+    first = publish_slate(**common, captured_at=NOW)
+    second = publish_slate(**common, captured_at=NOW.replace(minute=5))
+    assert first.status == "PASS"
+    assert first.market_quotes_persisted is True
+    assert second.status == "PRICES_UPDATED"
+    assert second.odds_quotes_changed == 1
+    assert len(evaluation_calls) == 1

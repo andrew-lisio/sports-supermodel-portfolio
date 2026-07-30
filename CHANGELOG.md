@@ -203,3 +203,10 @@
   skipped-game reporting, and started/postponed/final game exclusion.
 - Made High Probability usable before an odds provider is connected by falling back to model-only
   moneyline probabilities from the latest published snapshots.
+
+## 2.4.0.dev4+platform.foundation.6
+
+- Added licensed MLB moneyline, run-line, and game-total ingestion through The Odds API v4.
+- Added current provider snapshots so stale moved lines cannot remain active on Best Value.
+- Added provider-only refresh and an adaptive hosted worker that reprices odds without resimulating.
+- Added single-service Docker/Railway MVP deployment files with a shared runtime volume boundary.

@@ -25,6 +25,24 @@ def test_moneyline_quote_is_canonicalized():
     assert quote.captured_at == "2026-07-30T12:00:00Z"
 
 
+def test_provider_identity_fields_round_trip():
+    quote = MarketQuote(
+        game_pk=123,
+        sportsbook="FanDuel",
+        market_type="moneyline",
+        selection="ATL",
+        american_odds=-120,
+        captured_at=NOW,
+        provider="the_odds_api",
+        provider_event_id="event",
+        provider_bookmaker_key="fanduel",
+        provider_market_key="h2h",
+    )
+    restored = MarketQuote.from_record(quote.to_record())
+    assert restored.provider_event_id == "event"
+    assert restored.provider_bookmaker_key == "fanduel"
+
+
 def test_team_total_requires_team():
     with pytest.raises(ValueError, match="require a team"):
         MarketQuote(

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sports-supermodel"
-version = "2.4.0.dev4+platform.foundation.5"
+version = "2.4.0.dev4+platform.foundation.6"
 description = "Experimental MLB prediction ensemble with user-entered odds, immutable pregame snapshots, and Monte Carlo score simulation"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -59,6 +59,8 @@ sports-supermodel-features = "supermodel.feature_authority_cli:main"
 sports-supermodel-pitching = "supermodel.pitching_context_cli:main"
 sports-supermodel-refresh = "supermodel.refresh_cli:main"
 sports-supermodel-publish = "supermodel.publisher_cli:main"
+sports-supermodel-odds = "supermodel.odds_cli:main"
+sports-supermodel-worker = "supermodel.worker_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

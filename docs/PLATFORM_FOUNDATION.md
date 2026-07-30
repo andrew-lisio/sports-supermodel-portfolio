@@ -68,3 +68,13 @@ sports-supermodel-publish --date 2026-07-31
 
 A second invocation with unchanged baseball inputs returns `SKIPPED_UNCHANGED`. Use `--force` only
 for controlled development checks. Public website visitors never invoke this command.
+
+## Licensed odds and hosted worker
+
+When `SPORTS_SUPERMODEL_ODDS_API_KEY` is configured, the publisher also refreshes featured MLB
+moneylines, run lines, and game totals through the licensed provider adapter. Odds-only changes
+write a new current-price snapshot and return `PRICES_UPDATED`; they do not rerun simulations.
+
+`sports-supermodel-worker` runs the publisher immediately and then uses an adaptive hosted cadence:
+30 minutes normally, 10 minutes within two hours of the next scheduled game, and 60 minutes
+overnight. See `docs/ODDS_PROVIDER_AND_WORKER.md`.

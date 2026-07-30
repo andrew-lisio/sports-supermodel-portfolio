@@ -51,6 +51,10 @@ class MarketQuote:
     provider_updated_at: datetime | str | None = None
     source: QuoteSource | str = QuoteSource.PROVIDER
     event_date: str | None = None
+    provider: str | None = None
+    provider_event_id: str | None = None
+    provider_bookmaker_key: str | None = None
+    provider_market_key: str | None = None
 
     def __post_init__(self) -> None:
         market_type = MarketType(str(self.market_type))

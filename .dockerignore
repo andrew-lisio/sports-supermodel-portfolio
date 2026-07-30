@@ -1,0 +1,7 @@
+.git
+.venv
+.pytest_cache
+__pycache__
+*.pyc
+runtime
+reports/v2_4_rc3_pitching_validation

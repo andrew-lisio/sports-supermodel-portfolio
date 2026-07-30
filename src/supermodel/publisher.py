@@ -11,6 +11,13 @@ from typing import Any, Callable, Iterator
 
 from ._version import __version__
 from .live_mlb import MLBStatsHTTPClient
+from .odds_provider import (
+    DEFAULT_BOOKMAKERS,
+    DEFAULT_MARKETS,
+    OddsProviderError,
+    TheOddsAPIClient,
+    refresh_the_odds_api,
+)
 from .odds_input import ManualMoneyline
 from .providers import PregameContext
 from .refresh_orchestrator import PlatformRefreshReport, refresh_platform_data
@@ -43,6 +50,14 @@ class SlatePublishReport:
     evaluation_artifact: str | None
     simulation_manifests: tuple[str, ...]
     market_quotes_persisted: bool
+    odds_refresh_status: str
+    odds_provider: str | None
+    odds_quotes_received: int
+    odds_quotes_changed: int
+    odds_sportsbooks: tuple[str, ...]
+    odds_snapshot_path: str | None
+    odds_unmatched_events: tuple[dict[str, Any], ...]
+    next_game_start_utc: str | None
     evidence_recorded: bool
 
     def to_record(self) -> dict[str, Any]:
@@ -53,6 +68,8 @@ class SlatePublishReport:
             "unchanged_game_pks",
             "excluded_games",
             "simulation_manifests",
+            "odds_sportsbooks",
+            "odds_unmatched_events",
         ):
             payload[key] = list(payload[key])
         return payload
@@ -247,6 +264,12 @@ def publish_slate(
     client: MLBStatsHTTPClient | None = None,
     captured_at: datetime | None = None,
     progress_callback: Callable[[int, int, int, str], None] | None = None,
+    odds_api_key: str | None = None,
+    odds_bookmakers: tuple[str, ...] = DEFAULT_BOOKMAKERS,
+    odds_markets: tuple[str, ...] = DEFAULT_MARKETS,
+    odds_snapshot_root: str | Path = "runtime/snapshots/odds/the_odds_api",
+    odds_client: TheOddsAPIClient | None = None,
+    require_odds: bool = False,
 ) -> SlatePublishReport:
     """Refresh inputs and centrally publish changed pregame simulations.
 
@@ -297,6 +320,39 @@ def publish_slate(
                         "reason": reason,
                     }
                 )
+
+        odds_status = "NOT_CONFIGURED"
+        odds_provider: str | None = None
+        odds_quotes_received = 0
+        odds_quotes_changed = 0
+        odds_sportsbooks: tuple[str, ...] = ()
+        odds_snapshot_path: str | None = None
+        odds_unmatched_events: tuple[dict[str, Any], ...] = ()
+        configured_key = odds_api_key or os.environ.get("SPORTS_SUPERMODEL_ODDS_API_KEY")
+        if odds_client is not None or configured_key:
+            odds_provider = "the_odds_api"
+            try:
+                provider_client = odds_client or TheOddsAPIClient(str(configured_key))
+                odds_report = refresh_the_odds_api(
+                    client=provider_client,
+                    slate_date=slate_date,
+                    contexts=eligible,
+                    market_store_root=market_store_root,
+                    raw_snapshot_root=odds_snapshot_root,
+                    bookmakers=odds_bookmakers,
+                    markets=odds_markets,
+                    captured_at=timestamp,
+                )
+                odds_status = odds_report.status
+                odds_quotes_received = odds_report.quotes_received
+                odds_quotes_changed = odds_report.quotes_changed
+                odds_sportsbooks = odds_report.sportsbooks
+                odds_snapshot_path = odds_report.raw_snapshot_path
+                odds_unmatched_events = odds_report.unmatched_events
+            except (OddsProviderError, ValueError) as exc:
+                odds_status = f"ERROR:{exc}"
+                if require_odds:
+                    raise
 
         model_hash = model_data_fingerprint(
             data_dir=data_dir,
@@ -360,9 +416,16 @@ def publish_slate(
         if not eligible:
             status = "NO_PREGAME_GAMES"
         elif not changed:
-            status = "SKIPPED_UNCHANGED"
+            status = "PRICES_UPDATED" if odds_quotes_changed else "SKIPPED_UNCHANGED"
         else:
             status = "PASS"
+
+        starts = [
+            start
+            for start in (_parse_start(context.game_datetime) for context in eligible)
+            if start is not None
+        ]
+        next_game_start = _utc_iso(min(starts)) if starts else None
 
         report_path = _report_path(Path(publisher_report_root), slate_date, timestamp)
         report = SlatePublishReport(
@@ -389,7 +452,15 @@ def publish_slate(
                 if workflow_result is not None
                 else ()
             ),
-            market_quotes_persisted=False,
+            market_quotes_persisted=bool(odds_quotes_changed),
+            odds_refresh_status=odds_status,
+            odds_provider=odds_provider,
+            odds_quotes_received=odds_quotes_received,
+            odds_quotes_changed=odds_quotes_changed,
+            odds_sportsbooks=odds_sportsbooks,
+            odds_snapshot_path=odds_snapshot_path,
+            odds_unmatched_events=odds_unmatched_events,
+            next_game_start_utc=next_game_start,
             evidence_recorded=False,
         )
         _write_json_atomic(report_path, report.to_record())
