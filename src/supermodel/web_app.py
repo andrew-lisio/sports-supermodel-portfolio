@@ -551,8 +551,10 @@ def render_app() -> None:
         settings_left, settings_right = st.columns([1.4, 1])
         with settings_left:
             st.caption(
-                "The app automatically loads official schedule, starter, lineup, weather, "
-                "bullpen, park, and recent-form context. Games at or past scheduled start are locked."
+                "The app captures official starter, lineup, bullpen, weather, park, and recent-form "
+                "context. Current team/starter history drives the base models; weather and park apply "
+                "bounded score-simulation adjustments. Other advanced live context is recorded for "
+                "prospective validation and does not alter the base prediction unless explicitly activated."
             )
         with settings_right:
             include_parlays = st.toggle("Show two-leg comparison", value=True)

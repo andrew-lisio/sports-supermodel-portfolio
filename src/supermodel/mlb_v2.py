@@ -358,11 +358,19 @@ def build_pregame_features(
     team_states: dict[str, TeamState] = defaultdict(TeamState)
     starter_states: dict[str, StarterState] = defaultdict(StarterState)
     output: list[dict[str, Any]] = []
-    external_lookup: dict[tuple, dict] = {}
+    external_lookup_by_pk: dict[int, dict] = {}
+    external_lookup_by_match: dict[tuple, dict] = {}
     if external_features is not None and not external_features.empty:
         for r in external_features.to_dict("records"):
+            game_pk = r.get("game_pk")
+            if game_pk is not None and pd.notna(game_pk):
+                external_lookup_by_pk[int(game_pk)] = r
             key = (pd.Timestamp(r["date"]), r["team_a"], r["team_b"])
-            external_lookup[key] = r
+            if key in external_lookup_by_match and game_pk is None:
+                raise ValueError(
+                    "Ambiguous external features for a same-day matchup; include game_pk"
+                )
+            external_lookup_by_match[key] = r
 
     # Update after every full date to avoid same-day leakage.
     for date, day_games in games.groupby("date", sort=True):
@@ -410,14 +418,21 @@ def build_pregame_features(
             for name in spa:
                 rec[f"{name}_diff"] = spa[name] - spb[name]
 
-            ext = external_lookup.get((date, a, b), {})
+            game_pk = getattr(g, "game_pk", None)
+            ext = (
+                external_lookup_by_pk.get(int(game_pk), {})
+                if game_pk is not None and not pd.isna(game_pk)
+                else {}
+            )
+            if not ext:
+                ext = external_lookup_by_match.get((date, a, b), {})
             for name in LIVE_FEATURES:
                 # Difference-style values can be supplied directly as `<name>_diff`.
-                # Game-level values use the plain name.
-                if f"{name}_diff" in ext:
+                # Game-level values use the plain name. NaN remains explicitly missing.
+                if f"{name}_diff" in ext and pd.notna(ext[f"{name}_diff"]):
                     value = float(ext[f"{name}_diff"])
                     missing = 0.0
-                elif name in ext:
+                elif name in ext and pd.notna(ext[name]):
                     value = float(ext[name])
                     missing = 0.0
                 else:

@@ -576,6 +576,27 @@ The conflict audit reports helpful passes, false passes, accepted-pick accuracy,
 and performance by exact trigger. It does not automatically retune thresholds. See
 `docs/V2_4_CONFLICT_FILTER_AUDIT.md`.
 
+Audit which captured live features actually have prediction authority:
+
+```powershell
+sports-supermodel-features audit
+```
+
+The audit distinguishes historically trained signal, direct bounded score proxies,
+prospective adaptive-only context, and capture-only evidence fields. See
+`docs/FEATURE_AUTHORITY_AUDIT.md`.
+
+Build the leakage-safe historical starter/bullpen context dataset for RC3 development:
+
+```powershell
+sports-supermodel-pitching backfill --start-date 2026-03-25 --end-date 2026-07-28
+sports-supermodel-pitching audit
+```
+
+The generated pitching dataset is development input only until matched chronological
+validation clears an activation gate; RC2 probabilities remain unchanged by merely
+creating the file.
+
 See `docs/V2_4_PHASE6B_EVIDENCE_PIPELINE.md` for closing-line, outcome, provenance, and
 validation-gate workflows.
 
@@ -591,3 +612,18 @@ sports-supermodel-adaptive show
 The overlay cannot alter V2.4 until enough graded prospective games exist and its
 chronological activation test passes. No background predictions occur while the program is
 not running.
+
+## Platform foundation (development)
+
+The `v2.4-platform-foundation` branch adds backend services for the planned public site:
+canonical multi-book markets, custom-line pricing, playable-through prices, persistent simulation
+distributions, High Probability rankings, Best Value rankings, and a unified supported-data
+refresh command.
+
+```powershell
+sports-supermodel-refresh --date 2026-07-31
+```
+
+The refresh command currently updates completed-game history and point-in-time pitching context.
+Lineup/roster, weather, and licensed sportsbook provider slots remain explicitly unconfigured and
+are reported as `PENDING_PROVIDER`; the program does not claim to refresh them yet.

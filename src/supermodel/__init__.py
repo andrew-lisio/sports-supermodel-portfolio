@@ -1,3 +1,17 @@
+"""Sports SuperModel public package interface."""
+
+from .market_schema import MarketQuote, MarketType, QuoteSource
+from .pricing import (
+    OutcomeProbability,
+    PriceEvaluation,
+    evaluate_quote,
+    expected_roi,
+    fair_american_odds,
+    playable_through_odds,
+)
+from .rankings import BEST_AVAILABLE, MarketCandidate, rank_best_value, rank_high_probability
+from .refresh_orchestrator import PlatformRefreshReport, refresh_platform_data
+from .simulation_store import LocalSimulationSnapshotStore, SimulationSnapshot
 from ._version import __version__
 from .evidence import (
     EvidenceIntegrityError,
@@ -11,6 +25,20 @@ from .execution import (
     load_execution_profile,
     resolve_execution_plan,
 )
+from .feature_authority import (
+    FEATURE_AUTHORITY_POLICY_VERSION,
+    build_feature_authority_report,
+    write_feature_authority_report,
+)
+from .pitching_context import (
+    PITCHING_CONTEXT_FEATURES,
+    PITCHING_CONTEXT_SCHEMA_VERSION,
+    PitchingContextError,
+    audit_pitching_context,
+    build_pitching_context_rows,
+    fetch_pitching_context,
+    write_pitching_context,
+)
 from .feature_attribution import (
     AttributionInputError,
     leave_group_at_reference_sensitivity,
@@ -22,7 +50,6 @@ from .feature_registry import (
     group_feature_names,
     validate_feature_groups,
 )
-"""Sports SuperModel public package interface."""
 
 from .game_registry import (
     GameRecord,
@@ -156,6 +183,16 @@ __all__ = [
     "WorkflowResult",
     "capture_official_slate",
     "evaluate_captured_slate",
+    "FEATURE_AUTHORITY_POLICY_VERSION",
+    "build_feature_authority_report",
+    "write_feature_authority_report",
+    "PITCHING_CONTEXT_FEATURES",
+    "PITCHING_CONTEXT_SCHEMA_VERSION",
+    "PitchingContextError",
+    "audit_pitching_context",
+    "build_pitching_context_rows",
+    "fetch_pitching_context",
+    "write_pitching_context",
     "AttributionInputError",
     "leave_group_at_reference_sensitivity",
     "FEATURE_GROUP_ORDER",
@@ -169,4 +206,21 @@ __all__ = [
     "latest_starter_training_rows",
     "parse_innings_pitched",
     "parse_pitcher_season_stats",
+    "MarketQuote",
+    "MarketType",
+    "QuoteSource",
+    "OutcomeProbability",
+    "PriceEvaluation",
+    "evaluate_quote",
+    "expected_roi",
+    "fair_american_odds",
+    "playable_through_odds",
+    "BEST_AVAILABLE",
+    "MarketCandidate",
+    "rank_best_value",
+    "rank_high_probability",
+    "PlatformRefreshReport",
+    "refresh_platform_data",
+    "LocalSimulationSnapshotStore",
+    "SimulationSnapshot",
 ]

@@ -176,3 +176,16 @@
 - Parallelized independent ensemble components, matched baseline/candidate fits, and
   bounded candidate experiments without changing prediction contracts.
 - Added execution metadata and serial-equivalence tests.
+
+## 2.4.0.dev4+platform.foundation.1
+
+- Added a canonical sportsbook/custom-line quote schema for MLB moneylines, run lines,
+  game totals, and team totals.
+- Added push-aware fair odds, expected ROI, and conservative playable-through prices.
+- Added persistent compressed simulation snapshots so odds changes can be repriced without
+  rerunning 100,000 simulations.
+- Added price-independent High Probability and global-sportsbook Best Value ranking services.
+- Added `sports-supermodel-refresh` for automatic completed-history and cached pitching-context
+  refresh through the day before a slate.
+- Preserved V2.3.3 production and V2.4 RC2 predictive identities; the rejected RC3 pitching
+  feature experiment remains inactive.
