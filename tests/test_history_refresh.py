@@ -145,6 +145,8 @@ def test_refresh_completed_history_persists_and_reuses_cache(tmp_path):
     assert report.status == "PASS"
     assert report.checked_through_date == "2026-07-20"
     assert report.backfilled_games == 1
+    assert report.reconciled_games == 0
+    assert report.reconciled_game_pks == ()
     assert len(merged) == 2
     assert cache.exists()
     assert report.state_path.exists()
@@ -161,7 +163,92 @@ def test_refresh_completed_history_persists_and_reuses_cache(tmp_path):
     )
     assert second_client.calls == []
     assert second_report.backfilled_games == 0
+    assert second_report.reconciled_games == 0
     assert len(merged_again) == 2
+
+
+def test_refresh_reconciles_rescheduled_final_game_by_game_pk(tmp_path):
+    store = ImmutableSnapshotStore(tmp_path / "snapshots")
+    cache = tmp_path / "runtime" / "mlb_completed_games.csv"
+    captured = datetime(2026, 7, 30, 12, tzinfo=timezone.utc)
+
+    original = _game(
+        823598,
+        "2026-07-28",
+        away="ATL",
+        home="NYM",
+        away_score=0,
+        home_score=0,
+    )
+    refresh_completed_history(
+        _base_games(),
+        slate_date="2026-07-29",
+        client=FakeClient(_payload(original, date="2026-07-28")),
+        snapshot_store=store,
+        captured_at=captured,
+        cache_path=cache,
+    )
+
+    rescheduled_final = _game(
+        823598,
+        "2026-07-29",
+        away="ATL",
+        home="NYM",
+        away_score=1,
+        home_score=0,
+    )
+    merged, report = refresh_completed_history(
+        _base_games(),
+        slate_date="2026-07-30",
+        client=FakeClient(_payload(rescheduled_final, date="2026-07-29")),
+        snapshot_store=store,
+        captured_at=captured,
+        cache_path=cache,
+    )
+
+    assert report.status == "PASS"
+    assert report.backfilled_games == 0
+    assert report.reconciled_games == 1
+    assert report.reconciled_game_pks == (823598,)
+    row = merged.loc[merged["game_pk"] == 823598].iloc[0]
+    assert row.date == pd.Timestamp("2026-07-29")
+    assert row.team_a == "ATL"
+    assert row.team_b == "NYM"
+    assert float(row.a_runs) == 1.0
+    assert float(row.b_runs) == 0.0
+
+
+def test_refresh_rejects_conflicting_team_identity_for_same_game_pk(tmp_path):
+    store = ImmutableSnapshotStore(tmp_path / "snapshots")
+    cache = tmp_path / "runtime" / "mlb_completed_games.csv"
+    captured = datetime(2026, 7, 30, 12, tzinfo=timezone.utc)
+
+    refresh_completed_history(
+        _base_games(),
+        slate_date="2026-07-29",
+        client=FakeClient(_payload(_game(823598, "2026-07-28"), date="2026-07-28")),
+        snapshot_store=store,
+        captured_at=captured,
+        cache_path=cache,
+    )
+
+    conflicting = _game(
+        823598,
+        "2026-07-29",
+        away="CCC",
+        home="DDD",
+        away_score=1,
+        home_score=0,
+    )
+    with pytest.raises(HistoryFreshnessError, match="could not be reconciled"):
+        refresh_completed_history(
+            _base_games(),
+            slate_date="2026-07-30",
+            client=FakeClient(_payload(conflicting, date="2026-07-29")),
+            snapshot_store=store,
+            captured_at=captured,
+            cache_path=cache,
+        )
 
 
 def test_refresh_filters_cache_after_requested_slate_date(tmp_path):

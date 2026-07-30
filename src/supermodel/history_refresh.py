@@ -34,6 +34,8 @@ class HistoryRefreshReport:
     fetched_start_date: str | None
     fetched_end_date: str | None
     backfilled_games: int
+    reconciled_games: int
+    reconciled_game_pks: tuple[int, ...]
     cached_games: int
     cache_path: Path
     state_path: Path
@@ -317,11 +319,25 @@ def _write_state_atomic(payload: dict[str, Any], path: Path) -> None:
     temporary.replace(path)
 
 
-def _merge_cached_games(existing: pd.DataFrame, incoming: pd.DataFrame) -> pd.DataFrame:
+def _merge_cached_games(
+    existing: pd.DataFrame,
+    incoming: pd.DataFrame,
+) -> tuple[pd.DataFrame, tuple[int, ...]]:
+    """Merge completed-game cache rows using the newest official final record.
+
+    MLB can retain the same ``gamePk`` when a game is postponed and moved to a new
+    official date. A previously cached final-looking placeholder may therefore conflict
+    with the later authoritative final score. When the freshly fetched official record
+    has the same two teams, it is safe to replace the older cached row while preserving
+    the immutable schedule snapshots as the audit trail. Team-identity changes still
+    fail closed because they indicate corruption or an unexpected upstream identity
+    change rather than an ordinary postponement correction.
+    """
+
     if incoming.empty:
-        return existing.copy()
+        return existing.copy(), ()
     if existing.empty:
-        return incoming.sort_values(["date", "game_pk"]).reset_index(drop=True)
+        return incoming.sort_values(["date", "game_pk"]).reset_index(drop=True), ()
     combined = pd.concat([existing, incoming], ignore_index=True)
     conflicts = combined.groupby("game_pk").agg(
         a_scores=("a_runs", "nunique"),
@@ -337,15 +353,68 @@ def _merge_cached_games(existing: pd.DataFrame, incoming: pd.DataFrame) -> pd.Da
         | (conflicts["team_b_values"] > 1)
         | (conflicts["dates"] > 1)
     ]
+    reconciled: list[int] = []
     if not bad.empty:
+        incoming_ids = set(incoming["game_pk"].astype(int))
+        unresolved: list[int] = []
+        for game_pk in bad.index.astype(int):
+            if game_pk not in incoming_ids:
+                unresolved.append(game_pk)
+                continue
+
+            old_rows = existing.loc[existing["game_pk"].astype(int) == game_pk]
+            new_rows = incoming.loc[incoming["game_pk"].astype(int) == game_pk]
+            if len(new_rows) != 1:
+                unresolved.append(game_pk)
+                continue
+
+            canonical = new_rows.iloc[0]
+            same_teams = (
+                old_rows["team_a"].astype(str).eq(str(canonical["team_a"])).all()
+                and old_rows["team_b"].astype(str).eq(str(canonical["team_b"])).all()
+            )
+            if not same_teams:
+                unresolved.append(game_pk)
+                continue
+
+            reconciled.append(game_pk)
+
+        if unresolved:
+            raise HistoryFreshnessError(
+                "Conflicting completed-game cache records could not be reconciled for "
+                f"gamePk={sorted(unresolved)}"
+            )
+
+        existing = existing.loc[
+            ~existing["game_pk"].astype(int).isin(reconciled)
+        ].copy()
+        combined = pd.concat([existing, incoming], ignore_index=True)
+
+    remaining_conflicts = combined.groupby("game_pk").agg(
+        a_scores=("a_runs", "nunique"),
+        b_scores=("b_runs", "nunique"),
+        team_a_values=("team_a", "nunique"),
+        team_b_values=("team_b", "nunique"),
+        dates=("date", "nunique"),
+    )
+    remaining_bad = remaining_conflicts[
+        (remaining_conflicts["a_scores"] > 1)
+        | (remaining_conflicts["b_scores"] > 1)
+        | (remaining_conflicts["team_a_values"] > 1)
+        | (remaining_conflicts["team_b_values"] > 1)
+        | (remaining_conflicts["dates"] > 1)
+    ]
+    if not remaining_bad.empty:
         raise HistoryFreshnessError(
-            f"Conflicting completed-game cache records for gamePk={bad.index.astype(int).tolist()}"
+            "Conflicting completed-game cache records for "
+            f"gamePk={remaining_bad.index.astype(int).tolist()}"
         )
-    return (
+    merged = (
         combined.sort_values(["date", "game_pk"])
         .drop_duplicates("game_pk", keep="last")
         .reset_index(drop=True)
     )
+    return merged, tuple(sorted(reconciled))
 
 
 def refresh_completed_history(
@@ -387,6 +456,7 @@ def refresh_completed_history(
     fetch_start = checked_through + pd.Timedelta(days=1)
     schedule_snapshot_path: Path | None = None
     backfilled_games = 0
+    reconciled_game_pks: tuple[int, ...] = ()
 
     if fetch_start <= target_through:
         try:
@@ -424,7 +494,7 @@ def refresh_completed_history(
                 f"refusing a stale/incomplete run. gamePk={blocking}"
             )
         before = set(cached["game_pk"].astype(int)) if not cached.empty else set()
-        cached = _merge_cached_games(cached, incoming)
+        cached, reconciled_game_pks = _merge_cached_games(cached, incoming)
         after = set(cached["game_pk"].astype(int)) if not cached.empty else set()
         backfilled_games = len(after - before)
         checked_through = target_through
@@ -435,6 +505,7 @@ def refresh_completed_history(
                 "checked_through_date": checked_through.date().isoformat(),
                 "updated_at_utc": captured_at.isoformat().replace("+00:00", "Z"),
                 "cached_games": int(len(cached)),
+                "reconciled_game_pks": list(reconciled_game_pks),
             },
             state_path,
         )
@@ -468,6 +539,8 @@ def refresh_completed_history(
             target_through.date().isoformat() if fetch_start <= target_through else None
         ),
         backfilled_games=backfilled_games,
+        reconciled_games=len(reconciled_game_pks),
+        reconciled_game_pks=reconciled_game_pks,
         cached_games=int(len(cached)),
         cache_path=cache,
         state_path=state_path,
