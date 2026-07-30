@@ -89,3 +89,19 @@ def test_custom_line_checker_prices_from_latest_snapshot(tmp_path):
     )
     assert evaluation.probability.win == 0.60
     assert evaluation.expected_roi > 0.0
+
+
+def test_high_probability_falls_back_to_model_only_moneylines(tmp_path):
+    from supermodel.platform_views import high_probability_snapshot_records
+
+    sim_root = tmp_path / "simulations"
+    LocalSimulationSnapshotStore(sim_root).save(_snapshot(1, "ATL", "MIA", 0.60))
+    LocalSimulationSnapshotStore(sim_root).save(_snapshot(2, "BOS", "NYY", 0.52))
+    records = high_probability_snapshot_records(
+        event_date="2026-07-30",
+        simulation_store_root=sim_root,
+        top_n=3,
+    )
+    assert records[0]["selection"] == "ATL"
+    assert records[0]["sportsbook"] is None
+    assert records[0]["odds_available"] is False

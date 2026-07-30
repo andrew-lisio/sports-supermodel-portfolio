@@ -1,0 +1,121 @@
+from datetime import datetime, timezone
+from pathlib import Path
+from types import SimpleNamespace
+
+from supermodel.providers import PregameContext
+from supermodel.publisher import (
+    game_input_fingerprint,
+    publish_slate,
+    publisher_lock,
+)
+from supermodel.workflow import CapturedSlate
+
+
+NOW = datetime(2026, 7, 30, 12, tzinfo=timezone.utc)
+
+
+def _context() -> PregameContext:
+    return PregameContext(
+        game_date="2026-07-30",
+        away_team="ATL",
+        home_team="MIA",
+        game_pk=123,
+        game_datetime="2026-07-30T23:00:00Z",
+        status_abstract="Preview",
+        status_detailed="Scheduled",
+        weather_run_factor=1.04,
+        away_starter_stats_snapshot_sha256="volatile-one",
+        provenance={"capture": "first"},
+    )
+
+
+def test_game_input_fingerprint_ignores_transport_provenance():
+    first = _context()
+    second = _context()
+    second.away_starter_stats_snapshot_sha256 = "volatile-two"
+    second.provenance = {"capture": "second"}
+    assert game_input_fingerprint(context=first, model_data_hash="model") == game_input_fingerprint(
+        context=second, model_data_hash="model"
+    )
+    second.weather_run_factor = 1.08
+    assert game_input_fingerprint(context=first, model_data_hash="model") != game_input_fingerprint(
+        context=second, model_data_hash="model"
+    )
+
+
+def test_publisher_only_runs_changed_baseball_inputs(tmp_path, monkeypatch):
+    schedule = tmp_path / "schedule.json"
+    schedule.write_text("{}", encoding="utf-8")
+    context = _context()
+    captured = CapturedSlate(
+        game_date="2026-07-30",
+        captured_at=NOW,
+        schedule_path=schedule,
+        pregame_paths=(),
+        starter_paths=(),
+        advanced_paths=(),
+        contexts=(context,),
+    )
+    monkeypatch.setattr("supermodel.publisher.capture_official_slate", lambda **kwargs: captured)
+    monkeypatch.setattr("supermodel.publisher.model_data_fingerprint", lambda **kwargs: "model")
+
+    class FakeStore:
+        snapshots = {}
+
+        def __init__(self, root):
+            self.root = root
+
+        def latest(self, game_pk, *, model_track="production"):
+            return self.snapshots.get((game_pk, model_track))
+
+    monkeypatch.setattr("supermodel.publisher.LocalSimulationSnapshotStore", FakeStore)
+    calls = []
+
+    def fake_evaluate(**kwargs):
+        calls.append(kwargs)
+        for game_pk, input_hash in kwargs["snapshot_input_hashes"].items():
+            for track in ("production", "shadow"):
+                FakeStore.snapshots[(game_pk, track)] = SimpleNamespace(
+                    input_snapshot_hash=input_hash,
+                    simulations=kwargs["simulations"],
+                )
+        artifact = tmp_path / "evaluation.json"
+        artifact.write_text("{}", encoding="utf-8")
+        manifest = tmp_path / "manifest.json"
+        manifest.write_text("{}", encoding="utf-8")
+        return SimpleNamespace(json_path=artifact, simulation_manifest_paths=(manifest,))
+
+    monkeypatch.setattr("supermodel.publisher.evaluate_captured_slate", fake_evaluate)
+    common = dict(
+        slate_date="2026-07-30",
+        data_dir=tmp_path / "data",
+        history_cache_path=tmp_path / "history.csv",
+        publisher_state_path=tmp_path / "state.json",
+        publisher_report_root=tmp_path / "reports",
+        publisher_lock_path=tmp_path / "publisher.lock",
+        simulation_store_root=tmp_path / "simulations",
+        refresh=False,
+        captured_at=NOW,
+    )
+    first = publish_slate(**common)
+    second = publish_slate(**common)
+    assert first.status == "PASS"
+    assert first.published_game_pks == (123,)
+    assert first.market_quotes_persisted is False
+    assert first.evidence_recorded is False
+    assert second.status == "SKIPPED_UNCHANGED"
+    assert second.unchanged_game_pks == (123,)
+    assert len(calls) == 1
+    assert calls[0]["persist_market_quotes"] is False
+    assert calls[0]["record_evidence"] is False
+
+
+def test_publisher_lock_rejects_overlap(tmp_path):
+    lock = tmp_path / "publisher.lock"
+    with publisher_lock(lock, now=NOW):
+        try:
+            with publisher_lock(lock, now=NOW):
+                raise AssertionError("overlapping lock should not be acquired")
+        except RuntimeError as exc:
+            assert "already running" in str(exc)
+    assert not lock.exists()

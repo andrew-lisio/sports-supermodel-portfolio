@@ -17,6 +17,7 @@ from supermodel.platform_views import (
     best_value_records,
     evaluate_custom_line,
     high_probability_records,
+    high_probability_snapshot_records,
     load_market_candidates,
 )
 from supermodel.rankings import BEST_AVAILABLE
@@ -563,7 +564,7 @@ def _render_probability_cards(st, records: list[dict[str, Any]]) -> None:
             <div class="ssm-result-card">
               <div class="ssm-rank">Probability rank #{rank}</div>
               <div class="ssm-pick">{_market_label(record)}</div>
-              <div class="ssm-small">{record.get('sportsbook', '—')} · {_format_american_odds(record.get('american_odds'))}</div>
+              <div class="ssm-small">{record.get('sportsbook') or 'Model probability'} · {_format_american_odds(record.get('american_odds'))}</div>
               <div style="margin-top:.8rem; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem">
                 <div><div class="ssm-model-label">Raw probability</div><div class="ssm-model-value">{_format_probability(record.get('win_probability'))}</div></div>
                 <div><div class="ssm-model-label">Push probability</div><div class="ssm-model-value">{_format_probability(record.get('push_probability'))}</div></div>
@@ -607,11 +608,19 @@ def _render_high_probability_page(st, *, game_date: str) -> None:
         simulation_store_root=_SIMULATION_STORE,
         market_store_root=_MARKET_STORE,
     )
-    if not candidates:
-        st.info("No saved simulation-and-market snapshot exists for this slate date yet.")
-        return
     top_n = int(st.selectbox("Outcomes shown", [5, 10, 20, 50], index=1))
-    records = high_probability_records(candidates, top_n=top_n)
+    if candidates:
+        records = high_probability_records(candidates, top_n=top_n)
+    else:
+        records = high_probability_snapshot_records(
+            event_date=game_date,
+            model_track="production",
+            simulation_store_root=_SIMULATION_STORE,
+            top_n=top_n,
+        )
+    if not records:
+        st.info("No backend simulation snapshot exists for this slate date yet.")
+        return
     _render_probability_cards(st, records)
 
 

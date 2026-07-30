@@ -646,3 +646,14 @@ sports-supermodel-refresh --date 2026-07-31
 The refresh command currently updates completed-game history and point-in-time pitching context.
 Lineup/roster, weather, and licensed sportsbook provider slots remain explicitly unconfigured and
 are reported as `PENDING_PROVIDER`; the program does not claim to refresh them yet.
+
+The backend publication worker is separate from the public website:
+
+```powershell
+sports-supermodel-publish --date 2026-07-31
+```
+
+It captures the official pregame slate, detects which baseball inputs materially changed, and runs
+the canonical production/shadow simulations only for those games. It does not persist synthetic
+prices or betting evidence. Re-running it with unchanged inputs returns `SKIPPED_UNCHANGED`, while
+sportsbook-only price movement is handled by the pricing layer without another simulation.

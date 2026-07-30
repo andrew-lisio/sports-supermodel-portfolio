@@ -6,7 +6,7 @@ from hashlib import sha256
 from pathlib import Path
 import os
 import subprocess
-from typing import Iterable
+from typing import Any, Iterable, Mapping
 
 import yaml
 
@@ -481,11 +481,22 @@ def _game_input_snapshot_hash(
     *,
     captured_slate: CapturedSlate,
     game_pk: int,
-    market_snapshot_path: Path,
+    market_snapshot_path: Path | None = None,
+    base_input_hash: str | None = None,
 ) -> str:
-    """Hash the immutable inputs used for one game's canonical simulation snapshot."""
+    """Hash immutable inputs used for one canonical simulation snapshot.
 
-    parts = [captured_slate.schedule_path.read_bytes(), market_snapshot_path.read_bytes()]
+    Interactive/manual runs keep the captured market payload in the identity for
+    backward compatibility. Scheduled backend publications pass a baseball-only
+    ``base_input_hash`` and omit the market path so changing odds only reprices an
+    existing distribution instead of forcing another simulation.
+    """
+
+    parts = [captured_slate.schedule_path.read_bytes()]
+    if market_snapshot_path is not None:
+        parts.append(Path(market_snapshot_path).read_bytes())
+    if base_input_hash:
+        parts.append(str(base_input_hash).encode("utf-8"))
     candidate_paths = (
         *captured_slate.pregame_paths,
         *captured_slate.starter_paths,
@@ -517,70 +528,110 @@ def _persist_platform_outputs(
     sportsbook_name: str,
     market_store_root: str | Path,
     simulation_store_root: str | Path,
+    persist_market_quotes: bool = True,
+    snapshot_input_hashes: Mapping[int, str] | None = None,
+    snapshot_metadata: Mapping[str, Any] | None = None,
 ) -> tuple[Path | None, tuple[Path, ...]]:
-    quote_store = LocalMarketQuoteStore(market_store_root)
     context_by_pk = {
         int(context.game_pk): context
         for context in captured_slate.contexts
         if context.game_pk is not None
     }
-    quotes: list[MarketQuote] = []
-    for line in moneylines:
-        context = None
-        if line.game_pk is not None:
-            context = context_by_pk.get(int(line.game_pk))
-        if context is None:
-            context = next(
-                candidate
-                for candidate in captured_slate.contexts
-                if candidate.game_date == line.game_date
-                and candidate.away_team == line.away_team
-                and candidate.home_team == line.home_team
-            )
-        game_pk = int(context.game_pk)
-        for team, odds in ((context.away_team, line.away_odds), (context.home_team, line.home_odds)):
-            quotes.append(
-                MarketQuote(
-                    game_pk=game_pk,
-                    sportsbook=sportsbook_name,
-                    market_type="moneyline",
-                    selection=team,
-                    american_odds=int(odds),
-                    captured_at=market_timestamp,
-                    source=QuoteSource.MANUAL,
-                    event_date=captured_slate.game_date,
+    quote_path: Path | None = None
+    if persist_market_quotes:
+        quote_store = LocalMarketQuoteStore(market_store_root)
+        quotes: list[MarketQuote] = []
+        for line in moneylines:
+            context = None
+            if line.game_pk is not None:
+                context = context_by_pk.get(int(line.game_pk))
+            if context is None:
+                context = next(
+                    candidate
+                    for candidate in captured_slate.contexts
+                    if candidate.game_date == line.game_date
+                    and candidate.away_team == line.away_team
+                    and candidate.home_team == line.home_team
                 )
-            )
-    quote_path = quote_store.save_many(quotes)
+            game_pk = int(context.game_pk)
+            for team, odds in (
+                (context.away_team, line.away_odds),
+                (context.home_team, line.home_odds),
+            ):
+                quotes.append(
+                    MarketQuote(
+                        game_pk=game_pk,
+                        sportsbook=sportsbook_name,
+                        market_type="moneyline",
+                        selection=team,
+                        american_odds=int(odds),
+                        captured_at=market_timestamp,
+                        source=QuoteSource.MANUAL,
+                        event_date=captured_slate.game_date,
+                    )
+                )
+        quote_path = quote_store.save_many(quotes)
 
     snapshot_store = LocalSimulationSnapshotStore(simulation_store_root)
     manifests: list[Path] = []
+    extra_metadata = dict(snapshot_metadata or {})
     for row in evaluation.to_dict("records"):
         game_pk = int(row["game_pk"])
-        input_hash = _game_input_snapshot_hash(
-            captured_slate=captured_slate,
-            game_pk=game_pk,
-            market_snapshot_path=market_snapshot_path,
-        )
+        if snapshot_input_hashes is not None and game_pk in snapshot_input_hashes:
+            input_hash = str(snapshot_input_hashes[game_pk])
+        else:
+            input_hash = _game_input_snapshot_hash(
+                captured_slate=captured_slate,
+                game_pk=game_pk,
+                market_snapshot_path=market_snapshot_path,
+            )
         away = str(row["away_team"])
         production_components = {
             name: float(row[f"p_{name}_{away}"])
-            for name in ("logistic", "random_forest", "neural_network", "elo_pyth", "xgboost", "lightgbm", "catboost")
+            for name in (
+                "logistic",
+                "random_forest",
+                "neural_network",
+                "elo_pyth",
+                "xgboost",
+                "lightgbm",
+                "catboost",
+            )
             if f"p_{name}_{away}" in row
         }
         shadow_components = {
             name: float(row[f"shadow_p_{name}_{away}"])
-            for name in ("logistic", "random_forest", "neural_network", "elo_pyth", "xgboost", "lightgbm", "catboost")
+            for name in (
+                "logistic",
+                "random_forest",
+                "neural_network",
+                "elo_pyth",
+                "xgboost",
+                "lightgbm",
+                "catboost",
+            )
             if f"shadow_p_{name}_{away}" in row
         }
         common_metadata = {
             "game_date": captured_slate.game_date,
-            "sportsbook": sportsbook_name,
+            "sportsbook": sportsbook_name if persist_market_quotes else None,
+            "odds_available": bool(persist_market_quotes),
             "history_freshness_status": row.get("history_freshness_status"),
             "history_checked_through": row.get("history_checked_through"),
             "lineups_confirmed": bool(row.get("lineups_confirmed", False)),
+            **extra_metadata,
         }
-        for track, draws, version, commit, away_probability, home_probability, components, status, reasons in (
+        for (
+            track,
+            draws,
+            version,
+            commit,
+            away_probability,
+            home_probability,
+            components,
+            status,
+            reasons,
+        ) in (
             (
                 "production",
                 production_draws,
@@ -657,6 +708,10 @@ def evaluate_captured_slate(
     sportsbook_name: str = "Custom",
     market_store_root: str | Path = "runtime/markets",
     simulation_store_root: str | Path = "runtime/simulations",
+    persist_market_quotes: bool = True,
+    record_evidence: bool = True,
+    snapshot_input_hashes: Mapping[int, str] | None = None,
+    snapshot_metadata: Mapping[str, Any] | None = None,
 ) -> WorkflowResult:
     """Run the complete prediction-only pipeline from a captured official slate."""
 
@@ -807,21 +862,27 @@ def evaluate_captured_slate(
         sportsbook_name=sportsbook_name,
         market_store_root=market_store_root,
         simulation_store_root=simulation_store_root,
+        persist_market_quotes=persist_market_quotes,
+        snapshot_input_hashes=snapshot_input_hashes,
+        snapshot_metadata=snapshot_metadata,
     )
 
-    ledger_path = record_prediction_evidence(
-        evaluation=evaluation,
-        contexts=selected_contexts,
-        moneylines=moneylines,
-        pregame_paths=captured_slate.pregame_paths,
-        market_snapshot_path=market_snapshot_path,
-        prediction_artifact=json_path,
-        evidence_ledger=evidence_ledger,
-        recorded_at=market_timestamp,
-        input_source=input_source,
-        starter_paths=captured_slate.starter_paths,
-        advanced_paths=captured_slate.advanced_paths,
-    )
+    if record_evidence:
+        ledger_path = record_prediction_evidence(
+            evaluation=evaluation,
+            contexts=selected_contexts,
+            moneylines=moneylines,
+            pregame_paths=captured_slate.pregame_paths,
+            market_snapshot_path=market_snapshot_path,
+            prediction_artifact=json_path,
+            evidence_ledger=evidence_ledger,
+            recorded_at=market_timestamp,
+            input_source=input_source,
+            starter_paths=captured_slate.starter_paths,
+            advanced_paths=captured_slate.advanced_paths,
+        )
+    else:
+        ledger_path = Path(evidence_ledger)
 
     return WorkflowResult(
         evaluation=evaluation,

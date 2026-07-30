@@ -114,6 +114,62 @@ def best_value_records(
     return [evaluation_record(item) for item in evaluations]
 
 
+
+def high_probability_snapshot_records(
+    *,
+    event_date: str,
+    model_track: str = "production",
+    simulation_store_root: str | Path = "runtime/simulations",
+    top_n: int | None = None,
+) -> list[dict[str, Any]]:
+    """Rank moneyline outcomes directly from saved simulations when no quotes exist."""
+
+    snapshots = LocalSimulationSnapshotStore(simulation_store_root).list_latest(
+        event_date=event_date,
+        model_track=model_track,
+    )
+    records: list[dict[str, Any]] = []
+    for snapshot in snapshots:
+        if snapshot.away_win_probability is None:
+            ties = snapshot.away_runs == snapshot.home_runs
+            away_probability = float(
+                (snapshot.away_runs > snapshot.home_runs).mean() + 0.5 * ties.mean()
+            )
+            home_probability = 1.0 - away_probability
+        else:
+            away_probability = float(snapshot.away_win_probability)
+            home_probability = float(snapshot.home_win_probability)
+        for selection, probability in (
+            (snapshot.away_team, away_probability),
+            (snapshot.home_team, home_probability),
+        ):
+            records.append(
+                {
+                    "game_pk": snapshot.game_pk,
+                    "sportsbook": None,
+                    "market_type": "moneyline",
+                    "selection": selection,
+                    "american_odds": None,
+                    "captured_at": snapshot.created_at,
+                    "line": None,
+                    "team": selection,
+                    "provider_updated_at": None,
+                    "source": "model",
+                    "event_date": event_date,
+                    "win_probability": probability,
+                    "push_probability": 0.0,
+                    "conservative_win_probability": probability,
+                    "conflict": bool(snapshot.metadata.get("conflict", False)),
+                    "fresh": bool(snapshot.metadata.get("fresh", True)),
+                    "odds_available": False,
+                }
+            )
+    records.sort(
+        key=lambda item: (item["win_probability"], item["game_pk"], item["selection"]),
+        reverse=True,
+    )
+    return records if top_n is None else records[: int(top_n)]
+
 def evaluate_custom_line(
     *,
     quote: MarketQuote,

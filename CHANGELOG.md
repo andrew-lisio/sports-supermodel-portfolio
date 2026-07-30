@@ -189,3 +189,17 @@
   refresh through the day before a slate.
 - Preserved V2.3.3 production and V2.4 RC2 predictive identities; the rejected RC3 pitching
   feature experiment remains inactive.
+
+## 2.4.0.dev4+platform.foundation.5
+
+- Added `sports-supermodel-publish`, a lock-protected backend worker command that refreshes
+  supported inputs and publishes production/shadow simulation snapshots only for new or changed
+  pregame baseball inputs.
+- Separated simulation identity from sportsbook prices for scheduled publications: odds-only
+  changes now reprice existing distributions instead of forcing another 100,000-run simulation.
+- Prevented backend-neutral evaluator prices from entering the canonical market store or the
+  prospective evidence ledger.
+- Added automatic overlap protection, publisher state, immutable run reports, changed-game and
+  skipped-game reporting, and started/postponed/final game exclusion.
+- Made High Probability usable before an odds provider is connected by falling back to model-only
+  moneyline probabilities from the latest published snapshots.

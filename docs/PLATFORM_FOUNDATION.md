@@ -39,3 +39,32 @@ the season start.
 Schedule/starters, lineup/roster, weather, and sportsbook provider slots are explicitly marked
 `PENDING_PROVIDER` until authorized production sources are connected. The command does not
 claim those inputs were refreshed.
+
+## Scheduled backend publisher
+
+`sports-supermodel-publish --date YYYY-MM-DD` is the worker-facing publication command. It:
+
+1. refreshes the supported historical datasets;
+2. captures the official point-in-time MLB slate;
+3. excludes games that have started or are postponed/cancelled/final;
+4. fingerprints the model-authoritative historical data and stable baseball context;
+5. runs production and shadow simulations only for new or materially changed games;
+6. saves the canonical 100,000-draw distributions for the read-only website.
+
+The worker uses neutral internal moneyline placeholders only because the current evaluator expects
+a two-way line object. Those placeholders are never written to the market store and never enter the
+prospective evidence ledger. Licensed or manually entered quotes remain an independent stream and
+reprice saved distributions without changing the simulation-input fingerprint.
+
+The publisher writes an overlap lock at `runtime/state/slate_publisher.lock`, its latest state at
+`runtime/state/slate_publisher.json`, and immutable run reports under
+`runtime/reports/slate_publisher/<date>/`.
+
+Run it manually for worker testing:
+
+```powershell
+sports-supermodel-publish --date 2026-07-31
+```
+
+A second invocation with unchanged baseball inputs returns `SKIPPED_UNCHANGED`. Use `--force` only
+for controlled development checks. Public website visitors never invoke this command.

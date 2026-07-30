@@ -68,3 +68,69 @@ def test_workflow_persists_quotes_and_both_model_tracks(tmp_path):
     store = LocalSimulationSnapshotStore(tmp_path / "simulations")
     assert store.latest(123, model_track="production").away_win_probability == 0.60
     assert store.latest(123, model_track="shadow").away_win_probability == 0.58
+
+
+def test_workflow_can_save_simulations_without_synthetic_market_quotes(tmp_path):
+    schedule = tmp_path / "schedule.json"
+    schedule.write_text("{}", encoding="utf-8")
+    market_snapshot = tmp_path / "market.json"
+    market_snapshot.write_text("{}", encoding="utf-8")
+    captured = CapturedSlate(
+        game_date="2026-07-30",
+        captured_at=datetime(2026, 7, 30, 12, tzinfo=timezone.utc),
+        schedule_path=schedule,
+        pregame_paths=(),
+        starter_paths=(),
+        advanced_paths=(),
+        contexts=(
+            PregameContext(
+                game_date="2026-07-30",
+                away_team="ATL",
+                home_team="MIA",
+                game_pk=123,
+                game_datetime="2026-07-30T23:00:00Z",
+            ),
+        ),
+    )
+    evaluation = pd.DataFrame(
+        [
+            {
+                "game_pk": 123,
+                "away_team": "ATL",
+                "home_team": "MIA",
+                "away_probability": 0.60,
+                "home_probability": 0.40,
+                "shadow_away_probability": 0.58,
+                "shadow_home_probability": 0.42,
+                "selection_status": "PLAY",
+                "shadow_selection_status": "PLAY",
+                "history_freshness_status": "PASS",
+                "history_checked_through": "2026-07-29",
+                "lineups_confirmed": True,
+            }
+        ]
+    )
+    quote_path, manifests = _persist_platform_outputs(
+        captured_slate=captured,
+        evaluation=evaluation,
+        moneylines=[ManualMoneyline("2026-07-30", "ATL", "MIA", 100, 100, 123)],
+        market_timestamp=datetime(2026, 7, 30, 12, tzinfo=timezone.utc),
+        market_snapshot_path=market_snapshot,
+        production_draws={123: (np.array([5, 4]), np.array([3, 6]))},
+        shadow_draws={123: (np.array([4, 2]), np.array([3, 5]))},
+        sportsbook_name="MODEL_ONLY",
+        market_store_root=tmp_path / "markets",
+        simulation_store_root=tmp_path / "simulations",
+        persist_market_quotes=False,
+        snapshot_input_hashes={123: "baseball-only-hash"},
+        snapshot_metadata={"publication_mode": "scheduled_backend"},
+    )
+    assert quote_path is None
+    assert not (tmp_path / "markets").exists()
+    assert len(manifests) == 2
+    snapshot = LocalSimulationSnapshotStore(tmp_path / "simulations").latest(
+        123, model_track="production"
+    )
+    assert snapshot.input_snapshot_hash == "baseball-only-hash"
+    assert snapshot.metadata["odds_available"] is False
+    assert snapshot.metadata["publication_mode"] == "scheduled_backend"
