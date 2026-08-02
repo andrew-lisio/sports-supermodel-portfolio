@@ -26,6 +26,7 @@ def _candidate(
         conservative_win_probability=conservative,
         conflict=bool(snapshot.metadata.get("conflict", False)),
         fresh=bool(snapshot.metadata.get("fresh", True)),
+        metadata=dict(snapshot.metadata),
     )
 
 
@@ -66,6 +67,11 @@ def candidate_record(candidate: MarketCandidate) -> dict[str, Any]:
         "conservative_win_probability": candidate.conservative_win_probability,
         "conflict": candidate.conflict,
         "fresh": candidate.fresh,
+        "series_context_summary": candidate.metadata.get("series_context_summary"),
+        "series_context_conflict": bool(
+            candidate.metadata.get("series_context_conflict", False)
+        ),
+        "series_context_reasons": candidate.metadata.get("series_context_reasons"),
     }
 
 
@@ -161,6 +167,15 @@ def high_probability_snapshot_records(
                     "conservative_win_probability": probability,
                     "conflict": bool(snapshot.metadata.get("conflict", False)),
                     "fresh": bool(snapshot.metadata.get("fresh", True)),
+                    "series_context_summary": snapshot.metadata.get(
+                        "series_context_summary"
+                    ),
+                    "series_context_conflict": bool(
+                        snapshot.metadata.get("series_context_conflict", False)
+                    ),
+                    "series_context_reasons": snapshot.metadata.get(
+                        "series_context_reasons"
+                    ),
                     "odds_available": False,
                 }
             )

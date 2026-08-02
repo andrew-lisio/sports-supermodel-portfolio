@@ -489,6 +489,17 @@ def enrich_advanced_context(
         usage = parse_recent_bullpen_usage(recent_feeds, team_id=int(team_id))
         setattr(context, f"{side}_bullpen_recent_pitches", usage.relief_pitches_weighted)
         setattr(context, f"{side}_bullpen_recent_innings", usage.relief_innings_weighted)
+        setattr(
+            context,
+            f"{side}_bullpen_high_leverage_pitches_yesterday",
+            usage.high_leverage_pitches_yesterday,
+        )
+        setattr(
+            context,
+            f"{side}_bullpen_reliever_appearances_weighted",
+            usage.reliever_appearances_weighted,
+        )
+        setattr(context, f"{side}_bullpen_games_observed", float(usage.games_observed))
         setattr(context, f"{side}_bullpen_fatigue", usage.fatigue)
         setattr(context, f"{side}_closer_available", usage.closer_available)
         raw_sources[f"{side}_recent_schedule"] = recent_schedule

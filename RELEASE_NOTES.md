@@ -51,3 +51,12 @@ This hotfix changes schedule parsing and reliability only. It does not claim an 
 This platform-only unit connects licensed featured MLB odds and a hosted publication loop. It does
 not change either predictive track. The worker reruns games only after baseball-input changes and
 reprices saved simulations when sportsbook prices change.
+
+## 2.4.0.dev4+platform.foundation.7
+
+This platform-only unit adds automatic current-series reconstruction and a conservative
+carryover abstention gate. It publishes prior series scores, record, run differential,
+latest blowout status, bullpen workload, high-leverage usage, and closer availability.
+The layer never changes V2.3.3 or V2.4 probabilities and never flips a pick; it can only
+label a modest-confidence recommendation `PASS — SERIES CONTEXT` when multiple adverse
+signals agree.

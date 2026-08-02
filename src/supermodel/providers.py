@@ -133,6 +133,12 @@ class PregameContext:
     home_bullpen_recent_pitches: float | None = None
     away_bullpen_recent_innings: float | None = None
     home_bullpen_recent_innings: float | None = None
+    away_bullpen_high_leverage_pitches_yesterday: float | None = None
+    home_bullpen_high_leverage_pitches_yesterday: float | None = None
+    away_bullpen_reliever_appearances_weighted: float | None = None
+    home_bullpen_reliever_appearances_weighted: float | None = None
+    away_bullpen_games_observed: float | None = None
+    home_bullpen_games_observed: float | None = None
     away_bullpen_fatigue: float | None = None
     home_bullpen_fatigue: float | None = None
     away_closer_available: float | None = None

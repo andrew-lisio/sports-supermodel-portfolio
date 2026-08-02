@@ -396,6 +396,9 @@ def _results_table(evaluation: pd.DataFrame) -> pd.DataFrame:
         "selection_rank",
         "selection_status",
         "selection_reasons",
+        "series_context_summary",
+        "series_context_conflict",
+        "series_context_reasons",
         "away_team",
         "home_team",
         "pick",
@@ -559,12 +562,16 @@ def _market_label(record: dict[str, Any]) -> str:
 
 def _render_probability_cards(st, records: list[dict[str, Any]]) -> None:
     for rank, record in enumerate(records, start=1):
+        series_summary = record.get("series_context_summary") or "Series context unavailable"
+        carryover = record.get("series_context_reasons") or "No carryover warning"
         st.markdown(
             f"""
             <div class="ssm-result-card">
               <div class="ssm-rank">Probability rank #{rank}</div>
               <div class="ssm-pick">{_market_label(record)}</div>
               <div class="ssm-small">{record.get('sportsbook') or 'Model probability'} · {_format_american_odds(record.get('american_odds'))}</div>
+              <div class="ssm-small" style="margin-top:.35rem">Current series: {series_summary}</div>
+              <div class="ssm-small">Carryover gate: {carryover}</div>
               <div style="margin-top:.8rem; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem">
                 <div><div class="ssm-model-label">Raw probability</div><div class="ssm-model-value">{_format_probability(record.get('win_probability'))}</div></div>
                 <div><div class="ssm-model-label">Push probability</div><div class="ssm-model-value">{_format_probability(record.get('push_probability'))}</div></div>
@@ -809,12 +816,19 @@ def _render_published_slate_page(st, *, game_date: str) -> None:
         home_mean = float(snapshot.home_runs.mean())
         freshness = "Fresh" if bool(snapshot.metadata.get("fresh", True)) else "Stale / blocked"
         conflict = "Conflict" if bool(snapshot.metadata.get("conflict", False)) else "Eligible"
+        series_summary = snapshot.metadata.get(
+            "series_context_summary",
+            "Series context unavailable",
+        )
+        series_reasons = snapshot.metadata.get("series_context_reasons") or "No series-context pass"
         st.markdown(
             f"""
             <div class="ssm-result-card">
               <div class="ssm-rank">gamePk {snapshot.game_pk} · {freshness} · {conflict}</div>
               <div class="ssm-pick">{snapshot.away_team} at {snapshot.home_team}</div>
               <div class="ssm-small">Latest production pick: {pick} · {_format_probability(pick_probability)}</div>
+              <div class="ssm-small" style="margin-top:.35rem">Current series: {series_summary}</div>
+              <div class="ssm-small">Carryover gate: {series_reasons}</div>
               <div style="margin-top:.8rem; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.65rem">
                 <div><div class="ssm-model-label">Away win</div><div class="ssm-model-value">{_format_probability(away_probability)}</div></div>
                 <div><div class="ssm-model-label">Home win</div><div class="ssm-model-value">{_format_probability(home_probability)}</div></div>

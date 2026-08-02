@@ -16,6 +16,20 @@
 
 # Changelog
 
+## 2.4.0.dev4+platform.foundation.7 — Series context and carryover gate
+
+- Reconstruct the active head-to-head series from each club's immediately preceding
+  completed schedule, preventing older series from being mixed into current context.
+- Publish prior scores, series record, run differential, consecutive losses, latest
+  margin, and blowout status for every game.
+- Surface recent bullpen workload, previous-day high-leverage usage, and closer
+  availability as context-only carryover evidence.
+- Add a conservative `PASS — SERIES CONTEXT` abstention gate for modest-confidence
+  picks with multiple adverse signals; raw V2.3.3 and V2.4 probabilities never change.
+- Persist series context in production/shadow simulation metadata and prospective
+  evidence, and display it on the read-only slate page.
+- Add regression coverage for the August 2 Kansas City–Colorado case.
+
 ## Unreleased — Local interface redesign
 
 - Replaced the raw editable odds table with automatic official-slate loading and matchup cards.

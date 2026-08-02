@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Iterable
+from dataclasses import dataclass, field
+from typing import Any, Iterable
 
 from .market_schema import MarketQuote
 from .pricing import OutcomeProbability, PriceEvaluation, evaluate_quote
@@ -17,6 +17,7 @@ class MarketCandidate:
     conservative_win_probability: float | None = None
     conflict: bool = False
     fresh: bool = True
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 def _evaluate(candidate: MarketCandidate, minimum_required_roi: float) -> PriceEvaluation:

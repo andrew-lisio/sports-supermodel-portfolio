@@ -45,6 +45,7 @@ from .market_schema import MarketQuote, QuoteSource
 from .market_store import LocalMarketQuoteStore
 from .odds_input import ManualMoneyline
 from .providers import PregameContext
+from .series_context import apply_series_context_policy, build_series_contexts
 from .simulation_store import LocalSimulationSnapshotStore, SimulationSnapshot
 from .validation import freeze_v23_feature_contract
 
@@ -398,6 +399,37 @@ def record_prediction_evidence(
                 "history_checked_through": row.get("history_checked_through"),
                 "history_latest_completed_date": row.get("history_latest_completed_date"),
                 "history_backfilled_games": int(row.get("history_backfilled_games", 0)),
+                "series_context_version": row.get("series_context_version"),
+                "series_context_probability_authority": row.get(
+                    "series_context_probability_authority"
+                ),
+                "series_context_status": row.get("series_context_status"),
+                "series_context_summary": row.get("series_context_summary"),
+                "series_games_played": int(row.get("series_games_played", 0)),
+                "series_away_wins": int(row.get("series_away_wins", 0)),
+                "series_home_wins": int(row.get("series_home_wins", 0)),
+                "series_away_runs": int(row.get("series_away_runs", 0)),
+                "series_home_runs": int(row.get("series_home_runs", 0)),
+                "series_run_differential_away": int(
+                    row.get("series_run_differential_away", 0)
+                ),
+                "series_previous_results": row.get("series_previous_results"),
+                "production_series_context_conflict": bool(
+                    row.get("series_context_conflict", False)
+                ),
+                "production_series_context_reasons": row.get("series_context_reasons"),
+                "production_series_context_pick_high_leverage_pitches_yesterday": row.get(
+                    "series_context_pick_high_leverage_pitches_yesterday"
+                ),
+                "production_series_context_pick_closer_available": row.get(
+                    "series_context_pick_closer_available"
+                ),
+                "shadow_series_context_conflict": bool(
+                    row.get("shadow_series_context_conflict", False)
+                ),
+                "shadow_series_context_reasons": row.get(
+                    "shadow_series_context_reasons"
+                ),
                 "selection_policy_version": row.get(
                     "shadow_selection_policy_version", row.get("selection_policy_version")
                 ),
@@ -619,6 +651,30 @@ def _persist_platform_outputs(
             "history_freshness_status": row.get("history_freshness_status"),
             "history_checked_through": row.get("history_checked_through"),
             "lineups_confirmed": bool(row.get("lineups_confirmed", False)),
+            "series_context_version": row.get("series_context_version"),
+            "series_context_probability_authority": row.get(
+                "series_context_probability_authority"
+            ),
+            "series_context_status": row.get("series_context_status"),
+            "series_context_summary": row.get("series_context_summary"),
+            "series_games_played": int(row.get("series_games_played", 0)),
+            "series_away_wins": int(row.get("series_away_wins", 0)),
+            "series_home_wins": int(row.get("series_home_wins", 0)),
+            "series_away_runs": int(row.get("series_away_runs", 0)),
+            "series_home_runs": int(row.get("series_home_runs", 0)),
+            "series_run_differential_away": int(
+                row.get("series_run_differential_away", 0)
+            ),
+            "series_previous_results": row.get("series_previous_results"),
+            "series_context_pick_high_leverage_pitches_yesterday": row.get(
+                "series_context_pick_high_leverage_pitches_yesterday"
+            ),
+            "series_context_pick_closer_available": row.get(
+                "series_context_pick_closer_available"
+            ),
+            "series_context_pick_reliever_appearances_weighted": row.get(
+                "series_context_pick_reliever_appearances_weighted"
+            ),
             **extra_metadata,
         }
         for (
@@ -679,6 +735,19 @@ def _persist_platform_outputs(
                     **common_metadata,
                     "selection_status": status,
                     "selection_reasons": reasons,
+                    "series_context_conflict": bool(
+                        row.get(
+                            "shadow_series_context_conflict"
+                            if track == "shadow"
+                            else "series_context_conflict",
+                            False,
+                        )
+                    ),
+                    "series_context_reasons": row.get(
+                        "shadow_series_context_reasons"
+                        if track == "shadow"
+                        else "series_context_reasons"
+                    ),
                     "conflict": str(status).upper().startswith("PASS"),
                     "fresh": row.get("history_freshness_status") == "PASS",
                 },
@@ -813,6 +882,18 @@ def evaluate_captured_slate(
         ),
         simulation_draws=production_draws,
     )
+    series_contexts = build_series_contexts(games, selected_contexts)
+    pregame_contexts_by_pk = {
+        int(context.game_pk): context
+        for context in selected_contexts
+        if context.game_pk is not None
+    }
+    production_evaluation = apply_series_context_policy(
+        production_evaluation,
+        series_contexts=series_contexts,
+        pregame_contexts=pregame_contexts_by_pk,
+        top_n=top_n,
+    )
     base_shadow_evaluation = evaluate_live_slate(
         historical_features=candidate_historical_features,
         future_features=candidate_future_features,
@@ -829,6 +910,12 @@ def evaluate_captured_slate(
         base_shadow_evaluation,
         contexts_by_game_pk={int(context.game_pk): context for context in selected_contexts},
         overlay=overlay,
+        top_n=top_n,
+    )
+    shadow_evaluation = apply_series_context_policy(
+        shadow_evaluation,
+        series_contexts=series_contexts,
+        pregame_contexts=pregame_contexts_by_pk,
         top_n=top_n,
     )
     evaluation = combine_production_and_shadow(production_evaluation, shadow_evaluation)
