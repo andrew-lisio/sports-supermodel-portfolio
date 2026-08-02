@@ -1,3 +1,13 @@
+# Changelog
+
+## 2.4.0.dev4+platform.foundation.8
+
+- Added optional PostgreSQL and S3-compatible shared production storage.
+- Added idempotent schema migrations and a secret-safe storage status CLI.
+- Added shared market history/current quotes, simulation metadata/object draws, publisher state,
+  freshness state, object-backed reports, raw odds artifacts, and PostgreSQL advisory locking.
+- Preserved local file mode and the frozen V2.3.3/V2.4 RC2 predictive identities.
+
 ## 2.4.0.rc2.post1
 
 - Keep the RC2 automatic completed-game refresh and fail-closed stale-data protection unchanged.
@@ -13,8 +23,6 @@
 - Fail closed on API refresh failure or unresolved prior-date games instead of using stale history.
 - Preserve raw ensemble predictions while excluding component/score conflicts and low-confidence rows from top picks.
 - Add `sports-supermodel-history` preflight command.
-
-# Changelog
 
 ## 2.4.0.dev4+platform.foundation.7 — Series context and carryover gate
 

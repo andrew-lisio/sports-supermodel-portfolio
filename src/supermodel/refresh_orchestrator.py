@@ -13,6 +13,7 @@ from .history_refresh import refresh_completed_history
 from .live_mlb import MLBStatsHTTPClient
 from .mlb_v2 import attach_official_home_away, load_team_logs, reconstruct_games
 from .pitching_context import audit_pitching_context, fetch_pitching_context, write_pitching_context
+from .storage import StorageSettings, create_state_store
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,8 @@ class PlatformRefreshReport:
     generated_at_utc: str
     steps: tuple[RefreshStep, ...]
     state_path: str
+    storage_backend: str
+    shared_state_ref: str | None
 
     def to_record(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -121,12 +124,37 @@ def refresh_platform_data(
 
     status = "PASS" if all(step.status in {"PASS", "PENDING_PROVIDER"} for step in steps) else "FAIL"
     target_state_path = Path(state_path)
+    storage_settings = StorageSettings.from_env()
     report = PlatformRefreshReport(
         status=status,
         slate_date=target_date.isoformat(),
         generated_at_utc=captured_at.isoformat().replace("+00:00", "Z"),
         steps=tuple(steps),
         state_path=str(target_state_path),
+        storage_backend=str(storage_settings.backend),
+        shared_state_ref=None,
     )
     _write_json_atomic(target_state_path, report.to_record())
+    state_store = create_state_store(
+        target_state_path.parent / "shared",
+        settings=storage_settings,
+    )
+    shared_ref = state_store.write(
+        f"platform_refresh/{target_date.isoformat()}", report.to_record()
+    )
+    state_store.write("platform_refresh/latest", report.to_record())
+    report = PlatformRefreshReport(
+        status=report.status,
+        slate_date=report.slate_date,
+        generated_at_utc=report.generated_at_utc,
+        steps=report.steps,
+        state_path=report.state_path,
+        storage_backend=report.storage_backend,
+        shared_state_ref=shared_ref,
+    )
+    _write_json_atomic(target_state_path, report.to_record())
+    state_store.write(
+        f"platform_refresh/{target_date.isoformat()}", report.to_record()
+    )
+    state_store.write("platform_refresh/latest", report.to_record())
     return report

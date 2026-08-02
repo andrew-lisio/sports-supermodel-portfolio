@@ -42,11 +42,11 @@ from .mlb_v2 import (
 )
 from .market import no_vig_probabilities
 from .market_schema import MarketQuote, QuoteSource
-from .market_store import LocalMarketQuoteStore
 from .odds_input import ManualMoneyline
 from .providers import PregameContext
 from .series_context import apply_series_context_policy, build_series_contexts
-from .simulation_store import LocalSimulationSnapshotStore, SimulationSnapshot
+from .simulation_store import SimulationSnapshot
+from .storage import create_market_quote_store, create_simulation_snapshot_store
 from .validation import freeze_v23_feature_contract
 
 
@@ -76,8 +76,8 @@ class WorkflowResult:
     evidence_ledger_path: Path
     adaptive_overlay_path: Path
     history_refresh_report: HistoryRefreshReport
-    market_quote_path: Path | None
-    simulation_manifest_paths: tuple[Path, ...]
+    market_quote_path: str | Path | None
+    simulation_manifest_paths: tuple[str | Path, ...]
 
 
 def _repository_commit() -> str:
@@ -563,15 +563,15 @@ def _persist_platform_outputs(
     persist_market_quotes: bool = True,
     snapshot_input_hashes: Mapping[int, str] | None = None,
     snapshot_metadata: Mapping[str, Any] | None = None,
-) -> tuple[Path | None, tuple[Path, ...]]:
+) -> tuple[str | Path | None, tuple[str | Path, ...]]:
     context_by_pk = {
         int(context.game_pk): context
         for context in captured_slate.contexts
         if context.game_pk is not None
     }
-    quote_path: Path | None = None
+    quote_path: str | Path | None = None
     if persist_market_quotes:
-        quote_store = LocalMarketQuoteStore(market_store_root)
+        quote_store = create_market_quote_store(market_store_root)
         quotes: list[MarketQuote] = []
         for line in moneylines:
             context = None
@@ -604,8 +604,8 @@ def _persist_platform_outputs(
                 )
         quote_path = quote_store.save_many(quotes)
 
-    snapshot_store = LocalSimulationSnapshotStore(simulation_store_root)
-    manifests: list[Path] = []
+    snapshot_store = create_simulation_snapshot_store(simulation_store_root)
+    manifests: list[str | Path] = []
     extra_metadata = dict(snapshot_metadata or {})
     for row in evaluation.to_dict("records"):
         game_pk = int(row["game_pk"])

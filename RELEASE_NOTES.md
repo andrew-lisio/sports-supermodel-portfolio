@@ -60,3 +60,9 @@ latest blowout status, bullpen workload, high-leverage usage, and closer availab
 The layer never changes V2.3.3 or V2.4 probabilities and never flips a pick; it can only
 label a modest-confidence recommendation `PASS — SERIES CONTEXT` when multiple adverse
 signals agree.
+
+## Platform Foundation Post7 — shared storage
+
+Post7 adds optional PostgreSQL/S3 persistence, distributed publisher locking, storage migrations,
+and backend-neutral reads for the public site. Local mode remains the default, and no prediction
+model or probability changed.

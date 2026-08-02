@@ -13,7 +13,7 @@ RUN apt-get update \
 
 COPY . .
 RUN python -m pip install --upgrade pip \
-    && python -m pip install ".[ui]" \
+    && python -m pip install ".[ui,storage]" \
     && chmod +x deploy/run-combined.sh
 
 EXPOSE 8501

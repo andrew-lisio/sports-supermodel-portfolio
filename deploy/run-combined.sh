@@ -3,6 +3,10 @@ set -euo pipefail
 
 PORT="${PORT:-8501}"
 
+if [[ "${SPORTS_SUPERMODEL_STORAGE_BACKEND:-local}" == "postgres" ]]; then
+  sports-supermodel-storage migrate
+fi
+
 sports-supermodel-worker &
 worker_pid=$!
 

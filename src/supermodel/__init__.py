@@ -27,6 +27,25 @@ from .rankings import BEST_AVAILABLE, MarketCandidate, rank_best_value, rank_hig
 from .refresh_orchestrator import PlatformRefreshReport, refresh_platform_data
 from .simulation_store import LocalSimulationSnapshotStore, SimulationSnapshot
 from .worker import WorkerPolicy, next_poll_seconds, run_worker
+from .storage import (
+    LocalJsonStateStore,
+    LocalObjectStore,
+    ObjectBackend,
+    S3ObjectStore,
+    StorageBackend,
+    StorageSettings,
+    create_market_quote_store,
+    create_object_store,
+    create_simulation_snapshot_store,
+    create_state_store,
+)
+from .postgres_storage import (
+    PostgresJsonStateStore,
+    PostgresMarketQuoteStore,
+    PostgresSimulationSnapshotStore,
+    apply_migrations,
+    postgres_healthcheck,
+)
 from ._version import __version__
 from .evidence import (
     EvidenceIntegrityError,
@@ -251,4 +270,19 @@ __all__ = [
     "WorkerPolicy",
     "next_poll_seconds",
     "run_worker",
+    "StorageBackend",
+    "ObjectBackend",
+    "StorageSettings",
+    "LocalObjectStore",
+    "S3ObjectStore",
+    "LocalJsonStateStore",
+    "PostgresJsonStateStore",
+    "PostgresMarketQuoteStore",
+    "PostgresSimulationSnapshotStore",
+    "create_object_store",
+    "create_state_store",
+    "create_market_quote_store",
+    "create_simulation_snapshot_store",
+    "apply_migrations",
+    "postgres_healthcheck",
 ]

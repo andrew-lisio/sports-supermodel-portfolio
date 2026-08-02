@@ -11,7 +11,6 @@ from typing import Any
 import pandas as pd
 
 from supermodel.market_schema import MarketQuote, MarketType
-from supermodel.market_store import LocalMarketQuoteStore
 from supermodel.odds_input import OddsInputError, build_moneyline_template, moneylines_from_records
 from supermodel.platform_views import (
     best_value_records,
@@ -21,7 +20,7 @@ from supermodel.platform_views import (
     load_market_candidates,
 )
 from supermodel.rankings import BEST_AVAILABLE
-from supermodel.simulation_store import LocalSimulationSnapshotStore
+from supermodel.storage import create_market_quote_store, create_simulation_snapshot_store
 from supermodel.workflow import capture_official_slate, evaluate_captured_slate
 
 
@@ -643,7 +642,7 @@ def _render_best_value_page(st, *, game_date: str) -> None:
         simulation_store_root=_SIMULATION_STORE,
         market_store_root=_MARKET_STORE,
     )
-    books = LocalMarketQuoteStore(_MARKET_STORE).sportsbooks(game_date)
+    books = create_market_quote_store(_MARKET_STORE).sportsbooks(game_date)
     if not candidates or not books:
         st.info("No saved sportsbook quotes and simulation snapshots exist for this slate date yet.")
         return
@@ -684,7 +683,7 @@ def _render_line_checker_page(st, *, game_date: str) -> None:
         '<div class="ssm-section-copy">Evaluate a private or unsupported price against the latest saved 100,000-simulation distribution.</div>',
         unsafe_allow_html=True,
     )
-    snapshots = LocalSimulationSnapshotStore(_SIMULATION_STORE).list_latest(
+    snapshots = create_simulation_snapshot_store(_SIMULATION_STORE).list_latest(
         event_date=game_date,
         model_track="production",
     )
@@ -790,7 +789,7 @@ def _render_published_slate_page(st, *, game_date: str) -> None:
         '<div class="ssm-section-copy">Read-only results from the latest completed backend simulation snapshot. Visiting this page never starts model training or Monte Carlo work.</div>',
         unsafe_allow_html=True,
     )
-    snapshots = LocalSimulationSnapshotStore(_SIMULATION_STORE).list_latest(
+    snapshots = create_simulation_snapshot_store(_SIMULATION_STORE).list_latest(
         event_date=game_date,
         model_track="production",
     )

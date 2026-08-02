@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
@@ -22,6 +22,15 @@ from .odds_input import ManualMoneyline
 from .providers import PregameContext
 from .refresh_orchestrator import PlatformRefreshReport, refresh_platform_data
 from .simulation_store import LocalSimulationSnapshotStore
+from .storage import (
+    ObjectBackend,
+    StorageBackend,
+    StorageSettings,
+    acquire_publisher_lock,
+    create_object_store,
+    create_simulation_snapshot_store,
+    create_state_store,
+)
 from .workflow import (
     CapturedSlate,
     WorkflowResult,
@@ -59,6 +68,9 @@ class SlatePublishReport:
     odds_unmatched_events: tuple[dict[str, Any], ...]
     next_game_start_utc: str | None
     evidence_recorded: bool
+    storage_backend: str
+    shared_state_ref: str | None
+    shared_report_ref: str | None
 
     def to_record(self) -> dict[str, Any]:
         payload = asdict(self)
@@ -284,7 +296,11 @@ def publish_slate(
     timestamp = timestamp.astimezone(timezone.utc)
     api_client = client or MLBStatsHTTPClient()
 
-    with publisher_lock(publisher_lock_path, now=timestamp):
+    storage_settings = StorageSettings.from_env()
+    object_store = create_object_store(storage_settings)
+    with acquire_publisher_lock(
+        publisher_lock_path, now=timestamp, settings=storage_settings
+    ):
         refresh_report: PlatformRefreshReport | None = None
         if refresh:
             refresh_report = refresh_platform_data(
@@ -365,7 +381,13 @@ def publish_slate(
             )
             for context in eligible
         }
-        snapshot_store = LocalSimulationSnapshotStore(simulation_store_root)
+        snapshot_store = (
+            LocalSimulationSnapshotStore(simulation_store_root)
+            if storage_settings.backend is StorageBackend.LOCAL
+            else create_simulation_snapshot_store(
+                simulation_store_root, settings=storage_settings
+            )
+        )
         changed: list[PregameContext] = []
         unchanged: list[int] = []
         for context in eligible:
@@ -428,6 +450,21 @@ def publish_slate(
         next_game_start = _utc_iso(min(starts)) if starts else None
 
         report_path = _report_path(Path(publisher_report_root), slate_date, timestamp)
+        evaluation_artifact_ref = (
+            str(workflow_result.json_path) if workflow_result is not None else None
+        )
+        if (
+            workflow_result is not None
+            and (
+                storage_settings.backend is StorageBackend.POSTGRES
+                or storage_settings.object_backend is ObjectBackend.S3
+            )
+        ):
+            evaluation_artifact_ref = object_store.put_bytes(
+                f"reports/evaluations/{slate_date}/{workflow_result.json_path.name}",
+                workflow_result.json_path.read_bytes(),
+                content_type="application/json",
+            )
         report = SlatePublishReport(
             status=status,
             slate_date=slate_date,
@@ -444,9 +481,7 @@ def publish_slate(
             ),
             publisher_state_path=str(Path(publisher_state_path)),
             report_path=str(report_path),
-            evaluation_artifact=(
-                str(workflow_result.json_path) if workflow_result is not None else None
-            ),
+            evaluation_artifact=evaluation_artifact_ref,
             simulation_manifests=(
                 tuple(str(path) for path in workflow_result.simulation_manifest_paths)
                 if workflow_result is not None
@@ -462,12 +497,65 @@ def publish_slate(
             odds_unmatched_events=odds_unmatched_events,
             next_game_start_utc=next_game_start,
             evidence_recorded=False,
+            storage_backend=str(storage_settings.backend),
+            shared_state_ref=None,
+            shared_report_ref=None,
         )
+        local_state_payload = {
+            **report.to_record(),
+            "latest_game_input_hashes": {str(key): value for key, value in hashes.items()},
+        }
         _write_json_atomic(report_path, report.to_record())
+        _write_json_atomic(Path(publisher_state_path), local_state_payload)
+
+        report_key = (
+            f"reports/slate_publisher/{slate_date}/"
+            f"{timestamp.strftime('%Y%m%dT%H%M%SZ')}.json"
+        )
+        shared_report_ref = object_store.put_bytes(
+            report_key,
+            (json.dumps(report.to_record(), indent=2, sort_keys=True) + "\n").encode("utf-8"),
+            content_type="application/json",
+        )
+        state_store = create_state_store(
+            Path(publisher_state_path).parent / "shared",
+            settings=storage_settings,
+        )
+        shared_state_ref = state_store.write(
+            f"slate_publisher/{slate_date}/latest",
+            local_state_payload,
+        )
+        state_store.write("slate_publisher/latest", local_state_payload)
+        report = replace(
+            report,
+            shared_state_ref=shared_state_ref,
+            shared_report_ref=shared_report_ref,
+        )
+        final_payload = report.to_record()
+        _write_json_atomic(report_path, final_payload)
         _write_json_atomic(
             Path(publisher_state_path),
             {
-                **report.to_record(),
+                **final_payload,
+                "latest_game_input_hashes": {str(key): value for key, value in hashes.items()},
+            },
+        )
+        object_store.put_bytes(
+            report_key,
+            (json.dumps(final_payload, indent=2, sort_keys=True) + "\n").encode("utf-8"),
+            content_type="application/json",
+        )
+        state_store.write(
+            f"slate_publisher/{slate_date}/latest",
+            {
+                **final_payload,
+                "latest_game_input_hashes": {str(key): value for key, value in hashes.items()},
+            },
+        )
+        state_store.write(
+            "slate_publisher/latest",
+            {
+                **final_payload,
                 "latest_game_input_hashes": {str(key): value for key, value in hashes.items()},
             },
         )

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sports-supermodel"
-version = "2.4.0.dev4+platform.foundation.7"
+version = "2.4.0.dev4+platform.foundation.8"
 description = "Experimental MLB prediction ensemble with user-entered odds, immutable pregame snapshots, and Monte Carlo score simulation"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -37,6 +37,10 @@ dependencies = [
 ui = [
   "streamlit>=1.37",
 ]
+storage = [
+  "psycopg[binary]>=3.2",
+  "boto3>=1.35",
+]
 dev = [
   "pytest>=8.0",
   "ruff>=0.9",
@@ -61,12 +65,16 @@ sports-supermodel-refresh = "supermodel.refresh_cli:main"
 sports-supermodel-publish = "supermodel.publisher_cli:main"
 sports-supermodel-odds = "supermodel.odds_cli:main"
 sports-supermodel-worker = "supermodel.worker_cli:main"
+sports-supermodel-storage = "supermodel.storage_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"supermodel.storage_migrations" = ["*.sql"]
 
 [tool.pytest.ini_options]
 addopts = "-q"

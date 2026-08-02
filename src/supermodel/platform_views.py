@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from .market_schema import MarketQuote
-from .market_store import LocalMarketQuoteStore
 from .pricing import PriceEvaluation, evaluate_quote
 from .rankings import MarketCandidate, rank_best_value, rank_high_probability
-from .simulation_store import LocalSimulationSnapshotStore, SimulationSnapshot
+from .simulation_store import SimulationSnapshot
+from .storage import create_market_quote_store, create_simulation_snapshot_store
 
 
 def _candidate(
@@ -38,8 +38,8 @@ def load_market_candidates(
     market_store_root: str | Path = "runtime/markets",
     uncertainty_buffer: float = 0.0,
 ) -> list[MarketCandidate]:
-    snapshot_store = LocalSimulationSnapshotStore(simulation_store_root)
-    quote_store = LocalMarketQuoteStore(market_store_root)
+    snapshot_store = create_simulation_snapshot_store(simulation_store_root)
+    quote_store = create_market_quote_store(market_store_root)
     snapshots = {
         snapshot.game_pk: snapshot
         for snapshot in snapshot_store.list_latest(
@@ -130,7 +130,7 @@ def high_probability_snapshot_records(
 ) -> list[dict[str, Any]]:
     """Rank moneyline outcomes directly from saved simulations when no quotes exist."""
 
-    snapshots = LocalSimulationSnapshotStore(simulation_store_root).list_latest(
+    snapshots = create_simulation_snapshot_store(simulation_store_root).list_latest(
         event_date=event_date,
         model_track=model_track,
     )
@@ -193,7 +193,7 @@ def evaluate_custom_line(
     uncertainty_buffer: float = 0.0,
     minimum_required_roi: float = 0.02,
 ) -> PriceEvaluation:
-    snapshot = LocalSimulationSnapshotStore(simulation_store_root).latest(
+    snapshot = create_simulation_snapshot_store(simulation_store_root).latest(
         quote.game_pk,
         model_track=model_track,
     )

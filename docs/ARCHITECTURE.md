@@ -108,3 +108,23 @@ The final draw is intentionally explicit so report manifests can state exactly h
 ## Prediction-only boundary
 
 V2.3.3 ends at probabilities, expected scores, confidence rankings, fair odds, and market differences. It intentionally has no bankroll object, staking module, wager-size output, exposure cap, or Kelly calculation.
+
+## Shared storage architecture
+
+Platform Foundation Post7 adds a backend-neutral persistence layer:
+
+```text
+worker / web / pricing views
+            |
+            v
+      storage factories
+       /            \
+local file mode   hosted shared mode
+                   |             |
+                   v             v
+              PostgreSQL     S3-compatible objects
+```
+
+PostgreSQL stores current markets, quote history, simulation metadata, shared state, and lock
+coordination. Object storage holds compressed simulation draws and large immutable JSON artifacts.
+Local mode remains the default. See [SHARED_STORAGE.md](SHARED_STORAGE.md).

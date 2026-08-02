@@ -103,6 +103,10 @@ def test_publisher_only_runs_changed_baseball_inputs(tmp_path, monkeypatch):
     assert first.published_game_pks == (123,)
     assert first.market_quotes_persisted is False
     assert first.evidence_recorded is False
+    assert first.storage_backend == "local"
+    assert first.shared_report_ref is not None
+    assert first.shared_report_ref.startswith("file://")
+    assert first.shared_state_ref is not None
     assert second.status == "SKIPPED_UNCHANGED"
     assert second.unchanged_game_pks == (123,)
     assert len(calls) == 1

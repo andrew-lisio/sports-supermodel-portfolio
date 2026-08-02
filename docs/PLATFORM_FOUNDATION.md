@@ -78,3 +78,10 @@ write a new current-price snapshot and return `PRICES_UPDATED`; they do not reru
 `sports-supermodel-worker` runs the publisher immediately and then uses an adaptive hosted cadence:
 30 minutes normally, 10 minutes within two hours of the next scheduled game, and 60 minutes
 overnight. See `docs/ODDS_PROVIDER_AND_WORKER.md`.
+
+## Shared production storage
+
+Post7 adds optional PostgreSQL and S3-compatible storage without changing production or shadow model
+probabilities. The website, publisher, workflow persistence, market refresh, and ranking views select
+the configured backend at runtime. PostgreSQL advisory locking prevents overlapping publishers across
+containers. See [SHARED_STORAGE.md](SHARED_STORAGE.md).

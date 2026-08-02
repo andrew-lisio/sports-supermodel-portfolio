@@ -11,7 +11,13 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from .market_schema import MarketQuote, MarketType, QuoteSource
-from .market_store import LocalMarketQuoteStore
+from .storage import (
+    ObjectBackend,
+    StorageBackend,
+    StorageSettings,
+    create_market_quote_store,
+    create_object_store,
+)
 from .providers import PregameContext
 
 
@@ -443,6 +449,18 @@ def refresh_the_odds_api(
         payload=response.payload,
         headers=response.headers,
     )
+    snapshot_reference = str(snapshot_path)
+    storage_settings = StorageSettings.from_env()
+    if (
+        storage_settings.backend is StorageBackend.POSTGRES
+        or storage_settings.object_backend is ObjectBackend.S3
+    ):
+        object_store = create_object_store(storage_settings)
+        snapshot_reference = object_store.put_bytes(
+            f"raw/odds/the_odds_api/{slate_date}/{snapshot_path.name}",
+            snapshot_path.read_bytes(),
+            content_type="application/json",
+        )
     quotes, unmatched, matched_events = parse_the_odds_api_quotes(
         response.payload,
         contexts=contexts,
@@ -450,7 +468,7 @@ def refresh_the_odds_api(
         captured_at=timestamp,
     )
     expected_titles = [BOOKMAKER_TITLES.get(key, key) for key in bookmakers]
-    store = LocalMarketQuoteStore(market_store_root)
+    store = create_market_quote_store(market_store_root)
     written = store.save_provider_snapshot(
         quotes,
         event_date=slate_date,
@@ -471,7 +489,7 @@ def refresh_the_odds_api(
         quotes_received=len(quotes),
         quotes_changed=written,
         sportsbooks=books,
-        raw_snapshot_path=str(snapshot_path),
+        raw_snapshot_path=snapshot_reference,
         quota_remaining=_header_int(response.headers, "x-requests-remaining"),
         quota_used=_header_int(response.headers, "x-requests-used"),
         quota_last=_header_int(response.headers, "x-requests-last"),

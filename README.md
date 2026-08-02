@@ -119,6 +119,27 @@ The schema supports advanced pitcher, lineup, bullpen, injury, defense, weather,
 
 A live snapshot recording a lineup or weather condition does **not** automatically mean the current fitted probability has a validated numerical response to that field. See [docs/DATA_AND_SNAPSHOTS.md](docs/DATA_AND_SNAPSHOTS.md) and [docs/VALIDATION.md](docs/VALIDATION.md).
 
+## Shared hosted storage
+
+Local file mode remains the default. Platform Foundation Post7 also supports PostgreSQL for shared
+structured state and S3-compatible storage for score draws, reports, and raw provider artifacts.
+Install the storage dependencies and inspect configuration with:
+
+```powershell
+python -m pip install --upgrade -e ".[ui,dev,storage]"
+sports-supermodel-storage status
+```
+
+After setting `SPORTS_SUPERMODEL_STORAGE_BACKEND=postgres` and `DATABASE_URL`, apply the idempotent
+schema migrations with:
+
+```powershell
+sports-supermodel-storage migrate
+```
+
+Credentials are environment variables and must never be committed. Full configuration is documented
+in [docs/SHARED_STORAGE.md](docs/SHARED_STORAGE.md).
+
 ## Quick start: local browser app
 
 ### Windows PowerShell
