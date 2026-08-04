@@ -1,3 +1,15 @@
+
+## 2.5.0.dev1+accelerated.integration
+
+- Added fail-closed live starter, lineup, roster, transaction, weather, and roof context.
+- Added a shadow-only correlated and overdispersed totals/team-total candidate.
+- Added shared-storage activation, verification, backups, and the second PostgreSQL migration.
+- Added separated web/API/publisher/odds/settlement service entry points.
+- Added automatic settlement, CLV, production/shadow performance, and candidate gates.
+- Added Game Analysis and Model Performance public pages.
+- Added secret redaction, structured logging, rate limiting, readiness checks, and a multi-service deployment template.
+- Preserved V2.3.3 production and V2.4 RC2 shadow governance.
+
 # Changelog
 
 ## 2.4.0.dev4+platform.foundation.8

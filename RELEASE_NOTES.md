@@ -1,3 +1,13 @@
+# V2.5 accelerated platform integration
+
+This cumulative development branch packages the planned live-context, totals-candidate,
+shared-storage activation, service separation, settlement, validation, public-page, and
+launch-hardening work. It does not promote a new prediction model and does not claim that
+external providers or hosted infrastructure are already configured. See
+`docs/V2_5_ACCELERATED_PLATFORM_INTEGRATION.md`.
+
+---
+
 # V2.4 RC1 implementation notes
 
 V2.4 RC1 is the code-complete candidate, delivered as one commit above rollback commit

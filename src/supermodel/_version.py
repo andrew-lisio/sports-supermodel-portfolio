@@ -1,1 +1,1 @@
-__version__ = "2.4.0.dev4+platform.foundation.8"
+__version__ = "2.5.0.dev1+accelerated.integration"

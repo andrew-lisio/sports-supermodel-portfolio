@@ -14,7 +14,7 @@ RUN apt-get update \
 COPY . .
 RUN python -m pip install --upgrade pip \
     && python -m pip install ".[ui,storage]" \
-    && chmod +x deploy/run-combined.sh
+    && chmod +x deploy/*.sh
 
 EXPOSE 8501
 CMD ["bash", "deploy/run-combined.sh"]

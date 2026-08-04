@@ -1,0 +1,47 @@
+services:
+  web:
+    build: .
+    command: ["sh", "deploy/run-web.sh"]
+    environment: &app-env
+      SPORTS_SUPERMODEL_ENV: production
+      SPORTS_SUPERMODEL_STORAGE_BACKEND: postgres
+      SPORTS_SUPERMODEL_OBJECT_BACKEND: s3
+      DATABASE_URL: ${DATABASE_URL}
+      SPORTS_SUPERMODEL_S3_BUCKET: ${SPORTS_SUPERMODEL_S3_BUCKET}
+      SPORTS_SUPERMODEL_S3_ENDPOINT_URL: ${SPORTS_SUPERMODEL_S3_ENDPOINT_URL}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      SPORTS_SUPERMODEL_ODDS_API_KEY: ${SPORTS_SUPERMODEL_ODDS_API_KEY}
+      SPORTS_SUPERMODEL_ADMIN_TOKEN: ${SPORTS_SUPERMODEL_ADMIN_TOKEN}
+      SPORTS_SUPERMODEL_REQUIRE_SHARED_STORAGE: "1"
+      SPORTS_SUPERMODEL_REQUIRE_HTTPS: "1"
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+
+  api:
+    build: .
+    command: ["sh", "deploy/run-api.sh"]
+    environment: *app-env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  publisher:
+    build: .
+    command: ["sh", "deploy/run-publisher.sh"]
+    environment: *app-env
+    restart: unless-stopped
+
+  odds:
+    build: .
+    command: ["sh", "deploy/run-odds.sh"]
+    environment: *app-env
+    restart: unless-stopped
+
+  settlement:
+    build: .
+    command: ["sh", "deploy/run-settlement.sh"]
+    environment: *app-env
+    restart: unless-stopped

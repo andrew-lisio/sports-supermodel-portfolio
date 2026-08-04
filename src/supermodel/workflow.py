@@ -405,6 +405,11 @@ def record_prediction_evidence(
                     "series_context_probability_authority"
                 ),
                 "series_context_status": row.get("series_context_status"),
+                "live_context_status": row.get("live_context_status"),
+                "live_context_block_reasons": row.get("live_context_block_reasons"),
+                "live_context_warnings": row.get("live_context_warnings"),
+                "selection_status": row.get("selection_status"),
+                "selection_reasons": row.get("selection_reasons"),
                 "series_context_summary": row.get("series_context_summary"),
                 "series_games_played": int(row.get("series_games_played", 0)),
                 "series_away_wins": int(row.get("series_away_wins", 0)),
@@ -652,6 +657,14 @@ def _persist_platform_outputs(
             "history_freshness_status": row.get("history_freshness_status"),
             "history_checked_through": row.get("history_checked_through"),
             "lineups_confirmed": bool(row.get("lineups_confirmed", False)),
+            "live_context_status": row.get("live_context_status"),
+            "live_context_block_reasons": row.get("live_context_block_reasons"),
+            "live_context_warnings": row.get("live_context_warnings"),
+            "starter_status": row.get("starter_status"),
+            "lineup_status": row.get("lineup_status"),
+            "roster_status": row.get("roster_status"),
+            "weather_status": row.get("weather_status"),
+            "roof_context_status": row.get("roof_context_status"),
             "series_context_version": row.get("series_context_version"),
             "series_context_probability_authority": row.get(
                 "series_context_probability_authority"
