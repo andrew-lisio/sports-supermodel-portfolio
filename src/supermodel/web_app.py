@@ -840,6 +840,95 @@ def _render_published_slate_page(st, *, game_date: str) -> None:
         )
 
 
+def _render_game_analysis_page(st, *, game_date: str) -> None:
+    st.markdown('<div class="ssm-section-title">Game Analysis</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ssm-section-copy">Production and shadow probabilities, exact component votes, score distribution, freshness, and carryover context.</div>',
+        unsafe_allow_html=True,
+    )
+    records = game_analysis_records(
+        event_date=game_date,
+        simulation_store_root=_SIMULATION_STORE,
+    )
+    if not records:
+        st.info("No published production snapshots exist for this slate date yet.")
+        return
+    labels = {
+        f"{record['away_team']} at {record['home_team']} · gamePk {record['game_pk']}": record
+        for record in records
+    }
+    selected = labels[st.selectbox("Game", list(labels))]
+    production_pick = (
+        selected["away_team"]
+        if selected["production_away_probability"] >= 0.5
+        else selected["home_team"]
+    )
+    columns = st.columns(5)
+    columns[0].metric("Production pick", production_pick)
+    columns[1].metric("Away win", _format_probability(selected["production_away_probability"]))
+    columns[2].metric("Home win", _format_probability(selected["production_home_probability"]))
+    columns[3].metric("Overlap", f"{selected['model_overlap']}/{selected['model_count']}")
+    columns[4].metric("Simulations", f"{selected['simulations']:,}")
+    st.markdown(
+        f"**Projected score:** {selected['away_team']} {selected['projected_away_runs']:.2f} – "
+        f"{selected['home_team']} {selected['projected_home_runs']:.2f}"
+    )
+    st.markdown(f"**Recommendation status:** {selected.get('selection_status') or '—'}")
+    st.markdown(f"**Reasons:** {selected.get('selection_reasons') or 'None'}")
+    st.markdown(f"**Series context:** {selected.get('series_context_summary') or 'Unavailable'}")
+    st.markdown(
+        f"**Freshness:** history={selected.get('history_freshness_status') or '—'} · "
+        f"live={selected.get('live_context_status') or '—'} · "
+        f"lineups confirmed={bool(selected.get('lineups_confirmed'))}"
+    )
+    if selected.get("shadow_away_probability") is not None:
+        st.markdown(
+            f"**V2.4 shadow:** away {_format_probability(selected['shadow_away_probability'])} · "
+            f"home {_format_probability(selected['shadow_home_probability'])} · "
+            f"away delta {_format_number(selected['production_shadow_delta'] * 100, 2, signed=True)} pp"
+        )
+    vote_rows = [
+        {"Model": name, "Vote": team}
+        for name, team in selected["component_votes"].items()
+    ]
+    st.dataframe(vote_rows, use_container_width=True, hide_index=True)
+    with st.expander("Reproducibility identity"):
+        st.code(
+            f"model_version={selected['model_version']}\n"
+            f"git_commit={selected['git_commit']}\n"
+            f"created_at={selected['created_at']}\n"
+            f"game_pk={selected['game_pk']}"
+        )
+
+
+def _render_performance_page(st) -> None:
+    st.markdown('<div class="ssm-section-title">Model Performance</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="ssm-section-copy">Prospectively settled production and shadow results. Missing evidence is shown as unavailable rather than estimated.</div>',
+        unsafe_allow_html=True,
+    )
+    payload = load_performance_payload()
+    if not payload:
+        st.info("No settled prospective performance report exists yet. Run sports-supermodel-settle after outcomes are recorded.")
+        return
+    summary = payload.get("summary") or {}
+    metrics = st.columns(6)
+    metrics[0].metric("Settled games", summary.get("settled_games", 0))
+    metrics[1].metric("Production accuracy", _format_probability(summary.get("production_accuracy")))
+    metrics[2].metric("Shadow accuracy", _format_probability(summary.get("shadow_accuracy")))
+    metrics[3].metric("Production Brier", _format_number(summary.get("production_brier"), 4))
+    metrics[4].metric("Shadow Brier", _format_number(summary.get("shadow_brier"), 4))
+    metrics[5].metric("ROI", _format_probability(summary.get("recommendation_roi")))
+    st.caption(
+        f"Generated {summary.get('generated_at_utc', '—')} · "
+        f"Production-shadow disagreements: {summary.get('production_shadow_disagreements', 0)} · "
+        f"Average CLV: {_format_probability(summary.get('average_closing_line_value'))}"
+    )
+    rows = payload.get("settled_predictions") or []
+    if rows:
+        st.dataframe(rows, use_container_width=True, hide_index=True)
+
+
 def _render_admin_run_page(st) -> None:
     st.warning(
         "Developer-only manual publisher. This control exists for local testing until the "
@@ -1008,7 +1097,7 @@ def render_app() -> None:
     )
     _inject_branding(st)
 
-    pages = ["Today’s Slate", "High Probability", "Best Value", "Line Checker"]
+    pages = ["Today’s Slate", "High Probability", "Best Value", "Line Checker", "Game Analysis", "Model Performance"]
     if _manual_run_enabled():
         pages.append("Admin Run")
     page = st.radio("View", pages, horizontal=True, label_visibility="collapsed")
@@ -1025,8 +1114,12 @@ def render_app() -> None:
         _render_high_probability_page(st, game_date=game_date)
     elif page == "Best Value":
         _render_best_value_page(st, game_date=game_date)
-    else:
+    elif page == "Line Checker":
         _render_line_checker_page(st, game_date=game_date)
+    elif page == "Game Analysis":
+        _render_game_analysis_page(st, game_date=game_date)
+    else:
+        _render_performance_page(st)
 
 
 def launch() -> None:
