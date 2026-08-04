@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+sports-supermodel-public guard --service combined
+
 PORT="${PORT:-8501}"
 
 if [[ "${SPORTS_SUPERMODEL_STORAGE_BACKEND:-local}" == "postgres" ]]; then
   sports-supermodel-storage migrate
 fi
 
-sports-supermodel-worker &
+sports-supermodel-worker --require-odds &
 worker_pid=$!
 
 streamlit run app.py \

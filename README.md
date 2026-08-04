@@ -119,6 +119,20 @@ The schema supports advanced pitcher, lineup, bullpen, injury, defense, weather,
 
 A live snapshot recording a lineup or weather condition does **not** automatically mean the current fitted probability has a validated numerical response to that field. See [docs/DATA_AND_SNAPSHOTS.md](docs/DATA_AND_SNAPSHOTS.md) and [docs/VALIDATION.md](docs/VALIDATION.md).
 
+## Dormant public-deployment framework
+
+The repository includes framework for a future hosted website, but it is deliberately inactive by
+default. No public service starts unless the user later enables the explicit deployment gate.
+Local commands and the private/local slate workflow remain unchanged.
+
+```powershell
+sports-supermodel-public status
+sports-supermodel-public plan
+sports-supermodel-public readiness
+```
+
+See [docs/PUBLIC_READINESS_FOUNDATION.md](docs/PUBLIC_READINESS_FOUNDATION.md).
+
 ## Shared hosted storage
 
 Local file mode remains the default. Platform Foundation Post7 also supports PostgreSQL for shared

@@ -1,3 +1,4 @@
 #!/usr/bin/env sh
 set -eu
-exec sports-supermodel-worker
+sports-supermodel-public guard --service publisher
+exec sports-supermodel-worker --require-odds

@@ -1,9 +1,12 @@
 services:
   web:
+    profiles: ["public"]
     build: .
     command: ["sh", "deploy/run-web.sh"]
     environment: &app-env
-      SPORTS_SUPERMODEL_ENV: production
+      SPORTS_SUPERMODEL_PUBLIC_DEPLOYMENT_ENABLED: ${SPORTS_SUPERMODEL_PUBLIC_DEPLOYMENT_ENABLED:-0}
+      SPORTS_SUPERMODEL_PUBLIC_DEPLOYMENT_ACK: ${SPORTS_SUPERMODEL_PUBLIC_DEPLOYMENT_ACK:-}
+      SPORTS_SUPERMODEL_ENV: ${SPORTS_SUPERMODEL_ENV:-production}
       SPORTS_SUPERMODEL_STORAGE_BACKEND: postgres
       SPORTS_SUPERMODEL_OBJECT_BACKEND: s3
       DATABASE_URL: ${DATABASE_URL}
@@ -21,6 +24,7 @@ services:
     restart: unless-stopped
 
   api:
+    profiles: ["public"]
     build: .
     command: ["sh", "deploy/run-api.sh"]
     environment: *app-env
@@ -29,18 +33,21 @@ services:
     restart: unless-stopped
 
   publisher:
+    profiles: ["public"]
     build: .
     command: ["sh", "deploy/run-publisher.sh"]
     environment: *app-env
     restart: unless-stopped
 
   odds:
+    profiles: ["public"]
     build: .
     command: ["sh", "deploy/run-odds.sh"]
     environment: *app-env
     restart: unless-stopped
 
   settlement:
+    profiles: ["public"]
     build: .
     command: ["sh", "deploy/run-settlement.sh"]
     environment: *app-env
