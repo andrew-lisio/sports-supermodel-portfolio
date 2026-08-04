@@ -1,3 +1,12 @@
+## 2.5.0.dev2+integration.acceptance
+
+- Integrated the official live-context roster and transaction capture into scheduled publisher runs.
+- Preserved loaded roster status in production and shadow evaluation artifacts instead of reverting to `PENDING`.
+- Added stable per-game live-context fingerprints so meaningful roster or transaction changes trigger resimulation while capture timestamp changes do not.
+- Added live-context provider, snapshot, status, and blocked-game provenance to publisher state and reports.
+- Added `--quiet-progress` to refresh and publisher CLIs for clean PowerShell/JSON acceptance runs.
+- Added regression coverage for roster propagation, game-specific live-context hashing, and publisher provenance.
+
 
 ## 2.5.0.dev1+accelerated.integration
 

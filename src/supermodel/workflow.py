@@ -21,7 +21,7 @@ from .advanced_features import context_feature_vector
 from .evidence import ProspectiveEvidenceLedger
 from .game_registry import ImmutableSnapshotStore, ScheduleIntegrityError, parse_mlb_schedule
 from .history_refresh import HistoryRefreshReport, refresh_completed_history
-from .live_context import apply_live_context_policy
+from .live_context import LiveContextAssessment, apply_live_context_policy
 from .live_mlb import (
     LiveEvaluationConfig,
     MLBStatsHTTPClient,
@@ -795,6 +795,7 @@ def evaluate_captured_slate(
     record_evidence: bool = True,
     snapshot_input_hashes: Mapping[int, str] | None = None,
     snapshot_metadata: Mapping[str, Any] | None = None,
+    live_context_assessments: Mapping[int, LiveContextAssessment] | None = None,
 ) -> WorkflowResult:
     """Run the complete prediction-only pipeline from a captured official slate."""
 
@@ -913,6 +914,7 @@ def evaluate_captured_slate(
         contexts_by_game_pk=pregame_contexts_by_pk,
         assessed_at=market_timestamp,
         top_n=top_n,
+        assessments_by_game_pk=live_context_assessments,
     )
     base_shadow_evaluation = evaluate_live_slate(
         historical_features=candidate_historical_features,
@@ -943,6 +945,7 @@ def evaluate_captured_slate(
         contexts_by_game_pk=pregame_contexts_by_pk,
         assessed_at=market_timestamp,
         top_n=top_n,
+        assessments_by_game_pk=live_context_assessments,
     )
     evaluation = combine_production_and_shadow(production_evaluation, shadow_evaluation)
     history_record = history_refresh_report.to_record()

@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
 
+from supermodel.live_context import LiveContextAssessment, LiveContextRefreshReport
 from supermodel.providers import PregameContext
 from supermodel.publisher import (
     game_input_fingerprint,
@@ -29,6 +30,44 @@ def _context() -> PregameContext:
     )
 
 
+
+
+def _live_report(tmp_path: Path) -> LiveContextRefreshReport:
+    assessment = LiveContextAssessment(
+        game_pk=123,
+        away_team="ATL",
+        home_team="MIA",
+        scheduled_start_utc="2026-07-30T23:00:00Z",
+        assessed_at_utc=NOW.isoformat().replace("+00:00", "Z"),
+        starter_status="PASS",
+        lineup_status="PENDING",
+        roster_status="PASS",
+        weather_status="PASS",
+        roof_status="PENDING",
+        overall_status="PASS",
+        block_reasons=(),
+        warning_reasons=("LINEUP_NOT_YET_POSTED",),
+        probable_pitchers_confirmed=True,
+        lineups_confirmed=False,
+        away_probable_pitcher_name=None,
+        home_probable_pitcher_name=None,
+        roof_value=None,
+    )
+    path = tmp_path / "live-context.json"
+    path.write_text("{}", encoding="utf-8")
+    return LiveContextRefreshReport(
+        status="PASS",
+        slate_date="2026-07-30",
+        captured_at_utc=NOW.isoformat().replace("+00:00", "Z"),
+        snapshot_path=str(path),
+        game_count=1,
+        blocked_game_pks=(),
+        assessments=(assessment,),
+        roster_snapshot_paths=(),
+        transaction_snapshot_path=None,
+    )
+
+
 def test_game_input_fingerprint_ignores_transport_provenance():
     first = _context()
     second = _context()
@@ -40,6 +79,11 @@ def test_game_input_fingerprint_ignores_transport_provenance():
     second.weather_run_factor = 1.08
     assert game_input_fingerprint(context=first, model_data_hash="model") != game_input_fingerprint(
         context=second, model_data_hash="model"
+    )
+    assert game_input_fingerprint(
+        context=first, model_data_hash="model", live_context_hash="one"
+    ) != game_input_fingerprint(
+        context=first, model_data_hash="model", live_context_hash="two"
     )
 
 
@@ -57,6 +101,10 @@ def test_publisher_only_runs_changed_baseball_inputs(tmp_path, monkeypatch):
         contexts=(context,),
     )
     monkeypatch.setattr("supermodel.publisher.capture_official_slate", lambda **kwargs: captured)
+    monkeypatch.setattr(
+        "supermodel.publisher.refresh_live_context",
+        lambda **kwargs: _live_report(tmp_path),
+    )
     monkeypatch.setattr("supermodel.publisher.model_data_fingerprint", lambda **kwargs: "model")
 
     class FakeStore:
@@ -112,6 +160,9 @@ def test_publisher_only_runs_changed_baseball_inputs(tmp_path, monkeypatch):
     assert len(calls) == 1
     assert calls[0]["persist_market_quotes"] is False
     assert calls[0]["record_evidence"] is False
+    assert calls[0]["live_context_assessments"][123].roster_status == "PASS"
+    assert first.live_context_status == "PASS"
+    assert first.live_context_provider == "mlb_stats_api"
 
 
 def test_publisher_lock_rejects_overlap(tmp_path):
@@ -141,6 +192,10 @@ def test_odds_only_change_reprices_without_resimulation(tmp_path, monkeypatch):
         contexts=(context,),
     )
     monkeypatch.setattr("supermodel.publisher.capture_official_slate", lambda **kwargs: captured)
+    monkeypatch.setattr(
+        "supermodel.publisher.refresh_live_context",
+        lambda **kwargs: _live_report(tmp_path),
+    )
     monkeypatch.setattr("supermodel.publisher.model_data_fingerprint", lambda **kwargs: "model")
 
     class FakeStore:

@@ -10,6 +10,11 @@ from pathlib import Path
 from typing import Any, Callable, Iterator
 
 from ._version import __version__
+from .live_context import (
+    LiveContextAssessment,
+    live_context_game_fingerprints,
+    refresh_live_context,
+)
 from .live_mlb import MLBStatsHTTPClient
 from .odds_provider import (
     DEFAULT_BOOKMAKERS,
@@ -59,6 +64,10 @@ class SlatePublishReport:
     evaluation_artifact: str | None
     simulation_manifests: tuple[str, ...]
     market_quotes_persisted: bool
+    live_context_status: str
+    live_context_provider: str | None
+    live_context_snapshot_path: str | None
+    live_context_blocked_game_pks: tuple[int, ...]
     odds_refresh_status: str
     odds_provider: str | None
     odds_quotes_received: int
@@ -80,6 +89,7 @@ class SlatePublishReport:
             "unchanged_game_pks",
             "excluded_games",
             "simulation_manifests",
+            "live_context_blocked_game_pks",
             "odds_sportsbooks",
             "odds_unmatched_events",
         ):
@@ -190,10 +200,12 @@ def game_input_fingerprint(
     *,
     context: PregameContext,
     model_data_hash: str,
+    live_context_hash: str | None = None,
 ) -> str:
     payload = {
         "schema": 1,
         "model_data_hash": model_data_hash,
+        "live_context_hash": live_context_hash,
         "context": _stable_context_record(context),
     }
     encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
@@ -280,6 +292,7 @@ def publish_slate(
     odds_bookmakers: tuple[str, ...] = DEFAULT_BOOKMAKERS,
     odds_markets: tuple[str, ...] = DEFAULT_MARKETS,
     odds_snapshot_root: str | Path = "runtime/snapshots/odds/the_odds_api",
+    live_context_root: str | Path = "runtime/live_context",
     odds_client: TheOddsAPIClient | None = None,
     require_odds: bool = False,
 ) -> SlatePublishReport:
@@ -320,6 +333,25 @@ def publish_slate(
             snapshot_dir=snapshot_dir,
             client=api_client,
             captured_at=timestamp,
+        )
+        live_context_report = refresh_live_context(
+            slate_date=slate_date,
+            snapshot_dir=snapshot_dir,
+            report_root=live_context_root,
+            client=api_client,
+            captured_at=timestamp,
+            contexts=captured.contexts,
+        )
+        live_context_assessments: dict[int, LiveContextAssessment] = {
+            int(item.game_pk): item for item in live_context_report.assessments
+        }
+        all_contexts_by_pk = {
+            int(context.game_pk): context
+            for context in captured.contexts
+            if context.game_pk is not None
+        }
+        live_context_hashes = live_context_game_fingerprints(
+            live_context_report, contexts_by_game_pk=all_contexts_by_pk
         )
         eligible: list[PregameContext] = []
         excluded: list[dict[str, Any]] = []
@@ -378,6 +410,7 @@ def publish_slate(
             int(context.game_pk): game_input_fingerprint(
                 context=context,
                 model_data_hash=model_hash,
+                live_context_hash=live_context_hashes.get(int(context.game_pk)),
             )
             for context in eligible
         }
@@ -432,7 +465,11 @@ def publish_slate(
                     "publication_mode": "scheduled_backend",
                     "provider_quotes_required_for_value": True,
                     "model_data_hash": model_hash,
+                    "live_context_provider": live_context_report.provider,
+                    "live_context_captured_at": live_context_report.captured_at_utc,
+                    "live_context_snapshot_path": live_context_report.snapshot_path,
                 },
+                live_context_assessments=live_context_assessments,
             )
 
         if not eligible:
@@ -488,6 +525,10 @@ def publish_slate(
                 else ()
             ),
             market_quotes_persisted=bool(odds_quotes_changed),
+            live_context_status=live_context_report.status,
+            live_context_provider=live_context_report.provider,
+            live_context_snapshot_path=live_context_report.snapshot_path,
+            live_context_blocked_game_pks=live_context_report.blocked_game_pks,
             odds_refresh_status=odds_status,
             odds_provider=odds_provider,
             odds_quotes_received=odds_quotes_received,

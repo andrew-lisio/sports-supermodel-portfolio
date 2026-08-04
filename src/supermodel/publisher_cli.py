@@ -81,6 +81,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip completed-history and pitching refresh for this invocation",
     )
+    parser.add_argument(
+        "--quiet-progress",
+        action="store_true",
+        help="Suppress pitching progress messages so stdout remains machine-readable JSON.",
+    )
     return parser
 
 
@@ -90,7 +95,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         raise SystemExit("--simulations must be positive")
 
     def progress(index: int, total: int, game_pk: int, source: str) -> None:
-        if index == 1 or index == total or index % 25 == 0:
+        if not args.quiet_progress and (index == 1 or index == total or index % 25 == 0):
             print(
                 f"Pitching refresh: {index}/{total} games (gamePk={game_pk}, {source})",
                 file=sys.stderr,

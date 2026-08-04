@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from enum import StrEnum
 import json
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 from .game_registry import ImmutableSnapshotStore
 from .live_mlb import MLBStatsHTTPClient, capture_live_slate
@@ -235,6 +235,7 @@ def refresh_live_context(
     client: MLBStatsHTTPClient | None = None,
     captured_at: datetime | None = None,
     policy: ContextFreshnessPolicy | None = None,
+    contexts: Iterable[PregameContext] | None = None,
 ) -> LiveContextRefreshReport:
     """Capture official live context, rosters, and transactions with explicit status.
 
@@ -247,13 +248,17 @@ def refresh_live_context(
         raise ValueError("captured_at must be timezone-aware")
     timestamp = timestamp.astimezone(timezone.utc)
     api_client = client or MLBStatsHTTPClient()
-    store = ImmutableSnapshotStore(snapshot_dir)
-    _, _, contexts = capture_live_slate(
-        game_date=slate_date,
-        client=api_client,
-        snapshot_store=store,
-        captured_at=timestamp,
-    )
+    supplied_contexts = tuple(contexts) if contexts is not None else None
+    if supplied_contexts is None:
+        store = ImmutableSnapshotStore(snapshot_dir)
+        _, _, captured_contexts = capture_live_slate(
+            game_date=slate_date,
+            client=api_client,
+            snapshot_store=store,
+            captured_at=timestamp,
+        )
+    else:
+        captured_contexts = supplied_contexts
 
     root = Path(report_root) / slate_date
     stamp = timestamp.strftime("%Y%m%dT%H%M%SZ")
@@ -262,7 +267,7 @@ def refresh_live_context(
     for team_id in sorted(
         {
             int(value)
-            for context in contexts
+            for context in captured_contexts
             for value in (context.away_team_id, context.home_team_id)
             if value is not None
         }
@@ -303,7 +308,7 @@ def refresh_live_context(
         transaction_path = str(target)
 
     assessments = apply_live_context_assessments(
-        contexts,
+        captured_contexts,
         assessed_at=timestamp,
         policy=policy,
         roster_team_ids=roster_team_ids,
@@ -327,6 +332,90 @@ def refresh_live_context(
     return report
 
 
+def live_context_game_fingerprints(
+    report: LiveContextRefreshReport,
+    *,
+    contexts_by_game_pk: Mapping[int, PregameContext],
+) -> dict[int, str]:
+    """Return stable per-game hashes for roster, transaction, and status context.
+
+    Capture timestamps and local paths are intentionally excluded so an unchanged
+    provider payload does not force a resimulation. Only the two teams' roster
+    payloads, relevant transactions, and the stable assessment fields participate.
+    """
+
+    from hashlib import sha256
+
+    def stable_json(value: Any) -> bytes:
+        return json.dumps(value, sort_keys=True, separators=(",", ":"), default=str).encode(
+            "utf-8"
+        )
+
+    roster_payloads: dict[int, Any] = {}
+    for raw_path in report.roster_snapshot_paths:
+        path = Path(raw_path)
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+            roster_payloads[int(document["team_id"])] = document.get("payload")
+        except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
+            continue
+
+    transactions: list[dict[str, Any]] = []
+    if report.transaction_snapshot_path:
+        try:
+            document = json.loads(
+                Path(report.transaction_snapshot_path).read_text(encoding="utf-8")
+            )
+            transactions = list((document.get("payload") or {}).get("transactions") or [])
+        except (OSError, TypeError, json.JSONDecodeError):
+            transactions = []
+
+    assessments = {int(item.game_pk): item for item in report.assessments}
+    hashes: dict[int, str] = {}
+    for game_pk, context in contexts_by_game_pk.items():
+        team_ids = {
+            int(value)
+            for value in (context.away_team_id, context.home_team_id)
+            if value is not None
+        }
+        relevant_transactions = []
+        for item in transactions:
+            from_id = ((item.get("fromTeam") or {}).get("id"))
+            to_id = ((item.get("toTeam") or {}).get("id"))
+            if from_id in team_ids or to_id in team_ids:
+                relevant_transactions.append(item)
+
+        assessment = assessments.get(int(game_pk))
+        assessment_record: dict[str, Any] | None = None
+        if assessment is not None:
+            assessment_record = assessment.to_record()
+            assessment_record.pop("assessed_at_utc", None)
+            assessment_record["block_reasons"] = sorted(
+                assessment_record.get("block_reasons") or []
+            )
+            assessment_record["warning_reasons"] = sorted(
+                assessment_record.get("warning_reasons") or []
+            )
+
+        payload = {
+            "schema": 1,
+            "provider": report.provider,
+            "assessment": assessment_record,
+            "rosters": {
+                str(team_id): roster_payloads.get(team_id) for team_id in sorted(team_ids)
+            },
+            "transactions": sorted(
+                relevant_transactions,
+                key=lambda item: (
+                    str(item.get("effectiveDate") or item.get("date") or ""),
+                    int(item.get("id") or 0),
+                ),
+            ),
+        }
+        hashes[int(game_pk)] = sha256(stable_json(payload)).hexdigest()
+    return hashes
+
+
 def apply_live_context_policy(
     evaluation: Any,
     *,
@@ -334,6 +423,7 @@ def apply_live_context_policy(
     assessed_at: datetime,
     top_n: int,
     policy: ContextFreshnessPolicy | None = None,
+    assessments_by_game_pk: Mapping[int, LiveContextAssessment] | None = None,
 ) -> Any:
     """Annotate evaluation rows and fail closed on unresolved critical inputs.
 
@@ -349,12 +439,14 @@ def apply_live_context_policy(
     for row in evaluation.to_dict("records"):
         game_pk = int(row["game_pk"])
         context = contexts_by_game_pk[game_pk]
-        assessment = assess_live_context(
-            context,
-            assessed_at=assessed_at,
-            policy=policy,
-            roster_loaded=False,
-        )
+        assessment = (assessments_by_game_pk or {}).get(game_pk)
+        if assessment is None:
+            assessment = assess_live_context(
+                context,
+                assessed_at=assessed_at,
+                policy=policy,
+                roster_loaded=False,
+            )
         existing_reasons = [
             value for value in str(row.get("selection_reasons") or "").split(";") if value
         ]
