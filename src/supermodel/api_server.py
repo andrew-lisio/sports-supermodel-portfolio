@@ -10,6 +10,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from .service_runtime import build_health
+from .security import SecuritySettings, SlidingWindowRateLimiter
 
 
 class ReadOnlyAPI:
@@ -55,11 +56,22 @@ class ReadOnlyAPI:
 
 
 def handler_factory(api: ReadOnlyAPI):
+    security = SecuritySettings.from_env()
+    limiter = SlidingWindowRateLimiter(
+        limit=security.rate_limit_requests,
+        window_seconds=security.rate_limit_window_seconds,
+    )
+
     class Handler(BaseHTTPRequestHandler):
         server_version = "SportsSuperModelAPI/1"
 
         def do_GET(self) -> None:  # noqa: N802
-            status, payload = api.response(self.path)
+            forwarded = self.headers.get("X-Forwarded-For") if security.trust_proxy_headers else None
+            client_key = (forwarded or self.client_address[0]).split(",")[0].strip()
+            if not limiter.allow(client_key):
+                status, payload = HTTPStatus.TOO_MANY_REQUESTS, {"status": "RATE_LIMITED"}
+            else:
+                status, payload = api.response(self.path)
             encoded = (json.dumps(payload, sort_keys=True) + "\n").encode("utf-8")
             self.send_response(int(status))
             self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -67,6 +79,8 @@ def handler_factory(api: ReadOnlyAPI):
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("X-Frame-Options", "DENY")
+            self.send_header("Referrer-Policy", "no-referrer")
+            self.send_header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(encoded)
 

@@ -71,6 +71,7 @@ sports-supermodel-totals = "supermodel.totals_cli:main"
 sports-supermodel-api = "supermodel.api_server:main"
 sports-supermodel-settle = "supermodel.settlement_cli:main"
 sports-supermodel-candidate = "supermodel.candidate_cli:main"
+sports-supermodel-ops = "supermodel.ops_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
