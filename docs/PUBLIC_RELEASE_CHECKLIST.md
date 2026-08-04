@@ -47,3 +47,17 @@ Complete this checklist before changing the GitHub repository to public.
 - [ ] Enable branch protection for `main`.
 - [ ] Require pull requests and passing tests for major model changes.
 - [ ] Create V2.4 on a separate development branch.
+
+## Hosted website activation
+
+- [ ] Confirm the user has explicitly approved public deployment.
+- [ ] Run `sports-supermodel-public status` and confirm the framework was intentionally enabled.
+- [ ] Run `sports-supermodel-public readiness` and resolve every failure.
+- [ ] Verify a checksummed runtime backup and complete a restore rehearsal.
+- [ ] Confirm PostgreSQL and object storage are configured for production.
+- [ ] Confirm provider credentials and quota monitoring work without exposing secrets.
+- [ ] Confirm the public Compose profile or hosting service is the only activated deployment path.
+- [ ] Verify `/healthz` and `/readyz` before exposing traffic.
+- [ ] Test the emergency stop by disabling the public deployment gate.
+
+The repository framework does not provision or activate these services automatically.

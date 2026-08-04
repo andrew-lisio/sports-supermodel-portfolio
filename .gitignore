@@ -56,3 +56,7 @@ reports/v2_4_opponent_form/
 reports/v2_4_validation*/
 runtime/evidence/
 reports/v2_4_feature_authority/
+
+# Local backup archives and public-readiness snapshots
+backups/
+*.tar.gz

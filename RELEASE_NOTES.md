@@ -1,3 +1,13 @@
+# V2.5 public readiness foundation
+
+This cumulative pre-deployment milestone completes dormant hosted-application framework without
+provisioning or activating any external service. Hosted startup requires an explicit enable flag
+and acknowledgement; local execution remains unchanged. The milestone also adds checksummed
+runtime backup/restore tooling, deployment profiles, CI coverage, rollback guidance, and sanitized
+readiness reports. V2.3.3 remains production and V2.4 RC2 remains shadow.
+
+---
+
 # V2.5 accelerated platform integration
 
 This cumulative development branch packages the planned live-context, totals-candidate,

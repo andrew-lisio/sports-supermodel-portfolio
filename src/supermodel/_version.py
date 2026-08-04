@@ -1,1 +1,1 @@
-__version__ = "2.5.0.dev2+integration.acceptance"
+__version__ = "2.5.0.dev3+public.readiness.foundation"

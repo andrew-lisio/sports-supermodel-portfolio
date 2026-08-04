@@ -1,3 +1,13 @@
+## 2.5.0.dev3+public.readiness.foundation
+
+- Added an explicit two-step public-deployment activation gate that is dormant by default.
+- Guarded every hosted service entry point and placed the production Compose services behind the
+  `public` profile without changing local commands.
+- Added side-effect-free public status, plan, readiness, and startup-guard commands.
+- Added checksummed runtime backup verification and safe restore commands.
+- Added dormant deployment templates, rollback documentation, release checks, and V2.5 CI coverage.
+- Preserved V2.3.3 production, V2.4 RC2 shadow, and shadow-only totals governance.
+
 ## 2.5.0.dev2+integration.acceptance
 
 - Integrated the official live-context roster and transaction capture into scheduled publisher runs.
