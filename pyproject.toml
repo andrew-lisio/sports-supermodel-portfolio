@@ -70,6 +70,7 @@ sports-supermodel-live-context = "supermodel.live_context_cli:main"
 sports-supermodel-totals = "supermodel.totals_cli:main"
 sports-supermodel-api = "supermodel.api_server:main"
 sports-supermodel-settle = "supermodel.settlement_cli:main"
+sports-supermodel-candidate = "supermodel.candidate_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
