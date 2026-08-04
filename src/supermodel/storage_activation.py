@@ -3,9 +3,12 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from hashlib import sha256
+import io
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+import shutil
 import tarfile
+import tempfile
 from typing import Any, Iterable
 
 from .storage import ObjectStore, StorageSettings, create_object_store, create_state_store
@@ -171,6 +174,30 @@ def verify_runtime_manifest(
     }
 
 
+def _runtime_backup_manifest(runtime_root: Path) -> dict[str, Any]:
+    files: list[dict[str, Any]] = []
+    if runtime_root.exists():
+        for path in sorted(runtime_root.rglob("*")):
+            if not path.is_file():
+                continue
+            payload = path.read_bytes()
+            files.append(
+                {
+                    "relative_path": path.relative_to(runtime_root).as_posix(),
+                    "bytes": len(payload),
+                    "sha256": sha256(payload).hexdigest(),
+                }
+            )
+    return {
+        "schema_version": 1,
+        "generated_at_utc": _utc_now(),
+        "runtime_root": str(runtime_root),
+        "file_count": len(files),
+        "total_bytes": sum(int(item["bytes"]) for item in files),
+        "files": files,
+    }
+
+
 def create_runtime_backup(
     *,
     runtime_root: str | Path = "runtime",
@@ -180,8 +207,124 @@ def create_runtime_backup(
     target = Path(destination)
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = target.with_suffix(target.suffix + ".tmp")
+    manifest = _runtime_backup_manifest(root)
     with tarfile.open(temporary, "w:gz") as archive:
         if root.exists():
             archive.add(root, arcname="runtime", recursive=True)
+        payload = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        info = tarfile.TarInfo("backup_manifest.json")
+        info.size = len(payload)
+        info.mtime = int(datetime.now(timezone.utc).timestamp())
+        archive.addfile(info, io.BytesIO(payload))
     temporary.replace(target)
+    return target
+
+
+def _safe_backup_members(archive: tarfile.TarFile) -> list[tarfile.TarInfo]:
+    members = archive.getmembers()
+    for member in members:
+        path = PurePosixPath(member.name)
+        if path.is_absolute() or ".." in path.parts:
+            raise ValueError(f"unsafe backup member: {member.name}")
+        if member.issym() or member.islnk() or member.isdev():
+            raise ValueError(f"unsupported backup member type: {member.name}")
+        if member.name != "backup_manifest.json" and path.parts[:1] != ("runtime",):
+            raise ValueError(f"unexpected backup member: {member.name}")
+    return members
+
+
+def verify_runtime_backup(backup: str | Path) -> dict[str, Any]:
+    source = Path(backup)
+    failures: list[str] = []
+    checked = 0
+    try:
+        with tarfile.open(source, "r:gz") as archive:
+            _safe_backup_members(archive)
+            try:
+                manifest_member = archive.getmember("backup_manifest.json")
+            except KeyError:
+                return {
+                    "status": "FAIL",
+                    "backup": str(source),
+                    "failures": ["BACKUP_MANIFEST_MISSING"],
+                    "checked_files": 0,
+                }
+            extracted = archive.extractfile(manifest_member)
+            if extracted is None:
+                raise ValueError("backup manifest could not be read")
+            manifest = json.loads(extracted.read().decode("utf-8"))
+            for item in manifest.get("files", []):
+                relative = str(item["relative_path"])
+                try:
+                    member = archive.getmember(f"runtime/{relative}")
+                except KeyError:
+                    failures.append(f"MISSING:{relative}")
+                    continue
+                fileobj = archive.extractfile(member)
+                if fileobj is None:
+                    failures.append(f"UNREADABLE:{relative}")
+                    continue
+                payload = fileobj.read()
+                checked += 1
+                if len(payload) != int(item["bytes"]):
+                    failures.append(f"SIZE_MISMATCH:{relative}")
+                if sha256(payload).hexdigest() != str(item["sha256"]):
+                    failures.append(f"HASH_MISMATCH:{relative}")
+    except (OSError, tarfile.TarError, ValueError, json.JSONDecodeError) as exc:
+        return {
+            "status": "FAIL",
+            "backup": str(source),
+            "failures": [f"BACKUP_INVALID:{type(exc).__name__}:{exc}"],
+            "checked_files": checked,
+        }
+    return {
+        "status": "PASS" if not failures else "FAIL",
+        "backup": str(source),
+        "failures": failures,
+        "checked_files": checked,
+    }
+
+
+def restore_runtime_backup(
+    backup: str | Path,
+    *,
+    runtime_root: str | Path = "runtime",
+    overwrite: bool = False,
+) -> Path:
+    verification = verify_runtime_backup(backup)
+    if verification["status"] != "PASS":
+        raise RuntimeError(
+            "runtime backup verification failed: " + ", ".join(verification["failures"])
+        )
+    target = Path(runtime_root)
+    if target.exists() and any(target.iterdir()) and not overwrite:
+        raise FileExistsError(
+            f"runtime destination {target} is not empty; pass overwrite=True to replace it"
+        )
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=target.parent) as temporary_dir:
+        staging = Path(temporary_dir)
+        with tarfile.open(backup, "r:gz") as archive:
+            members = _safe_backup_members(archive)
+            for member in members:
+                if member.name == "backup_manifest.json":
+                    continue
+                destination = staging.joinpath(*PurePosixPath(member.name).parts)
+                if member.isdir():
+                    destination.mkdir(parents=True, exist_ok=True)
+                    continue
+                if not member.isfile():
+                    raise ValueError(f"unsupported backup member type: {member.name}")
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                source = archive.extractfile(member)
+                if source is None:
+                    raise ValueError(f"backup member could not be read: {member.name}")
+                with destination.open("wb") as output:
+                    shutil.copyfileobj(source, output)
+        restored = staging / "runtime"
+        if not restored.exists():
+            restored.mkdir()
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.move(str(restored), str(target))
     return target

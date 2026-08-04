@@ -6,7 +6,12 @@ from pathlib import Path
 
 from .postgres_storage import apply_migrations, postgres_healthcheck
 from .storage import StorageBackend, StorageSettings, create_object_store
-from .storage_activation import activate_shared_storage, create_runtime_backup
+from .storage_activation import (
+    activate_shared_storage,
+    create_runtime_backup,
+    restore_runtime_backup,
+    verify_runtime_backup,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -22,6 +27,12 @@ def build_parser() -> argparse.ArgumentParser:
     backup = subparsers.add_parser("backup", help="Create a compressed local runtime backup")
     backup.add_argument("--runtime-root", type=Path, default=Path("runtime"))
     backup.add_argument("--output", type=Path, required=True)
+    verify = subparsers.add_parser("verify-backup", help="Verify a runtime backup manifest")
+    verify.add_argument("--input", type=Path, required=True)
+    restore = subparsers.add_parser("restore", help="Restore a verified runtime backup")
+    restore.add_argument("--input", type=Path, required=True)
+    restore.add_argument("--runtime-root", type=Path, default=Path("runtime"))
+    restore.add_argument("--overwrite", action="store_true")
     return parser
 
 
@@ -39,6 +50,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "backup":
         path = create_runtime_backup(runtime_root=args.runtime_root, destination=args.output)
         print(json.dumps({"status": "PASS", "backup": str(path)}, indent=2, sort_keys=True))
+        return 0
+    if args.command == "verify-backup":
+        report = verify_runtime_backup(args.input)
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0 if report["status"] == "PASS" else 2
+    if args.command == "restore":
+        path = restore_runtime_backup(
+            args.input,
+            runtime_root=args.runtime_root,
+            overwrite=args.overwrite,
+        )
+        print(json.dumps({"status": "PASS", "runtime_root": str(path)}, indent=2, sort_keys=True))
         return 0
     if args.command == "migrate":
         if settings.backend is not StorageBackend.POSTGRES:
