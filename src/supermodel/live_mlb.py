@@ -182,6 +182,19 @@ class MLBStatsHTTPClient:
     def venue(self, venue_id: int) -> dict[str, Any]:
         return self._get_json(f"v1/venues/{int(venue_id)}")
 
+    def team_roster(self, team_id: int, game_date: str) -> dict[str, Any]:
+        season = datetime.fromisoformat(game_date).year
+        return self._get_json(
+            f"v1/teams/{int(team_id)}/roster",
+            {"rosterType": "active", "season": int(season), "date": game_date},
+        )
+
+    def transactions(self, start_date: str, end_date: str) -> dict[str, Any]:
+        return self._get_json(
+            "v1/transactions",
+            {"sportId": 1, "startDate": start_date, "endDate": end_date},
+        )
+
     def recent_team_schedule(self, team_id: int, end_date: str, days: int = 4) -> dict[str, Any]:
         end = datetime.fromisoformat(end_date).date()
         start = end - timedelta(days=days)

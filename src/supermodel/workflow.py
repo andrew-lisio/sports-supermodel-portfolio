@@ -21,6 +21,7 @@ from .advanced_features import context_feature_vector
 from .evidence import ProspectiveEvidenceLedger
 from .game_registry import ImmutableSnapshotStore, ScheduleIntegrityError, parse_mlb_schedule
 from .history_refresh import HistoryRefreshReport, refresh_completed_history
+from .live_context import apply_live_context_policy
 from .live_mlb import (
     LiveEvaluationConfig,
     MLBStatsHTTPClient,
@@ -894,6 +895,12 @@ def evaluate_captured_slate(
         pregame_contexts=pregame_contexts_by_pk,
         top_n=top_n,
     )
+    production_evaluation = apply_live_context_policy(
+        production_evaluation,
+        contexts_by_game_pk=pregame_contexts_by_pk,
+        assessed_at=market_timestamp,
+        top_n=top_n,
+    )
     base_shadow_evaluation = evaluate_live_slate(
         historical_features=candidate_historical_features,
         future_features=candidate_future_features,
@@ -916,6 +923,12 @@ def evaluate_captured_slate(
         shadow_evaluation,
         series_contexts=series_contexts,
         pregame_contexts=pregame_contexts_by_pk,
+        top_n=top_n,
+    )
+    shadow_evaluation = apply_live_context_policy(
+        shadow_evaluation,
+        contexts_by_game_pk=pregame_contexts_by_pk,
+        assessed_at=market_timestamp,
         top_n=top_n,
     )
     evaluation = combine_production_and_shadow(production_evaluation, shadow_evaluation)

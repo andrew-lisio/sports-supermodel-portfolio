@@ -66,6 +66,7 @@ sports-supermodel-publish = "supermodel.publisher_cli:main"
 sports-supermodel-odds = "supermodel.odds_cli:main"
 sports-supermodel-worker = "supermodel.worker_cli:main"
 sports-supermodel-storage = "supermodel.storage_cli:main"
+sports-supermodel-live-context = "supermodel.live_context_cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
