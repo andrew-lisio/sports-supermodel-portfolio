@@ -60,3 +60,17 @@ reports/v2_4_feature_authority/
 # Local backup archives and public-readiness snapshots
 backups/
 *.tar.gz
+
+# Public-portfolio privacy guardrails
+snapshots/
+snapshots/private_book/
+reports/live/
+examples/historical_runs/
+data/2026/
+data/mlb-2026-asplayed.csv
+*.png
+*.jpg
+*.jpeg
+!docs/assets/**
+.venv-public-312/
+portfolio-diagnostic.log

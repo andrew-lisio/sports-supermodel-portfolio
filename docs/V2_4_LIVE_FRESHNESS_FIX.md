@@ -1,8 +1,11 @@
 # V2.4 RC2 live-history freshness and conflict safeguards
 
+> **Portfolio note:** this document records a historical development run. The public portfolio snapshot intentionally omits the original `data/2026` season cache; the validation claims below are preserved as historical methodology/results, not as a promise that the seed dataset is redistributed here.
+
+
 ## Confirmed failure mode
 
-The repository seed under `data/2026` ends on 2026-07-19. Before RC2, a live slate
+The development seed used for this historical run under `data/2026` ended on 2026-07-19. Before RC2, a live slate
 loaded those files, attached official schedule identity, and then built current-form and
 starter-state features without appending completed games played after the seed cutoff.
 A July 25–27 slate could therefore use last-game and rolling-form state that was six to
@@ -12,7 +15,7 @@ eight days old.
 
 Every normal CLI or UI evaluation now:
 
-1. loads the reproducible repository seed;
+1. loads the approved local historical seed;
 2. checks the persistent local cache at `runtime/data/mlb_completed_games.csv`;
 3. downloads every newly completed official MLB game through the day before the slate;
 4. stores the official schedule response as an immutable snapshot;

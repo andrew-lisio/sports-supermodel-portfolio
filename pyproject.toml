@@ -8,15 +8,13 @@ version = "2.6.0.dev1+pa.generative.integration"
 description = "MLB probabilistic forecasting platform with seven-model ensembles, immutable pregame data, and generative PA simulation"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {file = "LICENSE"}
 authors = [
-  {name = "Sports SuperModel contributors"}
+  {name = "Andrew Lisio", email = "291412269+andrew-lisio@users.noreply.github.com"}
 ]
 keywords = ["mlb", "machine-learning", "sports-analytics", "monte-carlo", "baseball"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",

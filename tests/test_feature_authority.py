@@ -1,21 +1,16 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 
 from supermodel.feature_authority import (
     DIRECT_SCORE_PROXY_FEATURES,
     build_feature_authority_report,
 )
-from supermodel.mlb_v2 import LIVE_FEATURES, build_pregame_features, load_team_logs, reconstruct_games
-
-ROOT = Path(__file__).resolve().parents[1]
+from supermodel.mlb_v2 import LIVE_FEATURES, build_pregame_features
 
 
-def test_current_contract_discloses_live_feature_authority_truthfully():
-    games = reconstruct_games(load_team_logs(ROOT / "data" / "2026"))
-    features = build_pregame_features(games)
+def test_current_contract_discloses_live_feature_authority_truthfully(synthetic_games):
+    features = build_pregame_features(synthetic_games)
     report = build_feature_authority_report(features)
 
     assert report["summary"]["live_features_collected"] == len(LIVE_FEATURES)

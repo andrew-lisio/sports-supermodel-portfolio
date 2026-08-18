@@ -1,7 +1,9 @@
-# Historical game-log source
+# Historical data policy
 
-The 2026 team CSV files were downloaded on 2026-07-20 from the public `fantasy-toolz/mlb-predictions` GitHub repository (`data/2026/teams`). The upstream project states that its outcomes are scraped and processed from MLB and Baseball Savant.
+This public portfolio snapshot intentionally does **not** bundle the private development team-log cache or copied third-party season CSV files.
 
-These files do not contain official game identifiers or home/away flags. They are adequate for a prototype team-state replay, but ambiguous doubleheader matchups are excluded. Live and future production runs should preserve official MLB `gamePk` identifiers in timestamped snapshots.
+The production/development project has used point-in-time MLB game history, MLB Stats API identity data, Baseball Savant / Statcast context, and Retrosheet play-by-play data for specific validation work. Public redistribution rights are evaluated separately from the right to access or analyze a source.
 
-Before publishing or redistributing a repository containing third-party datasets or screenshots, the repository owner should independently confirm the applicable license, attribution requirements, API terms, trademark rules, and redistribution permissions. Inclusion here is not a representation that every third-party artifact may be republished in every jurisdiction or context.
+Tests in this repository use controlled fixtures and do not require a private season cache. Full local/live execution requires an approved historical input directory or a separately generated runtime cache.
+
+See `../docs/THIRD_PARTY_DATA.md` and `../NOTICE.md`.

@@ -1,63 +1,51 @@
-# Public release checklist
+# Public portfolio release checklist
 
-Complete this checklist before changing the GitHub repository to public.
+Use this checklist before publishing a recruiter-facing repository. The safest publication path is a **new public repository created from the cleaned snapshot**, not changing the private development repository to public, because old private files may remain reachable in Git history.
 
-## Legal and policy review
+## Content and privacy
 
-- [ ] Have a qualified attorney review `DISCLAIMER.md` if the project will be marketed, monetized, promoted as a betting product, hosted for other users, or made available to a broad public audience.
-- [ ] Confirm the project complies with gambling, consumer-protection, advertising, data, privacy, accessibility, and software laws in the jurisdictions you target.
-- [ ] Do not claim guaranteed accuracy, profit, safety, or legal compliance.
-- [ ] Keep the project described as experimental research, not a sportsbook or advisory service.
-- [ ] Do not publicly host the local Streamlit development server without a production security and legal design.
+- [ ] `snapshots/private_book/` is absent.
+- [ ] `reports/live/` is absent.
+- [ ] `examples/historical_runs/` is absent.
+- [ ] No screenshots, account balances, credit information, cookies, tokens, `.env` files, or provider credentials are present.
+- [ ] Private/local runtime paths are ignored by `.gitignore`.
+- [ ] Public examples contain only synthetic or intentionally shareable inputs.
 
-## Third-party content and data
+## Third-party data
 
-- [ ] Confirm redistribution rights for every dataset under `data/`.
-- [ ] Confirm current public API usage complies with provider terms and rate limits.
-- [ ] Remove sportsbook screenshots unless redistribution rights are clear.
-- [ ] Review preserved market-input snapshots and reports before publication.
-- [ ] Remove or redact balances, account names, IDs, device information, private URLs, or other personal details.
-- [ ] Confirm trademark and attribution language is accurate.
+- [ ] `NOTICE.md` is reviewed and Retrosheet's current required attribution is displayed prominently.
+- [ ] `docs/THIRD_PARTY_DATA.md` accurately describes included and excluded data.
+- [ ] No copied dataset is redistributed unless permission has been verified.
+- [ ] Provider terms and trademark requirements have been reviewed for any hosted/public use.
 
-## Repository hygiene
+## Engineering
 
-- [ ] Run `pytest` and confirm all tests pass.
-- [ ] Run `git status` and inspect every staged file.
-- [ ] Search for secrets: `.env`, API tokens, cookies, passwords, private URLs, and credentials.
-- [ ] Confirm `.streamlit/secrets.toml` is not tracked.
-- [ ] Confirm no generated personal odds file is staged.
-- [ ] Confirm README, license, disclaimer, input documentation, and source notes are present.
-- [ ] Confirm active outputs contain no bankroll, wager-size, exposure, or Kelly columns.
-- [ ] Confirm the browser and CLI call the shared model workflow rather than separate model implementations.
+- [ ] `python -m compileall -q src app.py tests` passes.
+- [ ] `python -m ruff check .` passes.
+- [ ] `python -m pytest` passes.
+- [ ] `python -m build` passes.
+- [ ] Python 3.11 and 3.12 GitHub Actions jobs pass.
+- [ ] README metrics match the canonical validation artifacts.
+- [ ] Experimental PA output remains `production_authority=false`.
 
-## User experience
+## GitHub presentation
 
-- [ ] Launch `sports-supermodel-ui` locally.
-- [ ] Generate a CSV template from an official slate.
-- [ ] Test interactive terminal input.
-- [ ] Test one American-odds file and one decimal-odds file.
-- [ ] Confirm a doubleheader fails without `game_pk` and succeeds with it.
-- [ ] Confirm the README installation commands work in a clean environment.
+- [ ] Use a new clean public repository with fresh history.
+- [ ] Add a concise repository description and topics such as `mlb`, `machine-learning`, `sports-analytics`, `monte-carlo`, and `python`.
+- [ ] Enable secret scanning / push protection where available.
+- [ ] Keep the private development repository private.
+- [ ] Put the clean public repository URL on the resume.
 
-## GitHub settings
+## Hosted deployment
 
-- [ ] Add a clear repository description.
-- [ ] Add relevant repository topics.
-- [ ] Enable private vulnerability reporting.
-- [ ] Enable branch protection for `main`.
-- [ ] Require pull requests and passing tests for major model changes.
-- [ ] Create V2.4 on a separate development branch.
+Public source visibility is separate from public application hosting. Do not activate hosted deployment solely because the portfolio repository is public. The dormant deployment gates remain unchanged.
 
-## Hosted website activation
 
-- [ ] Confirm the user has explicitly approved public deployment.
-- [ ] Run `sports-supermodel-public status` and confirm the framework was intentionally enabled.
-- [ ] Run `sports-supermodel-public readiness` and resolve every failure.
-- [ ] Verify a checksummed runtime backup and complete a restore rehearsal.
-- [ ] Confirm PostgreSQL and object storage are configured for production.
-- [ ] Confirm provider credentials and quota monitoring work without exposing secrets.
-- [ ] Confirm the public Compose profile or hosting service is the only activated deployment path.
-- [ ] Verify `/healthz` and `/readyz` before exposing traffic.
-- [ ] Test the emergency stop by disabling the public deployment gate.
+## Portfolio-publication gates
 
-The repository framework does not provision or activate these services automatically.
+- [ ] Publish only from the sanitized portfolio clone, never by changing the private development repository to public.
+- [ ] Confirm rewritten history contains no `Zeb1x` attribution and uses Andrew Lisio for those genuine user-authored commits.
+- [ ] Confirm private/runtime paths are absent from all reachable Git objects.
+- [ ] Run a history-wide secret scan after filtering and before adding any public remote.
+- [ ] Insert Retrosheet's current required attribution statement in `NOTICE.md` before publication.
+- [ ] Run public-repository audit, Ruff, pytest, package build, and GitHub Actions before publication.

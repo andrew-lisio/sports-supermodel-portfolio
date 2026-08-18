@@ -102,7 +102,7 @@ Confirm that GitHub displays:
 
 - `README.md`
 - `DISCLAIMER.md`
-- `LICENSE`
+- `COPYRIGHT.md` and `NOTICE.md`
 - `app.py`
 - `src/supermodel/`
 - `tests/`

@@ -1,0 +1,13 @@
+{
+  "captured_at_utc": "2026-08-01T20:00:00Z",
+  "game_pk": 999999,
+  "away_team": "AAA",
+  "home_team": "BBB",
+  "probable_pitchers_confirmed": true,
+  "lineups_confirmed": true,
+  "weather": {
+    "temperature_f": 78,
+    "condition": "clear"
+  },
+  "provenance_note": "Synthetic example only; no live or private user data."
+}

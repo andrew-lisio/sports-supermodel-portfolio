@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 
 from supermodel.feature_registry import (
@@ -11,11 +9,7 @@ from supermodel.feature_registry import (
 from supermodel.mlb_v2 import (
     build_pregame_features,
     feature_columns,
-    load_team_logs,
-    reconstruct_games,
 )
-
-ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_known_features_map_to_expected_baseball_categories():
@@ -29,9 +23,8 @@ def test_known_features_map_to_expected_baseball_categories():
     assert feature_group_for("team_a_is_home") == "home_field"
 
 
-def test_current_model_features_are_covered_exactly_once():
-    games = reconstruct_games(load_team_logs(ROOT / "data" / "2026"))
-    features = build_pregame_features(games)
+def test_current_model_features_are_covered_exactly_once(synthetic_games):
+    features = build_pregame_features(synthetic_games)
     names = feature_columns(features)
 
     validate_feature_groups(names)

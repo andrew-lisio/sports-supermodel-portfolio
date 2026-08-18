@@ -1,7 +1,10 @@
 # V2.4 Phase 3 Recent-Form Validation
 
+> **Portfolio note:** this document records a historical development run. The public portfolio snapshot intentionally omits the original `data/2026` season cache; the validation claims below are preserved as historical methodology/results, not as a promise that the seed dataset is redistributed here.
+
+
 Phase 3 was checked with the repository's five fixed chronological validation windows
-using the bundled `data/2026` team logs. The comparison covers 1,109 out-of-fold games.
+using the private development `data/2026` team-log seed. The comparison covers 1,109 out-of-fold games.
 It is a development check, not evidence of future profitability.
 
 | Version | Accuracy | Brier score | Log loss | AUC |
