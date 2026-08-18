@@ -1,7 +1,5 @@
 from datetime import datetime
 
-import pandas as pd
-
 from supermodel.refresh_orchestrator import _write_json_atomic
 
 

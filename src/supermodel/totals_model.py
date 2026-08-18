@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-import math
 from typing import Any, Iterable
 
 import numpy as np

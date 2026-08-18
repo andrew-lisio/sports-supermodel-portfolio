@@ -253,10 +253,11 @@ def main(argv: list[str] | None = None) -> int:
         workload="validation",
         total_workers=args.workers,
     )
-    model_factory = lambda: V2Ensemble(
-        model_workers=execution_plan.model_workers,
-        estimator_threads=execution_plan.estimator_threads,
-    )
+    def model_factory() -> V2Ensemble:
+        return V2Ensemble(
+            model_workers=execution_plan.model_workers,
+            estimator_threads=execution_plan.estimator_threads,
+        )
     bootstrap_iterations = (
         args.bootstrap_iterations
         if args.bootstrap_iterations is not None

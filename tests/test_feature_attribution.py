@@ -34,7 +34,8 @@ def test_leave_group_at_reference_sensitivity_is_directional_and_non_mutating():
 
 def test_sensitivity_fails_closed_for_missing_columns_or_references():
     frame = pd.DataFrame({"offense": [1.0]})
-    predictor = lambda target: np.asarray([0.5])
+    def predictor(target):
+        return np.asarray([0.5])
 
     with pytest.raises(AttributionInputError, match="missing columns"):
         leave_group_at_reference_sensitivity(

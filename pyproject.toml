@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sports-supermodel"
-version = "2.5.0.dev3+public.readiness.foundation"
-description = "Experimental MLB prediction ensemble with user-entered odds, immutable pregame snapshots, and Monte Carlo score simulation"
+version = "2.6.0.dev1+pa.generative.integration"
+description = "MLB probabilistic forecasting platform with seven-model ensembles, immutable pregame data, and generative PA simulation"
 readme = "README.md"
 requires-python = ">=3.11"
 license = {file = "LICENSE"}
@@ -43,7 +43,7 @@ storage = [
 ]
 dev = [
   "pytest>=8.0",
-  "ruff>=0.9",
+  "ruff==0.16.1",
   "build>=1.2",
 ]
 
@@ -82,6 +82,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "supermodel.storage_migrations" = ["*.sql"]
+"supermodel" = ["resources/*.json"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
@@ -91,8 +92,8 @@ pythonpath = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-exclude = ["reports", "snapshots", "docs/history"]
+exclude = ["reports", "snapshots", "docs/history", "examples/historical_runs"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E4", "E7", "E9", "F", "B"]
 ignore = ["E501"]

@@ -1,0 +1,7060 @@
+{
+  "event_counts": {
+    "1B": 25902,
+    "2B": 7771,
+    "3B": 697,
+    "BB": 14929,
+    "HBP": 2020,
+    "HR": 5453,
+    "K": 41147,
+    "OUT": 82566,
+    "REACH": 1964
+  },
+  "event_fallback_transitions": {
+    "1B": [
+      {
+        "count": 102,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0039379198517488995,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.00019303528685043626,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 3.860705737008725e-05,
+        "runs": 3
+      },
+      {
+        "count": 14065,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.5430082619102772,
+        "runs": 0
+      },
+      {
+        "count": 1707,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.06590224693073894,
+        "runs": 1
+      },
+      {
+        "count": 309,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.011929580727356962,
+        "runs": 2
+      },
+      {
+        "count": 138,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.005327773917072041,
+        "runs": 0
+      },
+      {
+        "count": 141,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.005443595089182303,
+        "runs": 1
+      },
+      {
+        "count": 48,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.001853138753764188,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.00011582117211026175,
+        "runs": 3
+      },
+      {
+        "count": 3573,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.13794301598332176,
+        "runs": 0
+      },
+      {
+        "count": 1024,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.03953362674696934,
+        "runs": 1
+      },
+      {
+        "count": 145,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.0055980233186626515,
+        "runs": 2
+      },
+      {
+        "count": 11,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0004246776310709598,
+        "runs": 0
+      },
+      {
+        "count": 15,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0005791058605513088,
+        "runs": 1
+      },
+      {
+        "count": 15,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0005791058605513088,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 3.860705737008725e-05,
+        "runs": 3
+      },
+      {
+        "count": 2172,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.0838545286078295,
+        "runs": 0
+      },
+      {
+        "count": 858,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.03312485522353486,
+        "runs": 1
+      },
+      {
+        "count": 141,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.005443595089182303,
+        "runs": 2
+      },
+      {
+        "count": 98,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.003783491622268551,
+        "runs": 0
+      },
+      {
+        "count": 111,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.004285383368079685,
+        "runs": 1
+      },
+      {
+        "count": 19,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0007335340900316578,
+        "runs": 2
+      },
+      {
+        "count": 589,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.022739556790981393,
+        "runs": 0
+      },
+      {
+        "count": 184,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.007103698556096054,
+        "runs": 1
+      },
+      {
+        "count": 193,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.00745116207242684,
+        "runs": 0
+      },
+      {
+        "count": 96,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.003706277507528376,
+        "runs": 1
+      },
+      {
+        "count": 16,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.000617712917921396,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 3.860705737008725e-05,
+        "runs": 3
+      },
+      {
+        "count": 23,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.0008879623195120068,
+        "runs": 0
+      },
+      {
+        "count": 9,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.00034746351633078526,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.00011582117211026175,
+        "runs": 2
+      },
+      {
+        "count": 15,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0005791058605513088,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.000154428229480349,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.00011582117211026175,
+        "runs": 2
+      },
+      {
+        "count": 10,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.00038607057370087253,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 7.72141147401745e-05,
+        "runs": 1
+      },
+      {
+        "count": 35,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0013512470079530539,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0002702494015906108,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.00011582117211026175,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 7.72141147401745e-05,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 7.72141147401745e-05,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 3.860705737008725e-05,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 3.860705737008725e-05,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 2,
+        "probability": 3.860705737008725e-05,
+        "runs": 0
+      }
+    ],
+    "2B": [
+      {
+        "count": 14,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0018015699395187235,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.00038605070132544073,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.000514734268433921,
+        "runs": 3
+      },
+      {
+        "count": 4287,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.5516664521940549,
+        "runs": 0
+      },
+      {
+        "count": 1249,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.16072577531849183,
+        "runs": 1
+      },
+      {
+        "count": 448,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.05765023806459915,
+        "runs": 2
+      },
+      {
+        "count": 68,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.008750482563376656,
+        "runs": 3
+      },
+      {
+        "count": 29,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.003731823446145927,
+        "runs": 0
+      },
+      {
+        "count": 60,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.007721014026508815,
+        "runs": 1
+      },
+      {
+        "count": 25,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0032170891777120064,
+        "runs": 2
+      },
+      {
+        "count": 6,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0007721014026508815,
+        "runs": 3
+      },
+      {
+        "count": 933,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.12006176811221207,
+        "runs": 0
+      },
+      {
+        "count": 452,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.05816497233303307,
+        "runs": 1
+      },
+      {
+        "count": 83,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.01068073607000386,
+        "runs": 2
+      },
+      {
+        "count": 41,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.00527602625144769,
+        "runs": 0
+      },
+      {
+        "count": 21,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0027023549092780852,
+        "runs": 1
+      },
+      {
+        "count": 12,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.001544202805301763,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.000514734268433921,
+        "runs": 3
+      },
+      {
+        "count": 19,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0024449877750611247,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.000514734268433921,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.00012868356710848025,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.000514734268433921,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.00038605070132544073,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.00012868356710848025,
+        "runs": 0
+      }
+    ],
+    "3B": [
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.007173601147776184,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.00430416068866571,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0028694404591104736,
+        "runs": 4
+      },
+      {
+        "count": 401,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.5753228120516499,
+        "runs": 0
+      },
+      {
+        "count": 193,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.2769010043041607,
+        "runs": 1
+      },
+      {
+        "count": 69,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.09899569583931134,
+        "runs": 2
+      },
+      {
+        "count": 23,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.03299856527977044,
+        "runs": 3
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0014347202295552368,
+        "runs": 1
+      }
+    ],
+    "BB": [
+      {
+        "count": 7,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.000468886060687253,
+        "runs": 1
+      },
+      {
+        "count": 8089,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.5418313349855985,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0003349186147766093,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 6.698372295532186e-05,
+        "runs": 1
+      },
+      {
+        "count": 4065,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.27228883381338337,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.00020095116886596556,
+        "runs": 1
+      },
+      {
+        "count": 630,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.04219974546185277,
+        "runs": 0
+      },
+      {
+        "count": 6,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.0004019023377319311,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 6.698372295532186e-05,
+        "runs": 1
+      },
+      {
+        "count": 1847,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.12371893629847946,
+        "runs": 0
+      },
+      {
+        "count": 270,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.0180856051979369,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.00026793489182128745,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 6.698372295532186e-05,
+        "runs": 0
+      }
+    ],
+    "HBP": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0004950495049504951,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0004950495049504951,
+        "runs": 1
+      },
+      {
+        "count": 1081,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.5351485148514852,
+        "runs": 0
+      },
+      {
+        "count": 548,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.2712871287128713,
+        "runs": 0
+      },
+      {
+        "count": 45,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.022277227722772276,
+        "runs": 0
+      },
+      {
+        "count": 274,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.13564356435643565,
+        "runs": 0
+      },
+      {
+        "count": 70,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.034653465346534656,
+        "runs": 1
+      }
+    ],
+    "HR": [
+      {
+        "count": 3088,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.5662937832385843,
+        "runs": 1
+      },
+      {
+        "count": 1618,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.2967174032642582,
+        "runs": 2
+      },
+      {
+        "count": 616,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.11296534017971759,
+        "runs": 3
+      },
+      {
+        "count": 131,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.024023473317439942,
+        "runs": 4
+      }
+    ],
+    "K": [
+      {
+        "count": 31558,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.7669574938634651,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 4.860621673512042e-05,
+        "runs": 1
+      },
+      {
+        "count": 4095,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.09952122876515906,
+        "runs": 0
+      },
+      {
+        "count": 2021,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.04911658201083919,
+        "runs": 0
+      },
+      {
+        "count": 6,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.00014581865020536126,
+        "runs": 1
+      },
+      {
+        "count": 1461,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.03550684132500547,
+        "runs": 0
+      },
+      {
+        "count": 477,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.01159258269132622,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 2.430310836756021e-05,
+        "runs": 1
+      },
+      {
+        "count": 475,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.0115439764745911,
+        "runs": 0
+      },
+      {
+        "count": 480,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.011665492016428901,
+        "runs": 0
+      },
+      {
+        "count": 460,
+        "next_base_mask": 7,
+        "outs_added": 1,
+        "probability": 0.011179429849077696,
+        "runs": 0
+      },
+      {
+        "count": 110,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.0026733419204316234,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 2.430310836756021e-05,
+        "runs": 0
+      }
+    ],
+    "OUT": [
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 3.6334568708669426e-05,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 1.211152290288981e-05,
+        "runs": 1
+      },
+      {
+        "count": 6,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 7.266913741733885e-05,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 4.844609161155924e-05,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.211152290288981e-05,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 4.844609161155924e-05,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 2.422304580577962e-05,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 1.211152290288981e-05,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 2.422304580577962e-05,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 1.211152290288981e-05,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 3.6334568708669426e-05,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 4.844609161155924e-05,
+        "runs": 1
+      },
+      {
+        "count": 61906,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.7497759368262965,
+        "runs": 0
+      },
+      {
+        "count": 431,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.005220066371145508,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 6.055761451444905e-05,
+        "runs": 2
+      },
+      {
+        "count": 6395,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.07745318896398033,
+        "runs": 0
+      },
+      {
+        "count": 485,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.005874088607901558,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 4.844609161155924e-05,
+        "runs": 2
+      },
+      {
+        "count": 3260,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.039483564663420775,
+        "runs": 0
+      },
+      {
+        "count": 307,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0037182375311871716,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 3.6334568708669426e-05,
+        "runs": 2
+      },
+      {
+        "count": 1256,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.015212072766029601,
+        "runs": 0
+      },
+      {
+        "count": 175,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.0021195165080057166,
+        "runs": 1
+      },
+      {
+        "count": 2067,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.025034517840273236,
+        "runs": 0
+      },
+      {
+        "count": 332,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.004021025603759417,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 1.211152290288981e-05,
+        "runs": 2
+      },
+      {
+        "count": 944,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.01143327762032798,
+        "runs": 0
+      },
+      {
+        "count": 215,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.002603977424121309,
+        "runs": 1
+      },
+      {
+        "count": 769,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.009313761112322263,
+        "runs": 0
+      },
+      {
+        "count": 131,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.001586609500278565,
+        "runs": 1
+      },
+      {
+        "count": 279,
+        "next_base_mask": 7,
+        "outs_added": 1,
+        "probability": 0.0033791148899062567,
+        "runs": 0
+      },
+      {
+        "count": 3183,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.03855097739989826,
+        "runs": 0
+      },
+      {
+        "count": 60,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.0007266913741733886,
+        "runs": 1
+      },
+      {
+        "count": 17,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 0.00020589588934912675,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 2.422304580577962e-05,
+        "runs": 1
+      },
+      {
+        "count": 21,
+        "next_base_mask": 2,
+        "outs_added": 2,
+        "probability": 0.000254341980960686,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 2,
+        "probability": 3.6334568708669426e-05,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 2,
+        "probability": 1.211152290288981e-05,
+        "runs": 0
+      },
+      {
+        "count": 219,
+        "next_base_mask": 4,
+        "outs_added": 2,
+        "probability": 0.0026524235157328684,
+        "runs": 0
+      },
+      {
+        "count": 48,
+        "next_base_mask": 4,
+        "outs_added": 2,
+        "probability": 0.0005813530993387108,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 5,
+        "outs_added": 2,
+        "probability": 4.844609161155924e-05,
+        "runs": 0
+      },
+      {
+        "count": 9,
+        "next_base_mask": 6,
+        "outs_added": 2,
+        "probability": 0.00010900370612600828,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 3,
+        "probability": 2.422304580577962e-05,
+        "runs": 0
+      }
+    ],
+    "REACH": [
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0025458248472505093,
+        "runs": 1
+      },
+      {
+        "count": 709,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.3609979633401222,
+        "runs": 0
+      },
+      {
+        "count": 69,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.03513238289205703,
+        "runs": 1
+      },
+      {
+        "count": 10,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0050916496945010185,
+        "runs": 2
+      },
+      {
+        "count": 113,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.057535641547861505,
+        "runs": 0
+      },
+      {
+        "count": 30,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.015274949083503055,
+        "runs": 1
+      },
+      {
+        "count": 8,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.004073319755600814,
+        "runs": 2
+      },
+      {
+        "count": 6,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.003054989816700611,
+        "runs": 3
+      },
+      {
+        "count": 259,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.1318737270875764,
+        "runs": 0
+      },
+      {
+        "count": 50,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.025458248472505093,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.002036659877800407,
+        "runs": 2
+      },
+      {
+        "count": 5,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0025458248472505093,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0025458248472505093,
+        "runs": 1
+      },
+      {
+        "count": 121,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.06160896130346232,
+        "runs": 0
+      },
+      {
+        "count": 58,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.029531568228105907,
+        "runs": 1
+      },
+      {
+        "count": 6,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.003054989816700611,
+        "runs": 2
+      },
+      {
+        "count": 27,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.01374745417515275,
+        "runs": 0
+      },
+      {
+        "count": 10,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0050916496945010185,
+        "runs": 1
+      },
+      {
+        "count": 6,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.003054989816700611,
+        "runs": 2
+      },
+      {
+        "count": 96,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.048879837067209775,
+        "runs": 0
+      },
+      {
+        "count": 36,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.018329938900203666,
+        "runs": 1
+      },
+      {
+        "count": 24,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.012219959266802444,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0025458248472505093,
+        "runs": 1
+      },
+      {
+        "count": 133,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.06771894093686355,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.003564154786150713,
+        "runs": 1
+      },
+      {
+        "count": 17,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.008655804480651732,
+        "runs": 0
+      },
+      {
+        "count": 72,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.03665987780040733,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0005091649694501018,
+        "runs": 0
+      },
+      {
+        "count": 50,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.025458248472505093,
+        "runs": 0
+      },
+      {
+        "count": 12,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.006109979633401222,
+        "runs": 0
+      },
+      {
+        "count": 9,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.004582484725050916,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 0.0005091649694501018,
+        "runs": 0
+      }
+    ]
+  },
+  "event_order": [
+    "K",
+    "BB",
+    "HBP",
+    "1B",
+    "2B",
+    "3B",
+    "HR",
+    "REACH",
+    "OUT"
+  ],
+  "event_probabilities": {
+    "1B": 0.14196844049570018,
+    "2B": 0.04259272454220083,
+    "3B": 0.0038202456576906423,
+    "BB": 0.08182560605977561,
+    "HBP": 0.011071587128457816,
+    "HR": 0.029887804263109143,
+    "K": 0.2255260374131949,
+    "OUT": 0.4525429024001228,
+    "REACH": 0.010764652039748093
+  },
+  "plate_appearances": 182449,
+  "schema_version": 1,
+  "source": "Retrosheet parsed play-by-play 2024 regular season",
+  "source_file": "2024plays.zip/2024plays.csv",
+  "transition_keys": 216,
+  "transitions": {
+    "0:0:1B": [
+      {
+        "count": 6217,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.9810635947609279,
+        "runs": 0
+      },
+      {
+        "count": 65,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.010257219504497397,
+        "runs": 0
+      },
+      {
+        "count": 6,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0009468202619536059,
+        "runs": 0
+      },
+      {
+        "count": 49,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.007732365472621114,
+        "runs": 0
+      }
+    ],
+    "0:0:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.000526592943654555,
+        "runs": 1
+      },
+      {
+        "count": 1880,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9899947340705635,
+        "runs": 0
+      },
+      {
+        "count": 13,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.006845708267509215,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0026329647182727752,
+        "runs": 0
+      }
+    ],
+    "0:0:3B": [
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.020512820512820513,
+        "runs": 1
+      },
+      {
+        "count": 191,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.9794871794871794,
+        "runs": 0
+      }
+    ],
+    "0:0:BB": [
+      {
+        "count": 3296,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:0:HBP": [
+      {
+        "count": 466,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:0:HR": [
+      {
+        "count": 1395,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "0:0:K": [
+      {
+        "count": 10028,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:0:OUT": [
+      {
+        "count": 20603,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:0:REACH": [
+      {
+        "count": 314,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.8698060941828255,
+        "runs": 0
+      },
+      {
+        "count": 43,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.11911357340720222,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.008310249307479225,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.002770083102493075,
+        "runs": 0
+      }
+    ],
+    "0:1:1B": [
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0006305170239596469,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0018915510718789407,
+        "runs": 1
+      },
+      {
+        "count": 1149,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.7244640605296343,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0006305170239596469,
+        "runs": 1
+      },
+      {
+        "count": 373,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.2351828499369483,
+        "runs": 0
+      },
+      {
+        "count": 28,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.017654476670870115,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.004413619167717529,
+        "runs": 0
+      },
+      {
+        "count": 6,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0037831021437578815,
+        "runs": 0
+      },
+      {
+        "count": 18,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.011349306431273645,
+        "runs": 0
+      }
+    ],
+    "0:1:2B": [
+      {
+        "count": 116,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.25272331154684097,
+        "runs": 1
+      },
+      {
+        "count": 7,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.015250544662309368,
+        "runs": 1
+      },
+      {
+        "count": 323,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.7037037037037037,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.008714596949891068,
+        "runs": 1
+      },
+      {
+        "count": 8,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.017429193899782137,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.002178649237472767,
+        "runs": 0
+      }
+    ],
+    "0:1:3B": [
+      {
+        "count": 35,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "0:1:BB": [
+      {
+        "count": 620,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.9967845659163987,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.003215434083601286,
+        "runs": 0
+      }
+    ],
+    "0:1:HBP": [
+      {
+        "count": 129,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:1:HR": [
+      {
+        "count": 300,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "0:1:K": [
+      {
+        "count": 1784,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.9301355578727841,
+        "runs": 0
+      },
+      {
+        "count": 97,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.05057351407716371,
+        "runs": 0
+      },
+      {
+        "count": 6,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0031282586027111575,
+        "runs": 0
+      },
+      {
+        "count": 31,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.01616266944734098,
+        "runs": 0
+      }
+    ],
+    "0:1:OUT": [
+      {
+        "count": 4,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.0008859357696566999,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.00022148394241417498,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.00022148394241417498,
+        "runs": 1
+      },
+      {
+        "count": 2856,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.6325581395348837,
+        "runs": 0
+      },
+      {
+        "count": 566,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.12535991140642302,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0015503875968992248,
+        "runs": 0
+      },
+      {
+        "count": 1080,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.23920265780730898,
+        "runs": 0
+      }
+    ],
+    "0:1:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.009433962264150943,
+        "runs": 1
+      },
+      {
+        "count": 82,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.7735849056603774,
+        "runs": 0
+      },
+      {
+        "count": 15,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.14150943396226415,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0660377358490566,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.009433962264150943,
+        "runs": 0
+      }
+    ],
+    "0:2:1B": [
+      {
+        "count": 10,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.01968503937007874,
+        "runs": 1
+      },
+      {
+        "count": 168,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.33070866141732286,
+        "runs": 1
+      },
+      {
+        "count": 15,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.02952755905511811,
+        "runs": 1
+      },
+      {
+        "count": 22,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.04330708661417323,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.001968503937007874,
+        "runs": 1
+      },
+      {
+        "count": 274,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.5393700787401575,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.007874015748031496,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.013779527559055118,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.005905511811023622,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.003937007874015748,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.003937007874015748,
+        "runs": 0
+      }
+    ],
+    "0:2:2B": [
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.034013605442176874,
+        "runs": 1
+      },
+      {
+        "count": 131,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.891156462585034,
+        "runs": 1
+      },
+      {
+        "count": 11,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.07482993197278912,
+        "runs": 0
+      }
+    ],
+    "0:2:3B": [
+      {
+        "count": 13,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "0:2:BB": [
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.00267379679144385,
+        "runs": 1
+      },
+      {
+        "count": 362,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.9679144385026738,
+        "runs": 0
+      },
+      {
+        "count": 11,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.029411764705882353,
+        "runs": 0
+      }
+    ],
+    "0:2:HBP": [
+      {
+        "count": 38,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:2:HR": [
+      {
+        "count": 79,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "0:2:K": [
+      {
+        "count": 693,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.9928366762177651,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0071633237822349575,
+        "runs": 0
+      }
+    ],
+    "0:2:OUT": [
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0006142506142506142,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0006142506142506142,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.002457002457002457,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0006142506142506142,
+        "runs": 1
+      },
+      {
+        "count": 791,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.4858722358722359,
+        "runs": 0
+      },
+      {
+        "count": 813,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.49938574938574937,
+        "runs": 0
+      },
+      {
+        "count": 17,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.010442260442260442,
+        "runs": 0
+      }
+    ],
+    "0:2:REACH": [
+      {
+        "count": 4,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.05970149253731343,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.029850746268656716,
+        "runs": 1
+      },
+      {
+        "count": 13,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.19402985074626866,
+        "runs": 0
+      },
+      {
+        "count": 17,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.2537313432835821,
+        "runs": 0
+      },
+      {
+        "count": 29,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.43283582089552236,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.014925373134328358,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.014925373134328358,
+        "runs": 0
+      }
+    ],
+    "0:3:1B": [
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.012531328320802004,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.005012531328320802,
+        "runs": 2
+      },
+      {
+        "count": 98,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.24561403508771928,
+        "runs": 1
+      },
+      {
+        "count": 60,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.15037593984962405,
+        "runs": 1
+      },
+      {
+        "count": 16,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.040100250626566414,
+        "runs": 1
+      },
+      {
+        "count": 210,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.5263157894736842,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.007518796992481203,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.005012531328320802,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.002506265664160401,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.002506265664160401,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 2,
+        "probability": 0.002506265664160401,
+        "runs": 0
+      }
+    ],
+    "0:3:2B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.018691588785046728,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.009345794392523364,
+        "runs": 2
+      },
+      {
+        "count": 23,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.21495327102803738,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.028037383177570093,
+        "runs": 2
+      },
+      {
+        "count": 77,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.719626168224299,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.009345794392523364,
+        "runs": 0
+      }
+    ],
+    "0:3:3B": [
+      {
+        "count": 9,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "0:3:BB": [
+      {
+        "count": 184,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:3:HBP": [
+      {
+        "count": 31,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:3:HR": [
+      {
+        "count": 74,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "0:3:K": [
+      {
+        "count": 544,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.998165137614679,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.001834862385321101,
+        "runs": 0
+      }
+    ],
+    "0:3:OUT": [
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0008389261744966443,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.0008389261744966443,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0008389261744966443,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.0025167785234899327,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0008389261744966443,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0008389261744966443,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.0008389261744966443,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0016778523489932886,
+        "runs": 1
+      },
+      {
+        "count": 446,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.37416107382550334,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0008389261744966443,
+        "runs": 1
+      },
+      {
+        "count": 263,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.22063758389261745,
+        "runs": 0
+      },
+      {
+        "count": 229,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.19211409395973153,
+        "runs": 0
+      },
+      {
+        "count": 16,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 0.013422818791946308,
+        "runs": 0
+      },
+      {
+        "count": 19,
+        "next_base_mask": 2,
+        "outs_added": 2,
+        "probability": 0.015939597315436243,
+        "runs": 0
+      },
+      {
+        "count": 206,
+        "next_base_mask": 4,
+        "outs_added": 2,
+        "probability": 0.17281879194630873,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 3,
+        "probability": 0.0008389261744966443,
+        "runs": 0
+      }
+    ],
+    "0:3:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.023809523809523808,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.11904761904761904,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.11904761904761904,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.023809523809523808,
+        "runs": 1
+      },
+      {
+        "count": 28,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.6666666666666666,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.023809523809523808,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 0.023809523809523808,
+        "runs": 0
+      }
+    ],
+    "0:4:1B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.014705882352941176,
+        "runs": 1
+      },
+      {
+        "count": 63,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.9264705882352942,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.04411764705882353,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.014705882352941176,
+        "runs": 1
+      }
+    ],
+    "0:4:2B": [
+      {
+        "count": 20,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "0:4:3B": [
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "0:4:BB": [
+      {
+        "count": 44,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:4:HBP": [
+      {
+        "count": 5,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:4:HR": [
+      {
+        "count": 13,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "0:4:K": [
+      {
+        "count": 84,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:4:OUT": [
+      {
+        "count": 79,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.45664739884393063,
+        "runs": 1
+      },
+      {
+        "count": 91,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.5260115606936416,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.017341040462427744,
+        "runs": 0
+      }
+    ],
+    "0:4:REACH": [
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.2222222222222222,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.2222222222222222,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.1111111111111111,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.2222222222222222,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.1111111111111111,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.1111111111111111,
+        "runs": 0
+      }
+    ],
+    "0:5:1B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.012345679012345678,
+        "runs": 1
+      },
+      {
+        "count": 122,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.7530864197530864,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.006172839506172839,
+        "runs": 2
+      },
+      {
+        "count": 32,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.19753086419753085,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.012345679012345678,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.006172839506172839,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.006172839506172839,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.006172839506172839,
+        "runs": 1
+      }
+    ],
+    "0:5:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.021739130434782608,
+        "runs": 3
+      },
+      {
+        "count": 9,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.1956521739130435,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.021739130434782608,
+        "runs": 2
+      },
+      {
+        "count": 33,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.717391304347826,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.043478260869565216,
+        "runs": 2
+      }
+    ],
+    "0:5:3B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.25,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.75,
+        "runs": 2
+      }
+    ],
+    "0:5:BB": [
+      {
+        "count": 53,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:5:HBP": [
+      {
+        "count": 9,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:5:HR": [
+      {
+        "count": 29,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "0:5:K": [
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0058823529411764705,
+        "runs": 1
+      },
+      {
+        "count": 158,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.9294117647058824,
+        "runs": 0
+      },
+      {
+        "count": 10,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.058823529411764705,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 0.0058823529411764705,
+        "runs": 0
+      }
+    ],
+    "0:5:OUT": [
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.0028653295128939827,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.0028653295128939827,
+        "runs": 1
+      },
+      {
+        "count": 155,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.44412607449856734,
+        "runs": 1
+      },
+      {
+        "count": 36,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.10315186246418338,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0057306590257879654,
+        "runs": 1
+      },
+      {
+        "count": 80,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.22922636103151864,
+        "runs": 0
+      },
+      {
+        "count": 11,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.03151862464183381,
+        "runs": 0
+      },
+      {
+        "count": 50,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.14326647564469913,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 0.0028653295128939827,
+        "runs": 0
+      },
+      {
+        "count": 11,
+        "next_base_mask": 4,
+        "outs_added": 2,
+        "probability": 0.03151862464183381,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 3,
+        "probability": 0.0028653295128939827,
+        "runs": 0
+      }
+    ],
+    "0:5:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.029411764705882353,
+        "runs": 2
+      },
+      {
+        "count": 5,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.14705882352941177,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.058823529411764705,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.029411764705882353,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.08823529411764706,
+        "runs": 0
+      },
+      {
+        "count": 18,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.5294117647058824,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.08823529411764706,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.029411764705882353,
+        "runs": 0
+      }
+    ],
+    "0:6:1B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.020833333333333332,
+        "runs": 1
+      },
+      {
+        "count": 35,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.3645833333333333,
+        "runs": 2
+      },
+      {
+        "count": 10,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.10416666666666667,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.03125,
+        "runs": 1
+      },
+      {
+        "count": 43,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.4479166666666667,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.010416666666666666,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.010416666666666666,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.010416666666666666,
+        "runs": 1
+      }
+    ],
+    "0:6:2B": [
+      {
+        "count": 33,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9428571428571428,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.05714285714285714,
+        "runs": 1
+      }
+    ],
+    "0:6:3B": [
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "0:6:BB": [
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.015384615384615385,
+        "runs": 1
+      },
+      {
+        "count": 64,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.9846153846153847,
+        "runs": 0
+      }
+    ],
+    "0:6:HBP": [
+      {
+        "count": 5,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:6:HR": [
+      {
+        "count": 23,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "0:6:K": [
+      {
+        "count": 131,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:6:OUT": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0036900369003690036,
+        "runs": 2
+      },
+      {
+        "count": 54,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.1992619926199262,
+        "runs": 1
+      },
+      {
+        "count": 91,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.33579335793357934,
+        "runs": 1
+      },
+      {
+        "count": 121,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.44649446494464945,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 2,
+        "probability": 0.007380073800738007,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 2,
+        "probability": 0.007380073800738007,
+        "runs": 0
+      }
+    ],
+    "0:6:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.058823529411764705,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.058823529411764705,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.11764705882352941,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.17647058823529413,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.11764705882352941,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.23529411764705882,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.11764705882352941,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.11764705882352941,
+        "runs": 0
+      }
+    ],
+    "0:7:1B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.01904761904761905,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.009523809523809525,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.009523809523809525,
+        "runs": 3
+      },
+      {
+        "count": 22,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.20952380952380953,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.009523809523809525,
+        "runs": 3
+      },
+      {
+        "count": 14,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.13333333333333333,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.009523809523809525,
+        "runs": 2
+      },
+      {
+        "count": 58,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.5523809523809524,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.009523809523809525,
+        "runs": 3
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.01904761904761905,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.009523809523809525,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.009523809523809525,
+        "runs": 1
+      }
+    ],
+    "0:7:2B": [
+      {
+        "count": 5,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.21739130434782608,
+        "runs": 3
+      },
+      {
+        "count": 17,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.7391304347826086,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.043478260869565216,
+        "runs": 2
+      }
+    ],
+    "0:7:3B": [
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "0:7:BB": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.05405405405405406,
+        "runs": 1
+      },
+      {
+        "count": 35,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.9459459459459459,
+        "runs": 1
+      }
+    ],
+    "0:7:HBP": [
+      {
+        "count": 10,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "0:7:HR": [
+      {
+        "count": 26,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 4
+      }
+    ],
+    "0:7:K": [
+      {
+        "count": 138,
+        "next_base_mask": 7,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "0:7:OUT": [
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0029411764705882353,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.0029411764705882353,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.0029411764705882353,
+        "runs": 2
+      },
+      {
+        "count": 48,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.1411764705882353,
+        "runs": 1
+      },
+      {
+        "count": 73,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.21470588235294116,
+        "runs": 1
+      },
+      {
+        "count": 45,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.1323529411764706,
+        "runs": 1
+      },
+      {
+        "count": 104,
+        "next_base_mask": 7,
+        "outs_added": 1,
+        "probability": 0.3058823529411765,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 2,
+        "probability": 0.0058823529411764705,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 2,
+        "probability": 0.008823529411764706,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 2,
+        "probability": 0.0029411764705882353,
+        "runs": 0
+      },
+      {
+        "count": 48,
+        "next_base_mask": 4,
+        "outs_added": 2,
+        "probability": 0.1411764705882353,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 5,
+        "outs_added": 2,
+        "probability": 0.011764705882352941,
+        "runs": 0
+      },
+      {
+        "count": 9,
+        "next_base_mask": 6,
+        "outs_added": 2,
+        "probability": 0.026470588235294117,
+        "runs": 0
+      }
+    ],
+    "0:7:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.09090909090909091,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.09090909090909091,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.09090909090909091,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.18181818181818182,
+        "runs": 2
+      },
+      {
+        "count": 6,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.5454545454545454,
+        "runs": 1
+      }
+    ],
+    "1:0:1B": [
+      {
+        "count": 4428,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.9798628015047577,
+        "runs": 0
+      },
+      {
+        "count": 45,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.009957955299845098,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0011064394777605664,
+        "runs": 0
+      },
+      {
+        "count": 41,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.009072803717636645,
+        "runs": 0
+      }
+    ],
+    "1:0:2B": [
+      {
+        "count": 1313,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9879608728367193,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.005267118133935289,
+        "runs": 0
+      },
+      {
+        "count": 9,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.006772009029345372,
+        "runs": 0
+      }
+    ],
+    "1:0:3B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.007462686567164179,
+        "runs": 1
+      },
+      {
+        "count": 133,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.9925373134328358,
+        "runs": 0
+      }
+    ],
+    "1:0:BB": [
+      {
+        "count": 2578,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:0:HBP": [
+      {
+        "count": 340,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:0:HR": [
+      {
+        "count": 966,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "1:0:K": [
+      {
+        "count": 7718,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:0:OUT": [
+      {
+        "count": 14968,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:0:REACH": [
+      {
+        "count": 232,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.862453531598513,
+        "runs": 0
+      },
+      {
+        "count": 36,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.13382899628252787,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0037174721189591076,
+        "runs": 0
+      }
+    ],
+    "1:1:1B": [
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0005567928730512249,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0016703786191536749,
+        "runs": 1
+      },
+      {
+        "count": 1256,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.6993318485523385,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0011135857461024498,
+        "runs": 1
+      },
+      {
+        "count": 476,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.2650334075723831,
+        "runs": 0
+      },
+      {
+        "count": 26,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.014476614699331848,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0016703786191536749,
+        "runs": 1
+      },
+      {
+        "count": 12,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.0066815144766146995,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0027839643652561247,
+        "runs": 0
+      },
+      {
+        "count": 12,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0066815144766146995,
+        "runs": 0
+      }
+    ],
+    "1:1:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.001976284584980237,
+        "runs": 1
+      },
+      {
+        "count": 134,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.2648221343873518,
+        "runs": 1
+      },
+      {
+        "count": 19,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.037549407114624504,
+        "runs": 1
+      },
+      {
+        "count": 336,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.6640316205533597,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.005928853754940711,
+        "runs": 1
+      },
+      {
+        "count": 10,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.019762845849802372,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.005928853754940711,
+        "runs": 0
+      }
+    ],
+    "1:1:3B": [
+      {
+        "count": 45,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "1:1:BB": [
+      {
+        "count": 856,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.9988331388564761,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.0011668611435239206,
+        "runs": 0
+      }
+    ],
+    "1:1:HBP": [
+      {
+        "count": 115,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:1:HR": [
+      {
+        "count": 407,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "1:1:K": [
+      {
+        "count": 2311,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.9258814102564102,
+        "runs": 0
+      },
+      {
+        "count": 111,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.04447115384615385,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.002003205128205128,
+        "runs": 0
+      },
+      {
+        "count": 69,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.027644230769230768,
+        "runs": 0
+      }
+    ],
+    "1:1:OUT": [
+      {
+        "count": 2,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.0003711952487008166,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0001855976243504083,
+        "runs": 1
+      },
+      {
+        "count": 3539,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.656829992576095,
+        "runs": 0
+      },
+      {
+        "count": 625,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.1159985152190052,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0012991833704528583,
+        "runs": 0
+      },
+      {
+        "count": 1214,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.2253155159613957,
+        "runs": 0
+      }
+    ],
+    "1:1:REACH": [
+      {
+        "count": 83,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.6587301587301587,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.015873015873015872,
+        "runs": 1
+      },
+      {
+        "count": 29,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.23015873015873015,
+        "runs": 0
+      },
+      {
+        "count": 10,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.07936507936507936,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.007936507936507936,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.007936507936507936,
+        "runs": 0
+      }
+    ],
+    "1:2:1B": [
+      {
+        "count": 10,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.014245014245014245,
+        "runs": 1
+      },
+      {
+        "count": 296,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.42165242165242167,
+        "runs": 1
+      },
+      {
+        "count": 36,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.05128205128205128,
+        "runs": 1
+      },
+      {
+        "count": 33,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.04700854700854701,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.005698005698005698,
+        "runs": 1
+      },
+      {
+        "count": 293,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.41737891737891736,
+        "runs": 0
+      },
+      {
+        "count": 7,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.009971509971509971,
+        "runs": 0
+      },
+      {
+        "count": 17,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.024216524216524215,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.0014245014245014246,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.002849002849002849,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.004273504273504274,
+        "runs": 0
+      }
+    ],
+    "1:2:2B": [
+      {
+        "count": 189,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9593908629441624,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.01015228426395939,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.015228426395939087,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.01015228426395939,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.005076142131979695,
+        "runs": 0
+      }
+    ],
+    "1:2:3B": [
+      {
+        "count": 15,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "1:2:BB": [
+      {
+        "count": 533,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.9744058500914077,
+        "runs": 0
+      },
+      {
+        "count": 13,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.02376599634369287,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.0018281535648994515,
+        "runs": 0
+      }
+    ],
+    "1:2:HBP": [
+      {
+        "count": 61,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:2:HR": [
+      {
+        "count": 142,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "1:2:K": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.000877963125548727,
+        "runs": 1
+      },
+      {
+        "count": 1120,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.9833187006145742,
+        "runs": 0
+      },
+      {
+        "count": 16,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.014047410008779631,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.001755926251097454,
+        "runs": 0
+      }
+    ],
+    "1:2:OUT": [
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0018281535648994515,
+        "runs": 1
+      },
+      {
+        "count": 1278,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.5840950639853748,
+        "runs": 0
+      },
+      {
+        "count": 890,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.40676416819012795,
+        "runs": 0
+      },
+      {
+        "count": 16,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.007312614259597806,
+        "runs": 0
+      }
+    ],
+    "1:2:REACH": [
+      {
+        "count": 5,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.04950495049504951,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0297029702970297,
+        "runs": 1
+      },
+      {
+        "count": 17,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.16831683168316833,
+        "runs": 0
+      },
+      {
+        "count": 21,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.2079207920792079,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.039603960396039604,
+        "runs": 0
+      },
+      {
+        "count": 45,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.44554455445544555,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.039603960396039604,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.019801980198019802,
+        "runs": 0
+      }
+    ],
+    "1:3:1B": [
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.008347245409015025,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.001669449081803005,
+        "runs": 3
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.001669449081803005,
+        "runs": 2
+      },
+      {
+        "count": 167,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.27879799666110183,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.00333889816360601,
+        "runs": 2
+      },
+      {
+        "count": 137,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.2287145242070117,
+        "runs": 1
+      },
+      {
+        "count": 26,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.04340567612687813,
+        "runs": 1
+      },
+      {
+        "count": 243,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.4056761268781302,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.001669449081803005,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.005008347245409015,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.001669449081803005,
+        "runs": 1
+      },
+      {
+        "count": 7,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.011686143572621035,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.00333889816360601,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.00333889816360601,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.001669449081803005,
+        "runs": 0
+      }
+    ],
+    "1:3:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.004901960784313725,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.004901960784313725,
+        "runs": 3
+      },
+      {
+        "count": 63,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.3088235294117647,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0196078431372549,
+        "runs": 2
+      },
+      {
+        "count": 130,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.6372549019607843,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.004901960784313725,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.0196078431372549,
+        "runs": 1
+      }
+    ],
+    "1:3:3B": [
+      {
+        "count": 12,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "1:3:BB": [
+      {
+        "count": 289,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:3:HBP": [
+      {
+        "count": 68,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:3:HR": [
+      {
+        "count": 138,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "1:3:K": [
+      {
+        "count": 917,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.9817987152034261,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.004282655246252677,
+        "runs": 0
+      },
+      {
+        "count": 8,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.008565310492505354,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.0053533190578158455,
+        "runs": 0
+      }
+    ],
+    "1:3:OUT": [
+      {
+        "count": 11,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.005566801619433198,
+        "runs": 1
+      },
+      {
+        "count": 6,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.003036437246963563,
+        "runs": 1
+      },
+      {
+        "count": 810,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.409919028340081,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0005060728744939271,
+        "runs": 1
+      },
+      {
+        "count": 443,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.2241902834008097,
+        "runs": 0
+      },
+      {
+        "count": 227,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.11487854251012146,
+        "runs": 0
+      },
+      {
+        "count": 478,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.24190283400809717,
+        "runs": 0
+      }
+    ],
+    "1:3:REACH": [
+      {
+        "count": 6,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.12244897959183673,
+        "runs": 1
+      },
+      {
+        "count": 9,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.1836734693877551,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.04081632653061224,
+        "runs": 1
+      },
+      {
+        "count": 32,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.6530612244897959,
+        "runs": 0
+      }
+    ],
+    "1:4:1B": [
+      {
+        "count": 15,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.052083333333333336,
+        "runs": 1
+      },
+      {
+        "count": 264,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.9166666666666666,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.006944444444444444,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.010416666666666666,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.013888888888888888,
+        "runs": 1
+      }
+    ],
+    "1:4:2B": [
+      {
+        "count": 73,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9864864864864865,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.013513513513513514,
+        "runs": 1
+      }
+    ],
+    "1:4:3B": [
+      {
+        "count": 4,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "1:4:BB": [
+      {
+        "count": 206,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:4:HBP": [
+      {
+        "count": 15,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:4:HR": [
+      {
+        "count": 52,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "1:4:K": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0027548209366391185,
+        "runs": 1
+      },
+      {
+        "count": 361,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.9944903581267218,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.0027548209366391185,
+        "runs": 0
+      }
+    ],
+    "1:4:OUT": [
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0033003300330033004,
+        "runs": 1
+      },
+      {
+        "count": 336,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.5544554455445545,
+        "runs": 1
+      },
+      {
+        "count": 259,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.4273927392739274,
+        "runs": 0
+      },
+      {
+        "count": 9,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.01485148514851485,
+        "runs": 0
+      }
+    ],
+    "1:4:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.00909090909090909,
+        "runs": 1
+      },
+      {
+        "count": 30,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.2727272727272727,
+        "runs": 1
+      },
+      {
+        "count": 9,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.08181818181818182,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.02727272727272727,
+        "runs": 0
+      },
+      {
+        "count": 55,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.5,
+        "runs": 0
+      },
+      {
+        "count": 10,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.09090909090909091,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.00909090909090909,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.00909090909090909,
+        "runs": 0
+      }
+    ],
+    "1:5:1B": [
+      {
+        "count": 8,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.02666666666666667,
+        "runs": 1
+      },
+      {
+        "count": 219,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.73,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0033333333333333335,
+        "runs": 2
+      },
+      {
+        "count": 63,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.21,
+        "runs": 1
+      },
+      {
+        "count": 6,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.02,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.006666666666666667,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0033333333333333335,
+        "runs": 1
+      }
+    ],
+    "1:5:2B": [
+      {
+        "count": 19,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.19387755102040816,
+        "runs": 2
+      },
+      {
+        "count": 5,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.05102040816326531,
+        "runs": 2
+      },
+      {
+        "count": 71,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.7244897959183674,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.030612244897959183,
+        "runs": 1
+      }
+    ],
+    "1:5:3B": [
+      {
+        "count": 5,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "1:5:BB": [
+      {
+        "count": 2,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.014705882352941176,
+        "runs": 1
+      },
+      {
+        "count": 134,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.9852941176470589,
+        "runs": 0
+      }
+    ],
+    "1:5:HBP": [
+      {
+        "count": 22,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:5:HR": [
+      {
+        "count": 49,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "1:5:K": [
+      {
+        "count": 5,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.014492753623188406,
+        "runs": 1
+      },
+      {
+        "count": 313,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.9072463768115943,
+        "runs": 0
+      },
+      {
+        "count": 26,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.07536231884057971,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.002898550724637681,
+        "runs": 0
+      }
+    ],
+    "1:5:OUT": [
+      {
+        "count": 3,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.0038412291933418692,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0012804097311139564,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.005121638924455826,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0012804097311139564,
+        "runs": 2
+      },
+      {
+        "count": 318,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.40717029449423814,
+        "runs": 1
+      },
+      {
+        "count": 87,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.11139564660691421,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.005121638924455826,
+        "runs": 1
+      },
+      {
+        "count": 158,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.2023047375160051,
+        "runs": 0
+      },
+      {
+        "count": 16,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.020486555697823303,
+        "runs": 0
+      },
+      {
+        "count": 184,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.235595390524968,
+        "runs": 0
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.006402048655569782,
+        "runs": 1
+      }
+    ],
+    "1:5:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.013157894736842105,
+        "runs": 1
+      },
+      {
+        "count": 21,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.27631578947368424,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.06578947368421052,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.02631578947368421,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.039473684210526314,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.02631578947368421,
+        "runs": 1
+      },
+      {
+        "count": 34,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.4473684210526316,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.02631578947368421,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.05263157894736842,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.02631578947368421,
+        "runs": 0
+      }
+    ],
+    "1:6:1B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.008695652173913044,
+        "runs": 1
+      },
+      {
+        "count": 101,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.4391304347826087,
+        "runs": 2
+      },
+      {
+        "count": 16,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.06956521739130435,
+        "runs": 2
+      },
+      {
+        "count": 8,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.034782608695652174,
+        "runs": 1
+      },
+      {
+        "count": 89,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.3869565217391304,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.013043478260869565,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.008695652173913044,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.008695652173913044,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.008695652173913044,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.013043478260869565,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.004347826086956522,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.004347826086956522,
+        "runs": 1
+      }
+    ],
+    "1:6:2B": [
+      {
+        "count": 77,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9625,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0375,
+        "runs": 1
+      }
+    ],
+    "1:6:3B": [
+      {
+        "count": 8,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "1:6:BB": [
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.008849557522123894,
+        "runs": 1
+      },
+      {
+        "count": 224,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.9911504424778761,
+        "runs": 0
+      }
+    ],
+    "1:6:HBP": [
+      {
+        "count": 23,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:6:HR": [
+      {
+        "count": 26,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "1:6:K": [
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0032679738562091504,
+        "runs": 1
+      },
+      {
+        "count": 304,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.9934640522875817,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.0032679738562091504,
+        "runs": 0
+      }
+    ],
+    "1:6:OUT": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0018248175182481751,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0018248175182481751,
+        "runs": 2
+      },
+      {
+        "count": 122,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.22262773722627738,
+        "runs": 1
+      },
+      {
+        "count": 233,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.4251824817518248,
+        "runs": 1
+      },
+      {
+        "count": 165,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.3010948905109489,
+        "runs": 0
+      },
+      {
+        "count": 23,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.041970802919708027,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.005474452554744526,
+        "runs": 1
+      }
+    ],
+    "1:6:REACH": [
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.02912621359223301,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.038834951456310676,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.019417475728155338,
+        "runs": 1
+      },
+      {
+        "count": 22,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.21359223300970873,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.038834951456310676,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.02912621359223301,
+        "runs": 1
+      },
+      {
+        "count": 16,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.1553398058252427,
+        "runs": 0
+      },
+      {
+        "count": 43,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.4174757281553398,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.038834951456310676,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.019417475728155338,
+        "runs": 0
+      }
+    ],
+    "1:7:1B": [
+      {
+        "count": 13,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.06435643564356436,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0049504950495049506,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0049504950495049506,
+        "runs": 3
+      },
+      {
+        "count": 50,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.24752475247524752,
+        "runs": 2
+      },
+      {
+        "count": 32,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.15841584158415842,
+        "runs": 2
+      },
+      {
+        "count": 7,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.034653465346534656,
+        "runs": 2
+      },
+      {
+        "count": 91,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.4504950495049505,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.0049504950495049506,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.009900990099009901,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.0049504950495049506,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.009900990099009901,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.0049504950495049506,
+        "runs": 1
+      }
+    ],
+    "1:7:2B": [
+      {
+        "count": 18,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.26865671641791045,
+        "runs": 3
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.029850746268656716,
+        "runs": 3
+      },
+      {
+        "count": 46,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.6865671641791045,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.014925373134328358,
+        "runs": 3
+      }
+    ],
+    "1:7:3B": [
+      {
+        "count": 10,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "1:7:BB": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.025,
+        "runs": 1
+      },
+      {
+        "count": 78,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.975,
+        "runs": 1
+      }
+    ],
+    "1:7:HBP": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.03225806451612903,
+        "runs": 1
+      },
+      {
+        "count": 30,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.967741935483871,
+        "runs": 1
+      }
+    ],
+    "1:7:HR": [
+      {
+        "count": 40,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 4
+      }
+    ],
+    "1:7:K": [
+      {
+        "count": 322,
+        "next_base_mask": 7,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "1:7:OUT": [
+      {
+        "count": 3,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.00425531914893617,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.00425531914893617,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0014184397163120568,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 1,
+        "probability": 0.00425531914893617,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 2,
+        "outs_added": 1,
+        "probability": 0.00425531914893617,
+        "runs": 2
+      },
+      {
+        "count": 127,
+        "next_base_mask": 3,
+        "outs_added": 1,
+        "probability": 0.18014184397163122,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 1,
+        "probability": 0.0014184397163120568,
+        "runs": 2
+      },
+      {
+        "count": 142,
+        "next_base_mask": 5,
+        "outs_added": 1,
+        "probability": 0.20141843971631207,
+        "runs": 1
+      },
+      {
+        "count": 86,
+        "next_base_mask": 6,
+        "outs_added": 1,
+        "probability": 0.12198581560283688,
+        "runs": 1
+      },
+      {
+        "count": 175,
+        "next_base_mask": 7,
+        "outs_added": 1,
+        "probability": 0.24822695035460993,
+        "runs": 0
+      },
+      {
+        "count": 159,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.225531914893617,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 2,
+        "probability": 0.0028368794326241137,
+        "runs": 1
+      }
+    ],
+    "1:7:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.047619047619047616,
+        "runs": 3
+      },
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.047619047619047616,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.047619047619047616,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.09523809523809523,
+        "runs": 2
+      },
+      {
+        "count": 15,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.7142857142857143,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.047619047619047616,
+        "runs": 1
+      }
+    ],
+    "2:0:1B": [
+      {
+        "count": 3420,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.981630309988519,
+        "runs": 0
+      },
+      {
+        "count": 28,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.008036739380022962,
+        "runs": 0
+      },
+      {
+        "count": 36,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.010332950631458095,
+        "runs": 0
+      }
+    ],
+    "2:0:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0009041591320072332,
+        "runs": 1
+      },
+      {
+        "count": 1094,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9891500904159132,
+        "runs": 0
+      },
+      {
+        "count": 9,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0081374321880651,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0018083182640144665,
+        "runs": 0
+      }
+    ],
+    "2:0:3B": [
+      {
+        "count": 77,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:0:BB": [
+      {
+        "count": 2215,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:0:HBP": [
+      {
+        "count": 275,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:0:HR": [
+      {
+        "count": 727,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "2:0:K": [
+      {
+        "count": 6380,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:0:OUT": [
+      {
+        "count": 11936,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:0:REACH": [
+      {
+        "count": 163,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.8190954773869347,
+        "runs": 0
+      },
+      {
+        "count": 34,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.1708542713567839,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.005025125628140704,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.005025125628140704,
+        "runs": 0
+      }
+    ],
+    "2:1:1B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0005555555555555556,
+        "runs": 1
+      },
+      {
+        "count": 8,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0044444444444444444,
+        "runs": 1
+      },
+      {
+        "count": 7,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0038888888888888888,
+        "runs": 1
+      },
+      {
+        "count": 1112,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.6177777777777778,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0022222222222222222,
+        "runs": 1
+      },
+      {
+        "count": 617,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.3427777777777778,
+        "runs": 0
+      },
+      {
+        "count": 31,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.017222222222222222,
+        "runs": 0
+      },
+      {
+        "count": 19,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.010555555555555556,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0005555555555555556,
+        "runs": 1
+      }
+    ],
+    "2:1:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0018587360594795538,
+        "runs": 1
+      },
+      {
+        "count": 226,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.4200743494423792,
+        "runs": 1
+      },
+      {
+        "count": 24,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.04460966542750929,
+        "runs": 1
+      },
+      {
+        "count": 260,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.483271375464684,
+        "runs": 0
+      },
+      {
+        "count": 25,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.046468401486988845,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0037174721189591076,
+        "runs": 1
+      }
+    ],
+    "2:1:3B": [
+      {
+        "count": 41,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.9761904761904762,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.023809523809523808,
+        "runs": 1
+      }
+    ],
+    "2:1:BB": [
+      {
+        "count": 818,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.9987789987789988,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.001221001221001221,
+        "runs": 0
+      }
+    ],
+    "2:1:HBP": [
+      {
+        "count": 118,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:1:HR": [
+      {
+        "count": 353,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "2:1:K": [
+      {
+        "count": 2571,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:1:OUT": [
+      {
+        "count": 5400,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:1:REACH": [
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.02247191011235955,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0449438202247191,
+        "runs": 1
+      },
+      {
+        "count": 58,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.651685393258427,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.011235955056179775,
+        "runs": 1
+      },
+      {
+        "count": 14,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.15730337078651685,
+        "runs": 0
+      },
+      {
+        "count": 6,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.06741573033707865,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0449438202247191,
+        "runs": 0
+      }
+    ],
+    "2:2:1B": [
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.004750593824228029,
+        "runs": 1
+      },
+      {
+        "count": 582,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.6912114014251781,
+        "runs": 1
+      },
+      {
+        "count": 70,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0831353919239905,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.0011876484560570072,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0023752969121140144,
+        "runs": 1
+      },
+      {
+        "count": 133,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.15795724465558195,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0023752969121140144,
+        "runs": 0
+      },
+      {
+        "count": 25,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.029691211401425176,
+        "runs": 0
+      },
+      {
+        "count": 23,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.027315914489311165,
+        "runs": 1
+      }
+    ],
+    "2:2:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.0036101083032490976,
+        "runs": 1
+      },
+      {
+        "count": 268,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9675090252707581,
+        "runs": 1
+      },
+      {
+        "count": 6,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.021660649819494584,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.007220216606498195,
+        "runs": 1
+      }
+    ],
+    "2:2:3B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.06896551724137931,
+        "runs": 2
+      },
+      {
+        "count": 27,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.9310344827586207,
+        "runs": 1
+      }
+    ],
+    "2:2:BB": [
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0022026431718061676,
+        "runs": 1
+      },
+      {
+        "count": 876,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.9647577092511013,
+        "runs": 0
+      },
+      {
+        "count": 27,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.02973568281938326,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.003303964757709251,
+        "runs": 0
+      }
+    ],
+    "2:2:HBP": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.011363636363636364,
+        "runs": 0
+      },
+      {
+        "count": 87,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.9886363636363636,
+        "runs": 0
+      }
+    ],
+    "2:2:HR": [
+      {
+        "count": 203,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "2:2:K": [
+      {
+        "count": 1558,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:2:OUT": [
+      {
+        "count": 2796,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:2:REACH": [
+      {
+        "count": 15,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.234375,
+        "runs": 1
+      },
+      {
+        "count": 10,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.15625,
+        "runs": 1
+      },
+      {
+        "count": 6,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.09375,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.03125,
+        "runs": 1
+      },
+      {
+        "count": 19,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.296875,
+        "runs": 0
+      },
+      {
+        "count": 12,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.1875,
+        "runs": 0
+      }
+    ],
+    "2:3:1B": [
+      {
+        "count": 7,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.009915014164305949,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.0028328611898017,
+        "runs": 2
+      },
+      {
+        "count": 6,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0084985835694051,
+        "runs": 2
+      },
+      {
+        "count": 210,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.29745042492917845,
+        "runs": 1
+      },
+      {
+        "count": 8,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0113314447592068,
+        "runs": 2
+      },
+      {
+        "count": 251,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.3555240793201133,
+        "runs": 1
+      },
+      {
+        "count": 48,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0679886685552408,
+        "runs": 1
+      },
+      {
+        "count": 131,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.18555240793201133,
+        "runs": 0
+      },
+      {
+        "count": 22,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.031161473087818695,
+        "runs": 0
+      },
+      {
+        "count": 21,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.029745042492917848,
+        "runs": 1
+      }
+    ],
+    "2:3:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.004484304932735426,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.004484304932735426,
+        "runs": 3
+      },
+      {
+        "count": 111,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.4977578475336323,
+        "runs": 2
+      },
+      {
+        "count": 10,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.04484304932735426,
+        "runs": 2
+      },
+      {
+        "count": 89,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.3991031390134529,
+        "runs": 1
+      },
+      {
+        "count": 7,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.03139013452914798,
+        "runs": 1
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.017937219730941704,
+        "runs": 2
+      }
+    ],
+    "2:3:3B": [
+      {
+        "count": 16,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "2:3:BB": [
+      {
+        "count": 1,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.0022172949002217295,
+        "runs": 1
+      },
+      {
+        "count": 449,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.9955654101995566,
+        "runs": 0
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.0022172949002217295,
+        "runs": 0
+      }
+    ],
+    "2:3:HBP": [
+      {
+        "count": 71,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:3:HR": [
+      {
+        "count": 148,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "2:3:K": [
+      {
+        "count": 1284,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:3:OUT": [
+      {
+        "count": 2314,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:3:REACH": [
+      {
+        "count": 4,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.1111111111111111,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.1388888888888889,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.05555555555555555,
+        "runs": 1
+      },
+      {
+        "count": 22,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.6111111111111112,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.08333333333333333,
+        "runs": 0
+      }
+    ],
+    "2:4:1B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.005988023952095809,
+        "runs": 1
+      },
+      {
+        "count": 324,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.9700598802395209,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.014970059880239521,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.0029940119760479044,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.005988023952095809,
+        "runs": 1
+      }
+    ],
+    "2:4:2B": [
+      {
+        "count": 92,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.989247311827957,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.010752688172043012,
+        "runs": 1
+      }
+    ],
+    "2:4:3B": [
+      {
+        "count": 11,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "2:4:BB": [
+      {
+        "count": 3,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.009146341463414634,
+        "runs": 1
+      },
+      {
+        "count": 325,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.9908536585365854,
+        "runs": 0
+      }
+    ],
+    "2:4:HBP": [
+      {
+        "count": 25,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:4:HR": [
+      {
+        "count": 69,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "2:4:K": [
+      {
+        "count": 636,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:4:OUT": [
+      {
+        "count": 1179,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:4:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.07142857142857142,
+        "runs": 1
+      },
+      {
+        "count": 11,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.7857142857142857,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.07142857142857142,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.07142857142857142,
+        "runs": 0
+      }
+    ],
+    "2:5:1B": [
+      {
+        "count": 197,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.5677233429394812,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.005763688760806916,
+        "runs": 2
+      },
+      {
+        "count": 134,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.3861671469740634,
+        "runs": 1
+      },
+      {
+        "count": 9,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.025936599423631124,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.002881844380403458,
+        "runs": 0
+      },
+      {
+        "count": 4,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.011527377521613832,
+        "runs": 1
+      }
+    ],
+    "2:5:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.009174311926605505,
+        "runs": 2
+      },
+      {
+        "count": 55,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.5045871559633027,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.01834862385321101,
+        "runs": 2
+      },
+      {
+        "count": 47,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.43119266055045874,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.009174311926605505,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.027522935779816515,
+        "runs": 2
+      }
+    ],
+    "2:5:3B": [
+      {
+        "count": 2,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "2:5:BB": [
+      {
+        "count": 1,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.005780346820809248,
+        "runs": 1
+      },
+      {
+        "count": 172,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.9942196531791907,
+        "runs": 0
+      }
+    ],
+    "2:5:HBP": [
+      {
+        "count": 21,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:5:HR": [
+      {
+        "count": 72,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "2:5:K": [
+      {
+        "count": 493,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:5:OUT": [
+      {
+        "count": 1042,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:5:REACH": [
+      {
+        "count": 1,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.08333333333333333,
+        "runs": 2
+      },
+      {
+        "count": 5,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.4166666666666667,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.25,
+        "runs": 1
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.16666666666666666,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.08333333333333333,
+        "runs": 0
+      }
+    ],
+    "2:6:1B": [
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.019762845849802372,
+        "runs": 1
+      },
+      {
+        "count": 171,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.6758893280632411,
+        "runs": 2
+      },
+      {
+        "count": 13,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.05138339920948617,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.003952569169960474,
+        "runs": 2
+      },
+      {
+        "count": 49,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.19367588932806323,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.003952569169960474,
+        "runs": 0
+      },
+      {
+        "count": 8,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.03162055335968379,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.019762845849802372,
+        "runs": 2
+      }
+    ],
+    "2:6:2B": [
+      {
+        "count": 58,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.9830508474576272,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.01694915254237288,
+        "runs": 2
+      }
+    ],
+    "2:6:3B": [
+      {
+        "count": 12,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 2
+      }
+    ],
+    "2:6:BB": [
+      {
+        "count": 3,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.010676156583629894,
+        "runs": 1
+      },
+      {
+        "count": 278,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.9893238434163701,
+        "runs": 0
+      }
+    ],
+    "2:6:HBP": [
+      {
+        "count": 24,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:6:HR": [
+      {
+        "count": 57,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 3
+      }
+    ],
+    "2:6:K": [
+      {
+        "count": 495,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:6:OUT": [
+      {
+        "count": 801,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:6:REACH": [
+      {
+        "count": 5,
+        "next_base_mask": 1,
+        "outs_added": 0,
+        "probability": 0.2631578947368421,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.10526315789473684,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.21052631578947367,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.15789473684210525,
+        "runs": 0
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.15789473684210525,
+        "runs": 0
+      },
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.10526315789473684,
+        "runs": 1
+      }
+    ],
+    "2:7:1B": [
+      {
+        "count": 8,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.03347280334728033,
+        "runs": 1
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.012552301255230125,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.0041841004184100415,
+        "runs": 3
+      },
+      {
+        "count": 73,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.3054393305439331,
+        "runs": 2
+      },
+      {
+        "count": 95,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.39748953974895396,
+        "runs": 2
+      },
+      {
+        "count": 11,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.04602510460251046,
+        "runs": 2
+      },
+      {
+        "count": 35,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.14644351464435146,
+        "runs": 1
+      },
+      {
+        "count": 5,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.02092050209205021,
+        "runs": 1
+      },
+      {
+        "count": 8,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.03347280334728033,
+        "runs": 2
+      }
+    ],
+    "2:7:2B": [
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.013333333333333334,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.013333333333333334,
+        "runs": 3
+      },
+      {
+        "count": 45,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.6,
+        "runs": 3
+      },
+      {
+        "count": 4,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.05333333333333334,
+        "runs": 3
+      },
+      {
+        "count": 20,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.26666666666666666,
+        "runs": 2
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.013333333333333334,
+        "runs": 2
+      },
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.04,
+        "runs": 3
+      }
+    ],
+    "2:7:3B": [
+      {
+        "count": 2,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.16666666666666666,
+        "runs": 4
+      },
+      {
+        "count": 10,
+        "next_base_mask": 4,
+        "outs_added": 0,
+        "probability": 0.8333333333333334,
+        "runs": 3
+      }
+    ],
+    "2:7:BB": [
+      {
+        "count": 3,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 0.01875,
+        "runs": 1
+      },
+      {
+        "count": 157,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.98125,
+        "runs": 1
+      }
+    ],
+    "2:7:HBP": [
+      {
+        "count": 30,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 1
+      }
+    ],
+    "2:7:HR": [
+      {
+        "count": 65,
+        "next_base_mask": 0,
+        "outs_added": 0,
+        "probability": 1.0,
+        "runs": 4
+      }
+    ],
+    "2:7:K": [
+      {
+        "count": 395,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:7:OUT": [
+      {
+        "count": 867,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 1.0,
+        "runs": 0
+      }
+    ],
+    "2:7:REACH": [
+      {
+        "count": 5,
+        "next_base_mask": 2,
+        "outs_added": 0,
+        "probability": 0.1724137931034483,
+        "runs": 3
+      },
+      {
+        "count": 2,
+        "next_base_mask": 3,
+        "outs_added": 0,
+        "probability": 0.06896551724137931,
+        "runs": 2
+      },
+      {
+        "count": 4,
+        "next_base_mask": 5,
+        "outs_added": 0,
+        "probability": 0.13793103448275862,
+        "runs": 2
+      },
+      {
+        "count": 2,
+        "next_base_mask": 6,
+        "outs_added": 0,
+        "probability": 0.06896551724137931,
+        "runs": 2
+      },
+      {
+        "count": 15,
+        "next_base_mask": 7,
+        "outs_added": 0,
+        "probability": 0.5172413793103449,
+        "runs": 1
+      },
+      {
+        "count": 1,
+        "next_base_mask": 0,
+        "outs_added": 1,
+        "probability": 0.034482758620689655,
+        "runs": 1
+      }
+    ]
+  }
+}

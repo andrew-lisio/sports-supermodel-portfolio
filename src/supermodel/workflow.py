@@ -44,6 +44,8 @@ from .mlb_v2 import (
 from .market import no_vig_probabilities
 from .market_schema import MarketQuote, QuoteSource
 from .odds_input import ManualMoneyline
+from .pa_live import PA_DEFAULT_MONEYLINE_WEIGHT, evaluate_pa_shadow_slate
+from .pa_simulator import PA_SIMULATOR_VERSION
 from .providers import PregameContext
 from .series_context import apply_series_context_policy, build_series_contexts
 from .simulation_store import SimulationSnapshot
@@ -79,6 +81,10 @@ class WorkflowResult:
     history_refresh_report: HistoryRefreshReport
     market_quote_path: str | Path | None
     simulation_manifest_paths: tuple[str | Path, ...]
+    pa_shadow_evaluation: pd.DataFrame | None = None
+    pa_shadow_csv_path: Path | None = None
+    pa_shadow_json_path: Path | None = None
+    pa_shadow_simulation_manifest_paths: tuple[str | Path, ...] = ()
 
 
 def _repository_commit() -> str:
@@ -408,8 +414,6 @@ def record_prediction_evidence(
                 "live_context_status": row.get("live_context_status"),
                 "live_context_block_reasons": row.get("live_context_block_reasons"),
                 "live_context_warnings": row.get("live_context_warnings"),
-                "selection_status": row.get("selection_status"),
-                "selection_reasons": row.get("selection_reasons"),
                 "series_context_summary": row.get("series_context_summary"),
                 "series_games_played": int(row.get("series_games_played", 0)),
                 "series_away_wins": int(row.get("series_away_wins", 0)),
@@ -771,6 +775,87 @@ def _persist_platform_outputs(
     return quote_path, tuple(manifests)
 
 
+def _persist_pa_shadow_outputs(
+    *,
+    captured_slate: CapturedSlate,
+    evaluation: pd.DataFrame,
+    draws: Mapping[int, tuple[object, object]],
+    market_timestamp: datetime,
+    market_snapshot_path: Path,
+    simulation_store_root: str | Path,
+    snapshot_input_hashes: Mapping[int, str] | None = None,
+) -> tuple[str | Path, ...]:
+    """Persist the PA implementation candidate as a distinct non-authoritative track."""
+
+    if evaluation is None or evaluation.empty:
+        return ()
+    store = create_simulation_snapshot_store(simulation_store_root)
+    manifests: list[str | Path] = []
+    for row in evaluation.to_dict("records"):
+        if str(row.get("pa_shadow_status")) != "READY":
+            continue
+        game_pk = int(row["game_pk"])
+        if game_pk not in draws:
+            raise ScheduleIntegrityError(
+                f"Missing pa_shadow simulation draws for game_pk {game_pk}"
+            )
+        if snapshot_input_hashes is not None and game_pk in snapshot_input_hashes:
+            input_hash = str(snapshot_input_hashes[game_pk])
+        else:
+            input_hash = _game_input_snapshot_hash(
+                captured_slate=captured_slate,
+                game_pk=game_pk,
+                market_snapshot_path=market_snapshot_path,
+            )
+        away = str(row["away_team"])
+        components = {
+            name: float(row[f"p_{name}_{away}"])
+            for name in (
+                "logistic",
+                "random_forest",
+                "neural_network",
+                "elo_pyth",
+                "xgboost",
+                "lightgbm",
+                "catboost",
+            )
+            if f"p_{name}_{away}" in row
+        }
+        away_runs, home_runs = draws[game_pk]
+        snapshot = SimulationSnapshot(
+            game_pk=game_pk,
+            away_team=away,
+            home_team=str(row["home_team"]),
+            model_track="pa_shadow",
+            model_version=PA_SIMULATOR_VERSION,
+            git_commit=_repository_commit(),
+            input_snapshot_hash=input_hash,
+            created_at=market_timestamp,
+            random_seed=RANDOM_SEED + game_pk,
+            away_runs=away_runs,
+            home_runs=home_runs,
+            away_win_probability=float(row["away_probability"]),
+            home_win_probability=float(row["home_probability"]),
+            component_probabilities=components,
+            metadata={
+                "game_date": captured_slate.game_date,
+                "production_authority": False,
+                "candidate_type": "pa_generative_implementation_shadow",
+                "pa_moneyline_weight": float(row["pa_moneyline_weight"]),
+                "pa_live_parity_status": row.get("pa_live_parity_status"),
+                "pa_live_parity_reasons": row.get("pa_live_parity_reasons"),
+                "lineups_confirmed": bool(row.get("lineups_confirmed", False)),
+                "score_disagreement_diagnostic": bool(
+                    row.get("pa_score_disagreement", False)
+                ),
+                "score_disagreement_has_veto_authority": False,
+            },
+        )
+        manifest_path, _ = store.save(snapshot)
+        manifests.append(manifest_path)
+    return tuple(manifests)
+
+
 def evaluate_captured_slate(
     *,
     captured_slate: CapturedSlate,
@@ -796,6 +881,9 @@ def evaluate_captured_slate(
     snapshot_input_hashes: Mapping[int, str] | None = None,
     snapshot_metadata: Mapping[str, Any] | None = None,
     live_context_assessments: Mapping[int, LiveContextAssessment] | None = None,
+    enable_pa_shadow: bool = False,
+    pa_shadow_moneyline_weight: float = PA_DEFAULT_MONEYLINE_WEIGHT,
+    pa_shadow_simulations: int | None = None,
 ) -> WorkflowResult:
     """Run the complete prediction-only pipeline from a captured official slate."""
 
@@ -948,6 +1036,21 @@ def evaluate_captured_slate(
         assessments_by_game_pk=live_context_assessments,
     )
     evaluation = combine_production_and_shadow(production_evaluation, shadow_evaluation)
+
+    pa_shadow_evaluation: pd.DataFrame | None = None
+    pa_shadow_draws: dict[int, tuple[object, object]] = {}
+    if enable_pa_shadow:
+        pa_shadow_evaluation = evaluate_pa_shadow_slate(
+            historical_features=candidate_historical_features,
+            future_features=candidate_future_features,
+            moneylines=moneylines,
+            contexts_by_game_pk=pregame_contexts_by_pk,
+            simulations=int(pa_shadow_simulations or simulations),
+            moneyline_weight=pa_shadow_moneyline_weight,
+            top_n=top_n,
+            simulation_draws=pa_shadow_draws,
+        )
+
     history_record = history_refresh_report.to_record()
     evaluation["history_freshness_status"] = history_refresh_report.status
     evaluation["history_checked_through"] = history_refresh_report.checked_through_date
@@ -966,6 +1069,14 @@ def evaluate_captured_slate(
         stem=f"mlb_v2_4_{captured_slate.game_date}_{timestamp}",
         parlays=parlays,
     )
+    pa_shadow_csv_path: Path | None = None
+    pa_shadow_json_path: Path | None = None
+    if pa_shadow_evaluation is not None:
+        pa_shadow_csv_path, _, pa_shadow_json_path = write_evaluation_artifacts(
+            pa_shadow_evaluation,
+            output_dir=output_dir,
+            stem=f"mlb_pa_shadow_{captured_slate.game_date}_{timestamp}",
+        )
 
     market_quote_path, simulation_manifest_paths = _persist_platform_outputs(
         captured_slate=captured_slate,
@@ -982,6 +1093,18 @@ def evaluate_captured_slate(
         snapshot_input_hashes=snapshot_input_hashes,
         snapshot_metadata=snapshot_metadata,
     )
+
+    pa_shadow_manifest_paths: tuple[str | Path, ...] = ()
+    if pa_shadow_evaluation is not None:
+        pa_shadow_manifest_paths = _persist_pa_shadow_outputs(
+            captured_slate=captured_slate,
+            evaluation=pa_shadow_evaluation,
+            draws=pa_shadow_draws,
+            market_timestamp=market_timestamp,
+            market_snapshot_path=market_snapshot_path,
+            simulation_store_root=simulation_store_root,
+            snapshot_input_hashes=snapshot_input_hashes,
+        )
 
     if record_evidence:
         ledger_path = record_prediction_evidence(
@@ -1012,4 +1135,8 @@ def evaluate_captured_slate(
         history_refresh_report=history_refresh_report,
         market_quote_path=market_quote_path,
         simulation_manifest_paths=simulation_manifest_paths,
+        pa_shadow_evaluation=pa_shadow_evaluation,
+        pa_shadow_csv_path=pa_shadow_csv_path,
+        pa_shadow_json_path=pa_shadow_json_path,
+        pa_shadow_simulation_manifest_paths=pa_shadow_manifest_paths,
     )

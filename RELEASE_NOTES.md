@@ -1,3 +1,15 @@
+# V2.6 PA generative integration candidate
+
+This cumulative candidate introduces the plate-appearance generative simulator as a third, non-authoritative shadow track above the V2.5 public-readiness rollback baseline. Historical point-in-time testing selected PA simulation over the inning-level candidate for score-distribution architecture, especially for calibration and realistic shutout/blowout/high-scoring/one-run tails, while leaving production moneyline authority unchanged.
+
+The candidate preserves V2.3.3 production, V2.4 RC2 shadow, the incumbent Poisson production path, dormant public deployment, and all prior platform-readiness work. PA shadow defaults to a conservative configurable 20% moneyline influence for operational testing, requires confirmed pregame inputs, and persists separate artifacts with `production_authority=false`.
+
+See `docs/PA_GENERATIVE_SIMULATOR.md`, `docs/validation/PA_GENERATIVE_CANONICAL_BACKTEST_2026-08-16.md`, and `PA_GENERATIVE_IMPLEMENTATION_CANDIDATE_REPORT_2026-08-16.md`.
+
+The cumulative candidate also includes the CI repair derived from the original failed workflow archive. The failure occurred at Ruff lint after Python 3.12 installation and compilation succeeded; it was not a Python 3.12 model/runtime failure. See `docs/CI_RUFF_REPAIR_2026-08-18.md`.
+
+---
+
 # V2.5 public readiness foundation
 
 This cumulative pre-deployment milestone completes dormant hosted-application framework without

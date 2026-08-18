@@ -9,7 +9,7 @@ from pathlib import Path, PurePosixPath
 import shutil
 import tarfile
 import tempfile
-from typing import Any, Iterable
+from typing import Any
 
 from .storage import ObjectStore, StorageSettings, create_object_store, create_state_store
 

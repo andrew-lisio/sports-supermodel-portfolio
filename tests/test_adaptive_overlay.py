@@ -4,8 +4,6 @@ from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pandas as pd
-import pytest
-
 from supermodel.adaptive_overlay import (
     AdaptiveOverlayPolicy,
     apply_overlay_to_evaluation,

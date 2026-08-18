@@ -56,7 +56,7 @@ def _required(mapping: dict[str, Any], key: str, context: str) -> Any:
 
 
 def _team_fields(game: dict[str, Any], side: str) -> tuple[int, str, str | None, int | None, str | None]:
-    side_payload = _required(_required(game, "teams", "game"), side, f"game.teams")
+    side_payload = _required(_required(game, "teams", "game"), side, "game.teams")
     team = _required(side_payload, "team", f"game.teams.{side}")
     team_id = int(_required(team, "id", f"game.teams.{side}.team"))
     team_name = str(_required(team, "name", f"game.teams.{side}.team"))
@@ -261,7 +261,7 @@ class ImmutableSnapshotStore:
             fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
         except FileExistsError:
             if path.read_bytes() != body:
-                raise FileExistsError(f"Immutable snapshot collision at {path}")
+                raise FileExistsError(f"Immutable snapshot collision at {path}") from None
             return path
         with os.fdopen(fd, "wb") as handle:
             handle.write(body)

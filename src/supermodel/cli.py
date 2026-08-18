@@ -85,6 +85,26 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not create the optional two-leg top-pick parlay comparison file.",
     )
+    parser.add_argument(
+        "--pa-shadow",
+        action="store_true",
+        help=(
+            "Also run the PA generative implementation candidate as a third, "
+            "non-authoritative shadow track. Production remains V2.3.3."
+        ),
+    )
+    parser.add_argument(
+        "--pa-shadow-weight",
+        type=float,
+        default=0.20,
+        help="PA contribution to the shadow moneyline blend; default 0.20.",
+    )
+    parser.add_argument(
+        "--pa-shadow-simulations",
+        type=int,
+        default=None,
+        help="Optional PA simulation count; defaults to --simulations.",
+    )
     return parser
 
 
@@ -125,6 +145,9 @@ def run(args: argparse.Namespace) -> WorkflowResult | Path:
         home_field_logit_adjustment=args.home_field_logit_adjustment,
         include_parlays=not args.skip_parlays,
         input_source=input_source,
+        enable_pa_shadow=args.pa_shadow,
+        pa_shadow_moneyline_weight=args.pa_shadow_weight,
+        pa_shadow_simulations=args.pa_shadow_simulations,
     )
 
 
@@ -167,6 +190,27 @@ def main() -> None:
         return
 
     _print_evaluation(result.evaluation)
+    if result.pa_shadow_evaluation is not None:
+        print("\nPA generative implementation shadow (non-authoritative):")
+        pa_columns = [
+            "selection_rank",
+            "selection_status",
+            "away_team",
+            "home_team",
+            "pick",
+            "pick_probability",
+            "model_overlap",
+            "pa_away_probability",
+            "simulated_away_runs",
+            "simulated_home_runs",
+            "pa_live_parity_status",
+            "pa_score_disagreement",
+            "production_authority",
+        ]
+        available = [
+            column for column in pa_columns if column in result.pa_shadow_evaluation.columns
+        ]
+        print(result.pa_shadow_evaluation[available].to_string(index=False))
     refresh = result.history_refresh_report
     print(
         "\nHistory freshness: "
@@ -182,6 +226,9 @@ def main() -> None:
         result.market_snapshot_path,
         result.evidence_ledger_path,
         result.adaptive_overlay_path,
+        result.pa_shadow_csv_path,
+        result.pa_shadow_json_path,
+        *result.pa_shadow_simulation_manifest_paths,
     ]:
         if path is not None:
             print(path)

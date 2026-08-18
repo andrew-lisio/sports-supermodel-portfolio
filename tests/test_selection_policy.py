@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from supermodel.selection_policy import apply_selection_policy
+from supermodel.selection_policy import SelectionPolicy, apply_selection_policy
 
 
 def _row(
@@ -78,3 +78,27 @@ def test_conflicted_ensemble_is_preserved_but_removed_from_top_picks():
     assert seattle["selection_status"] == "ELIGIBLE"
     assert int(seattle["selection_rank"]) == 1
     assert bool(seattle["is_top_pick"])
+
+
+def test_pa_shadow_can_disable_fixed_score_conflict_veto_without_hiding_diagnostic():
+    row = _row(
+        game_pk=3,
+        away="AAA",
+        home="BBB",
+        pick="AAA",
+        pick_probability=0.60,
+        overlap=6,
+        away_runs=3.8,
+        home_runs=4.4,
+        away_component_probabilities=[0.62, 0.61, 0.60, 0.59, 0.58, 0.57, 0.48],
+    )
+    result = apply_selection_policy(
+        pd.DataFrame([row]),
+        top_n=1,
+        policy=SelectionPolicy(enable_score_conflict_veto=False, version="pa-test"),
+    )
+    evaluated = result.iloc[0]
+    assert bool(evaluated["ensemble_score_conflict"])
+    assert not bool(evaluated["score_conflict_veto_enabled"])
+    assert "PROJECTED_SCORE_CONFLICT" not in evaluated["selection_reasons"]
+    assert evaluated["selection_status"] == "ELIGIBLE"

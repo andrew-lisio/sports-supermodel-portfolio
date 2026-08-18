@@ -37,7 +37,6 @@ from .storage import (
     create_state_store,
 )
 from .workflow import (
-    CapturedSlate,
     WorkflowResult,
     _candidate_model_commit,
     _repository_commit,
@@ -233,7 +232,7 @@ def publisher_lock(
         if created.tzinfo is None or created.utcoffset() is None:
             created = created.replace(tzinfo=timezone.utc)
         if now - created.astimezone(timezone.utc) <= stale_after:
-            raise RuntimeError(f"Slate publisher is already running; lock exists at {lock_path}")
+            raise RuntimeError(f"Slate publisher is already running; lock exists at {lock_path}") from None
         lock_path.unlink(missing_ok=True)
         descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
     try:

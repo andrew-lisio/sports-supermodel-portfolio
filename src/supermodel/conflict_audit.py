@@ -103,7 +103,7 @@ def _reason_summary(rows: pd.DataFrame) -> list[dict[str, Any]]:
         reason_values.update(item for item in value.split(";") if item)
     for reason in sorted(reason_values):
         mask = rows["selection_reasons"].fillna("").astype(str).str.split(";").apply(
-            lambda parts: reason in parts
+            lambda parts, reason=reason: reason in parts
         )
         subset = rows.loc[mask]
         raw_wins = int(subset["raw_correct"].sum())

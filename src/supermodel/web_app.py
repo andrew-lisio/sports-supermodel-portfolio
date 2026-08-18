@@ -20,6 +20,7 @@ from supermodel.platform_views import (
     load_market_candidates,
 )
 from supermodel.rankings import BEST_AVAILABLE
+from supermodel.public_views import game_analysis_records, load_performance_payload
 from supermodel.storage import create_market_quote_store, create_simulation_snapshot_store
 from supermodel.workflow import capture_official_slate, evaluate_captured_slate
 

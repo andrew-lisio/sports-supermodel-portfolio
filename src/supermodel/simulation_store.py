@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
@@ -104,7 +104,6 @@ class SimulationSnapshot:
             "score_draws_sha256": self.score_draws_sha256,
             "away_win_probability": self.away_win_probability,
             "home_win_probability": self.home_win_probability,
-            "score_draws_sha256": self.score_draws_sha256,
         }
         return sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()[:24]
 

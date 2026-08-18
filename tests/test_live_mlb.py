@@ -15,6 +15,7 @@ from supermodel.live_mlb import (
     capture_live_slate,
     enrich_context_from_live_feed,
     evaluate_live_slate,
+    enrich_advanced_context,
     no_vig_probabilities,
     parse_pitcher_season_stats,
 )
@@ -304,3 +305,95 @@ def test_poisson_score_model_produces_positive_expected_runs():
     a, b = model.expected_runs(frame.iloc[:3])
     assert len(a) == 3 and len(b) == 3
     assert np.all(a > 0) and np.all(b > 0)
+
+
+def test_advanced_capture_preserves_active_roster_reliever_profiles(tmp_path):
+    context = PregameContext(
+        game_date="2030-07-20",
+        away_team="AAA",
+        home_team="BBB",
+        game_pk=777,
+        away_team_id=1,
+        home_team_id=2,
+        away_probable_pitcher_id=11,
+        home_probable_pitcher_id=22,
+        away_probable_pitcher_name="Away Starter",
+        home_probable_pitcher_name="Home Starter",
+        probable_pitchers_confirmed=True,
+    )
+
+    def season_pitching(*, games: int, starts: int, bf: int) -> dict:
+        return {
+            "stats": [{"splits": [{"stat": {
+                "gamesPlayed": games,
+                "gamesStarted": starts,
+                "inningsPitched": "40.0",
+                "battersFaced": bf,
+                "hits": 35,
+                "doubles": 8,
+                "triples": 1,
+                "homeRuns": 5,
+                "baseOnBalls": 12,
+                "hitBatsmen": 2,
+                "strikeOuts": 45,
+            }}]}]
+        }
+
+    reliever_payloads = {
+        31: season_pitching(games=45, starts=0, bf=180),
+        32: season_pitching(games=38, starts=1, bf=160),
+        41: season_pitching(games=40, starts=0, bf=170),
+        42: season_pitching(games=35, starts=2, bf=150),
+    }
+
+    class FakeClient:
+        def team_stats(self, team_id, season, group):
+            return {"stats": []}
+
+        def team_roster(self, team_id, game_date):
+            starter = 11 if int(team_id) == 1 else 22
+            relievers = [31, 32] if int(team_id) == 1 else [41, 42]
+            return {
+                "roster": [
+                    {"person": {"id": starter}, "position": {"type": "Pitcher"}},
+                    *[
+                        {"person": {"id": player_id}, "position": {"type": "Pitcher"}}
+                        for player_id in relievers
+                    ],
+                    {"person": {"id": 999}, "position": {"type": "Infielder"}},
+                ]
+            }
+
+        def people_pitching_stats(self, person_ids, season):
+            return {
+                "people": [
+                    {"id": int(player_id), "stats": reliever_payloads[int(player_id)]["stats"]}
+                    for player_id in person_ids
+                    if int(player_id) in reliever_payloads
+                ]
+            }
+
+    store = ImmutableSnapshotStore(tmp_path / "snapshots")
+    result = enrich_advanced_context(
+        context,
+        client=FakeClient(),
+        season=2030,
+        capture_time=datetime(2030, 7, 20, 20, 0, tzinfo=timezone.utc),
+        snapshot_store=store,
+        hitter_cache={},
+        team_stats_cache={},
+        venue_cache={},
+        recent_schedule_cache={},
+        live_feed_cache={},
+        pitcher_cache={},
+        roster_cache={},
+    )
+    assert result.advanced_snapshot_path is not None
+    envelope = __import__("json").loads(Path(result.advanced_snapshot_path).read_text(encoding="utf-8"))
+    raw = envelope["payload"]["raw_sources"]
+    assert raw["away_bullpen_pitcher_stats"]["reliever_ids"] == [31, 32]
+    assert raw["home_bullpen_pitcher_stats"]["reliever_ids"] == [41, 42]
+    assert len(raw["away_bullpen_pitcher_stats"]["payloads"]) == 2
+    assert len(raw["home_bullpen_pitcher_stats"]["payloads"]) == 2
+    assert result.provenance["bullpen_event_profiles_away"].endswith("reliever_only")
+    assert result.provenance["bullpen_event_profiles_home"].endswith("reliever_only")

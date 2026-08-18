@@ -1,3 +1,16 @@
+## 2.6.0.dev1+pa.generative.integration
+
+- Added the historically validated plate-appearance generative simulator as an opt-in third shadow track.
+- Added complete PA-by-PA game-state simulation with projected score and derivative markets generated downstream.
+- Added reproducible 2024 empirical event/base-out priors and a prior-builder utility.
+- Added fail-closed live PA adaptation for confirmed starters, confirmed nine-player lineups, immutable snapshots, hitter coverage, and reliever-only bullpen profiles.
+- Added separate PA simulation artifacts and explicit `production_authority=false` governance.
+- Kept V2.3.3 production, V2.4 RC2 shadow, and incumbent Poisson production authority unchanged.
+- Documented the canonical 1,972-game locked 2025 historical comparison and its limitations.
+- Updated the README and release documentation for recruiter/public review.
+- Diagnosed the prior CI failure from the supplied workflow archive: Python 3.12 reached compile successfully and failed at the Ruff lint gate, not at runtime/tests.
+- Added the corresponding correctness cleanup, pinned Ruff 0.16.1 gate, focused E/F/B blocking lint policy, and non-fail-fast Python 3.11/3.12 matrix execution.
+
 ## 2.5.0.dev3+public.readiness.foundation
 
 - Added an explicit two-step public-deployment activation gate that is dormant by default.

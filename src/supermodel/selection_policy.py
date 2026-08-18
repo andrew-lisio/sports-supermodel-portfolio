@@ -22,6 +22,7 @@ class SelectionPolicy:
     minimum_pick_probability: float = 0.53
     minimum_model_overlap: int = 4
     score_conflict_margin_runs: float = 0.20
+    enable_score_conflict_veto: bool = True
     version: str = SELECTION_POLICY_VERSION
 
     def __post_init__(self) -> None:
@@ -90,7 +91,11 @@ def apply_selection_policy(
         reasons: list[str] = []
         if component_pick != pick:
             reasons.append("COMPONENT_CONSENSUS_CONFLICT")
-        if score_pick != pick and score_margin >= policy.score_conflict_margin_runs:
+        if (
+            policy.enable_score_conflict_veto
+            and score_pick != pick
+            and score_margin >= policy.score_conflict_margin_runs
+        ):
             reasons.append("PROJECTED_SCORE_CONFLICT")
         if float(row["pick_probability"]) < policy.minimum_pick_probability:
             reasons.append("LOW_PROBABILITY")
@@ -111,6 +116,7 @@ def apply_selection_policy(
                     score_pick != pick
                     and score_margin >= policy.score_conflict_margin_runs
                 ),
+                "score_conflict_veto_enabled": bool(policy.enable_score_conflict_veto),
                 "selection_policy_version": policy.version,
                 "selection_policy_mode": SELECTION_POLICY_MODE,
                 "selection_status": "ELIGIBLE" if eligible else "PASS",

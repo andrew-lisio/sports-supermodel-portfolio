@@ -10,7 +10,6 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from sklearn.calibration import calibration_curve
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -185,7 +184,7 @@ def attach_official_home_away(
         if not away or not home:
             continue
         a, b = sorted((str(away), str(home)))
-        key = (pd.Timestamp(getattr(record, "official_date")), a, b)
+        key = (pd.Timestamp(record.official_date), a, b)
         by_pair[key].append(record)
 
     output: list[dict[str, Any]] = []
@@ -1076,7 +1075,8 @@ def walk_forward_trials(features: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFr
         for n, p in comp.items():
             val[f"component_{n}"] = p
         predictions.append(val)
-        r1 = metric_row(val.a_win, p1); r2 = metric_row(val.a_win, p2)
+        r1 = metric_row(val.a_win, p1)
+        r2 = metric_row(val.a_win, p2)
         fold_rows.append({"window_start": start_s, "window_end": end_s,
                           "train_n": len(train), "validation_n": len(val),
                           **{f"v1_{k}":v for k,v in r1.items()},

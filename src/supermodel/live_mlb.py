@@ -42,7 +42,6 @@ from .starter_features import (
 from .odds_input import ManualMoneyline, load_moneylines
 from .market import (
     american_implied_probability,
-    american_to_decimal,
     combine_american_odds,
     no_vig_probabilities,
     probability_to_american,
@@ -168,6 +167,18 @@ class MLBStatsHTTPClient:
             {
                 "personIds": ",".join(str(value) for value in ids),
                 "hydrate": f"stats(group=[hitting],type=[season],season={int(season)})",
+            },
+        )
+
+    def people_pitching_stats(self, person_ids: list[int], season: int) -> dict[str, Any]:
+        ids = sorted({int(value) for value in person_ids if int(value) > 0})
+        if not ids:
+            return {"people": []}
+        return self._get_json(
+            "v1/people",
+            {
+                "personIds": ",".join(str(value) for value in ids),
+                "hydrate": f"stats(group=[pitching],type=[season],season={int(season)})",
             },
         )
 
@@ -346,6 +357,42 @@ def _people_hitting_payloads(payload: dict[str, Any] | None) -> dict[int, dict[s
     return output
 
 
+def _people_pitching_payloads(payload: dict[str, Any] | None) -> dict[int, dict[str, Any]]:
+    if not payload:
+        return {}
+    output: dict[int, dict[str, Any]] = {}
+    for person in payload.get("people", []) or []:
+        person_id = person.get("id")
+        stats = person.get("stats")
+        if person_id is None or not isinstance(stats, list):
+            continue
+        output[int(person_id)] = {"stats": stats}
+    return output
+
+
+def _active_pitcher_ids(roster_payload: dict[str, Any] | None) -> list[int]:
+    if not roster_payload:
+        return []
+    output: list[int] = []
+    for entry in roster_payload.get("roster", []) or []:
+        position = entry.get("position") or {}
+        if str(position.get("type") or "").lower() != "pitcher":
+            continue
+        person_id = (entry.get("person") or {}).get("id")
+        if person_id is not None:
+            output.append(int(person_id))
+    return list(dict.fromkeys(output))
+
+
+def _is_reliever_season_payload(payload: dict[str, Any] | None) -> bool:
+    stat = _first_stat_split(payload or {})
+    games = _float_stat(stat, "gamesPlayed") or 0.0
+    starts = _float_stat(stat, "gamesStarted") or 0.0
+    if games <= 0:
+        return False
+    return starts <= 2.0 or (starts / games) < 0.5
+
+
 def _recent_completed_games(
     schedule_payload: dict[str, Any] | None,
     *,
@@ -394,6 +441,8 @@ def enrich_advanced_context(
     venue_cache: dict[int, dict[str, Any]],
     recent_schedule_cache: dict[int, dict[str, Any]],
     live_feed_cache: dict[int, dict[str, Any]],
+    pitcher_cache: dict[int, dict[str, Any]] | None = None,
+    roster_cache: dict[int, dict[str, Any]] | None = None,
 ) -> PregameContext:
     """Collect optional point-in-time context while failing closed on unavailable feeds.
 
@@ -403,6 +452,8 @@ def enrich_advanced_context(
     """
 
     raw_sources: dict[str, Any] = {}
+    pitcher_cache = pitcher_cache if pitcher_cache is not None else {}
+    roster_cache = roster_cache if roster_cache is not None else {}
 
     weather = derive_weather_features(
         temperature_f=context.temperature_f,
@@ -473,6 +524,57 @@ def enrich_advanced_context(
                 setattr(context, f"{side}_defense_errors_per_game", parsed["errors_per_game"])
             context.provenance[f"team_{group}_{side}"] = (
                 f"mlb_stats_api:v1/teams/{int(team_id)}/stats:season:{group}"
+            )
+
+        # Preserve reliever-only season profiles for the PA shadow. This is collected
+        # into the immutable advanced snapshot but has no authority in V2.3.3/V2.4.
+        team_key = int(team_id)
+        if team_key not in roster_cache:
+            roster_payload = _optional_client_call(
+                client, "team_roster", team_key, context.game_date
+            )
+            if roster_payload is not None:
+                roster_cache[team_key] = roster_payload
+        roster_payload = roster_cache.get(team_key)
+        pitcher_ids = _active_pitcher_ids(roster_payload)
+        current_starter_id = getattr(context, f"{side}_probable_pitcher_id")
+        candidate_ids = [
+            person_id for person_id in pitcher_ids
+            if current_starter_id is None or int(person_id) != int(current_starter_id)
+        ]
+        uncached_pitchers = [
+            person_id for person_id in candidate_ids if person_id not in pitcher_cache
+        ]
+        if uncached_pitchers:
+            batch = _optional_client_call(
+                client, "people_pitching_stats", uncached_pitchers, int(season)
+            )
+            pitcher_cache.update(_people_pitching_payloads(batch))
+            for person_id in uncached_pitchers:
+                if person_id not in pitcher_cache:
+                    payload = _optional_client_call(
+                        client, "person_pitching_stats", int(person_id), int(season)
+                    )
+                    if payload is not None:
+                        pitcher_cache[person_id] = payload
+        reliever_ids = [
+            person_id for person_id in candidate_ids
+            if _is_reliever_season_payload(pitcher_cache.get(person_id))
+        ]
+        reliever_payloads = [pitcher_cache[person_id] for person_id in reliever_ids if person_id in pitcher_cache]
+        raw_sources[f"{side}_active_roster"] = roster_payload
+        raw_sources[f"{side}_bullpen_pitcher_stats"] = {
+            "person_ids": candidate_ids,
+            "reliever_ids": reliever_ids,
+            "payloads": reliever_payloads,
+        }
+        if reliever_payloads:
+            context.provenance[f"bullpen_event_profiles_{side}"] = (
+                "mlb_stats_api:active_roster+season_pitching:reliever_only"
+            )
+        else:
+            context.provenance[f"bullpen_event_profiles_{side}"] = (
+                "mlb_stats_api:reliever_profiles_unavailable"
             )
 
         if int(team_id) not in recent_schedule_cache:
@@ -727,6 +829,8 @@ def capture_live_slate(
     identity_source = "mlb_stats_api:v1/schedule+v1.1/game/feed/live"
     stats_source = "mlb_stats_api:v1/people/stats:season"
     hitter_cache: dict[int, dict[str, Any]] = {}
+    pitcher_cache: dict[int, dict[str, Any]] = {}
+    roster_cache: dict[int, dict[str, Any]] = {}
     team_stats_cache: dict[tuple[int, str], dict[str, Any]] = {}
     venue_cache: dict[int, dict[str, Any]] = {}
     recent_schedule_cache: dict[int, dict[str, Any]] = {}
@@ -828,6 +932,8 @@ def capture_live_slate(
                 venue_cache=venue_cache,
                 recent_schedule_cache=recent_schedule_cache,
                 live_feed_cache=live_feed_cache,
+                pitcher_cache=pitcher_cache,
+                roster_cache=roster_cache,
             )
             path = snapshot_store.write_pregame(
                 game_pk=record.game_pk,
@@ -926,7 +1032,6 @@ def evaluate_live_slate(
         away = str(feature_row["away_team"])
         home = str(feature_row["home_team"])
         team_a = str(feature_row["team_a"])
-        team_b = str(feature_row["team_b"])
         team_a_is_away = team_a == away
         away_probability = finalized_a if team_a_is_away else 1.0 - finalized_a
         home_probability = 1.0 - away_probability
@@ -992,12 +1097,16 @@ def evaluate_live_slate(
         away_mean = a_mean if team_a_is_away else b_mean
         home_mean = b_mean if team_a_is_away else a_mean
 
-        def oriented_last_value(name: str) -> tuple[float, float]:
-            diff_value = float(feature_row.get(f"{name}_diff", 0.0))
-            sum_value = float(feature_row.get(f"{name}_sum", 0.0))
+        def oriented_last_value(
+            name: str,
+            row: pd.Series = feature_row,
+            a_is_away: bool = team_a_is_away,
+        ) -> tuple[float, float]:
+            diff_value = float(row.get(f"{name}_diff", 0.0))
+            sum_value = float(row.get(f"{name}_sum", 0.0))
             a_value = 0.5 * (sum_value + diff_value)
             b_value = 0.5 * (sum_value - diff_value)
-            return (a_value, b_value) if team_a_is_away else (b_value, a_value)
+            return (a_value, b_value) if a_is_away else (b_value, a_value)
 
         away_last_win, home_last_win = oriented_last_value("last_win")
         away_last_rf, home_last_rf = oriented_last_value("last_rf")

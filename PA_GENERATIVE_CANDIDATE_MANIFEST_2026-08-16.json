@@ -1,0 +1,92 @@
+{
+  "candidate_package": "2.5.0.dev4+pa.shadow.candidate",
+  "simulator_version": "pa-generative-shadow-rc1",
+  "production_authority": false,
+  "rollback_package": "2.5.0.dev3+public.readiness.foundation",
+  "pytest_collected": 211,
+  "pytest_passed": 211,
+  "wheel_sha256": "ef4e744e54adfd4021f128ecceb239cb13d8c31ff3565912cea0d0e8371bf6c2",
+  "candidate_bundle_sha256": null,
+  "files": [
+    {
+      "path": "pyproject.toml",
+      "bytes": 3242,
+      "sha256": "2cfca343919d83fb9ba027d052de286734b101c092a0caf31f22e47ba54fd0d0"
+    },
+    {
+      "path": "src/supermodel/_version.py",
+      "bytes": 47,
+      "sha256": "5d65f7a568685e3c2b018c39caea1817c57e3a48b818a230b03fdd2f1ed62e49"
+    },
+    {
+      "path": "src/supermodel/live_mlb.py",
+      "bytes": 54460,
+      "sha256": "746c013fd2141b9d701ca1cc0c06832c5420b2b541894bdce007c49fcae7e603"
+    },
+    {
+      "path": "src/supermodel/pa_live.py",
+      "bytes": 19378,
+      "sha256": "6c5d616eea46a3ce60fbc64c0fcaee6e219b822889d59181b5c660259ed6f81b"
+    },
+    {
+      "path": "src/supermodel/pa_simulator.py",
+      "bytes": 22949,
+      "sha256": "d81297179edb33a1aa05e990b8608870b8c0e43acc833d39e4f570f41133e853"
+    },
+    {
+      "path": "src/supermodel/pa_prior_builder.py",
+      "bytes": 6519,
+      "sha256": "97b614e440231957ce749c72f2c7b1add42f611e0bac1aa8a6e5748b1c23ea36"
+    },
+    {
+      "path": "src/supermodel/resources/pa_priors_2024.json",
+      "bytes": 148756,
+      "sha256": "40b9d2059f6b8c2237c724747445b07935d2dd9825947da690a615cf12a35d97"
+    },
+    {
+      "path": "src/supermodel/selection_policy.py",
+      "bytes": 5866,
+      "sha256": "b8c13d98c45fa8f6c68c971db8004c6a6c1a08618b62d7c8f772407355cd04e6"
+    },
+    {
+      "path": "src/supermodel/workflow.py",
+      "bytes": 47907,
+      "sha256": "fd250cbec978165b94f51685ede4eec3289ec9668a21909b1468a938fa4f8693"
+    },
+    {
+      "path": "src/supermodel/cli.py",
+      "bytes": 8031,
+      "sha256": "f4ba51783dc711bd15a0bde1498854572d40e0be60ae3e26cdc649b634f1c771"
+    },
+    {
+      "path": "tests/test_live_mlb.py",
+      "bytes": 15764,
+      "sha256": "2db7bd2722173a545a0f6f5cc015e3bead56c1f2ffff2e1d997c083216e67d32"
+    },
+    {
+      "path": "tests/test_pa_live.py",
+      "bytes": 6217,
+      "sha256": "0acdf8d42148ba883ec3cd5845dcaf967954c425bb8e967f0762a19e25d3d1a8"
+    },
+    {
+      "path": "tests/test_pa_simulator.py",
+      "bytes": 4168,
+      "sha256": "1a153b5f8c370994566d9ce372d12abd4526a83a8902a3df8dfe7620a8505a4a"
+    },
+    {
+      "path": "tests/test_pa_prior_builder.py",
+      "bytes": 1138,
+      "sha256": "81ada7a8403d2de07f80ad87b07a87dfcdb18897a785f371503dfbe8323b5e98"
+    },
+    {
+      "path": "tests/test_selection_policy.py",
+      "bytes": 3272,
+      "sha256": "3ef0e553c4b175138802cb576083ca8d7fd86b907522b7bc314025e4350fda2c"
+    },
+    {
+      "path": "PA_GENERATIVE_IMPLEMENTATION_CANDIDATE_REPORT_2026-08-16.md",
+      "bytes": 8834,
+      "sha256": "a246e3a1d2e29587548c732a417b5006f449f2612801dbf90a7e56555c51f6d4"
+    }
+  ]
+}
