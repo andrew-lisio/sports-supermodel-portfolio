@@ -1,6 +1,6 @@
 # V2.4 RC2 live-history freshness and conflict safeguards
 
-> **Portfolio note:** this document records a historical development run. The public portfolio snapshot intentionally omits the original `data/2026` season cache; the validation claims below are preserved as historical methodology/results, not as a promise that the seed dataset is redistributed here.
+> **Data availability:** the `data/2026` season cache used for this historical run is not distributed in this repository. The results below document the recorded methodology and validation output.
 
 
 ## Confirmed failure mode

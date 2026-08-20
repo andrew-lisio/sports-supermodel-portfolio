@@ -4,24 +4,21 @@
 
 - Added a complete plate-appearance generative simulator as a non-authoritative shadow track.
 - Added reproducible empirical PA/base-out priors and live pregame adaptation.
-- Added historical 2024 development / 2025 locked-holdout validation artifacts.
-- Preserved V2.3.3 production authority and V2.4 RC2 shadow governance.
-- Repaired CI linting and verified the project on Python 3.11 and 3.12.
-- Added public-portfolio hygiene: private runtime artifacts excluded, third-party data policy documented, and recruiter-facing documentation simplified.
+- Added historical 2024 development and locked 1,972-game 2025 holdout validation.
+- Preserved V2.3.3 production authority while evaluating the PA architecture independently.
+- Verified continuous integration on Python 3.11 and 3.12.
 
-## V2.5 — public-readiness foundation
+## V2.5 — deployment foundation
 
-- Added dormant hosted-service, storage, backup/restore, publication, and operational-readiness infrastructure.
-- Kept all public deployment disabled until explicit activation.
+- Added hosted-service, shared-storage, backup/restore, publication, settlement, and operational-readiness infrastructure.
+- Kept hosted deployment disabled by default until explicitly configured.
 
 ## V2.4 — shadow-model development
 
 - Added chronological validation, feature-authority audits, point-in-time evidence capture, and the RC2 shadow model.
-- Experimental candidates remain separate from production unless promotion gates are satisfied.
+- Added conflict filtering and additional pregame feature research without silently replacing the production model.
 
 ## V2.3.3 — production baseline
 
-- Current production winner model and incumbent score-simulation path.
-- Prediction/simulation/market-comparison boundary; no active stake-sizing or bankroll automation.
-
-Detailed historical engineering notes are archived under `docs/history/CHANGELOG_FULL.md`.
+- Established the current production winner-model path and incumbent score-simulation engine.
+- Added clear separation between model probabilities, score simulation, and sportsbook market comparison.

@@ -4,7 +4,7 @@
 
 
 **Candidate package at initial implementation:** `2.5.0.dev4+pa.shadow.candidate`
-**Cumulative recruiter-ready package:** `2.6.0.dev1+pa.generative.integration`  
+**Package:** `2.6.0.dev1+pa.generative.integration`
 **Simulator version:** `pa-generative-shadow-rc1`  
 **Created from rollback package:** `2.5.0.dev3+public.readiness.foundation`  
 **Production authority:** **NONE**  

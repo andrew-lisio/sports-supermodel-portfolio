@@ -12,7 +12,7 @@ The primary confidence board shows V2.3.3 production picks alongside the V2.4 RC
 
 Runtime paths are intentionally fixed to the repository defaults and are not exposed as normal interface controls:
 
-- an approved local historical-data directory (the public portfolio does not bundle the private/copy-derived `data/2026` cache)
+- an approved local historical-data directory (the `data/2026` development cache is not distributed in this repository)
 - `runtime/snapshots`
 - `runtime/reports`
 - `runtime/evidence/prospective.jsonl`

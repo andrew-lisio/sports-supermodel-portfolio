@@ -27,7 +27,7 @@ sports-supermodel-public plan
 sports-supermodel-public readiness
 ```
 
-These commands only inspect local configuration and print sanitized JSON. They do not:
+These commands only inspect local configuration and print redacted JSON. They do not:
 
 - provision PostgreSQL;
 - create an object-storage bucket;

@@ -2,7 +2,7 @@
 
 ## Historical data
 
-The private development environment can use a season-history directory such as `data/2026/`. The public portfolio snapshot intentionally excludes copied/private season caches; source and provenance policy is documented in `data/SOURCE.md`.
+A local development environment can use a season-history directory such as `data/2026/`. Copied or private season caches are not distributed in this repository; source and provenance policy is documented in `data/SOURCE.md`.
 
 The historical logs provide team, opponent, runs, run differential, and starter names. They do not natively preserve official game identifiers or home/away identity. The pipeline attaches those fields from an official or frozen schedule when possible.
 

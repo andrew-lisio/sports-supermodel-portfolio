@@ -1,6 +1,6 @@
 # Third-party data and redistribution policy
 
-The public portfolio repository is intentionally code-first. It does not redistribute private sportsbook screenshots, private-book account metadata, historical live betting outputs, or copied third-party season datasets whose redistribution permissions have not been independently verified.
+This repository does not redistribute private sportsbook screenshots, account metadata, historical private-market outputs, or copied third-party season datasets whose redistribution permissions have not been independently verified.
 
 ## Retrosheet
 
@@ -8,11 +8,11 @@ Retrosheet play-by-play data was used to build and validate the plate-appearance
 
 ## MLB Stats API and Baseball Savant / Statcast
 
-Live and point-in-time workflows can consume public MLB endpoints and Baseball Savant / Statcast context. Raw network captures are runtime artifacts and are not required to be committed to the public portfolio repository. Users are responsible for complying with provider terms, rate limits, attribution requirements, and trademark rules.
+Live and point-in-time workflows can consume public MLB endpoints and Baseball Savant / Statcast context. Raw network captures are runtime artifacts and are not required to be committed to this repository. Users are responsible for complying with provider terms, rate limits, attribution requirements, and trademark rules.
 
 ## Historical team-log seed data
 
-Earlier development snapshots included team CSV files copied from another public GitHub project. Because public availability does not by itself grant redistribution rights, those copied files are intentionally excluded from this portfolio snapshot. Tests rely on fixtures; a full live deployment should build or obtain historical inputs from a source whose redistribution and usage terms have been reviewed.
+Third-party team CSV files are not redistributed unless their license or permissions clearly allow it. Tests rely on fixtures; a full live deployment should build or obtain historical inputs from sources whose redistribution and usage terms have been reviewed.
 
 ## Private market inputs
 

@@ -19,7 +19,7 @@ FORBIDDEN_FILENAMES = {".env", "secrets.toml"}
 SECRET_PATTERNS = {
     "AWS access key": re.compile(r"AKIA[0-9A-Z]{16}"),
     "GitHub token": re.compile(r"(?:ghp_|github_pat_)[A-Za-z0-9_]{20,}"),
-    "OpenAI-style secret": re.compile(r"sk-[A-Za-z0-9]{20,}"),
+    "API secret pattern": re.compile(r"sk-[A-Za-z0-9]{20,}"),
     "private key": re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
 }
 TEXT_SUFFIXES = {
