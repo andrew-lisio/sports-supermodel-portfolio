@@ -4,7 +4,7 @@ This repository does not redistribute private sportsbook screenshots, account me
 
 ## Retrosheet
 
-Retrosheet play-by-play data was used to build and validate the plate-appearance simulation architecture. The packaged PA prior is a derived statistical artifact rather than a copy of the raw event-file archive. Retrosheet requires prominent attribution when its data or products based on its data are redistributed. The repository owner should verify the current official notice before changing repository visibility.
+Retrosheet play-by-play data was used to build and validate the plate-appearance simulation architecture. The packaged PA prior is a derived statistical artifact rather than a copy of the raw event-file archive. Retrosheet requires prominent attribution when its data or products based on its data are redistributed.
 
 ## MLB Stats API and Baseball Savant / Statcast
 

@@ -72,5 +72,5 @@ data/mlb-2026-asplayed.csv
 *.jpg
 *.jpeg
 !docs/assets/**
-.venv-public-312/
+.venv-*/
 repo-diagnostic.log
