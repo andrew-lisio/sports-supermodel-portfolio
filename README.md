@@ -187,6 +187,8 @@ The test suite uses controlled fixtures and does not require private season-hist
 
 A full live slate run additionally requires historical inputs and current pregame MLB data, which are not bundled with the repository.
 
+A full live slate run additionally requires historical inputs and current pregame MLB data, which are not bundled with the repository.
+
 ## Main entry points
 
 ```text
